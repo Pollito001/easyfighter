@@ -289,10 +289,26 @@ def step_lines(sd, st, entry, nframes, hit_frame, time):
     return sd + [f"[State {st}, Avanzar]", "type = PosAdd"] + cond + [f"x = {_fmt(round(step / ticks, 3))}", ""]
 
 
+class ManualBoxes(dict):
+    """{cuadro: cajas}. strict = modo «a mano»: los cuadros que no están no pegan (no se pone la automática)."""
+    strict = False
+
+
+def box_mode(entry):
+    """«auto» (el editor pone la caja de daño) o «manual» (solo las dibujadas). Los personajes de antes, con
+    cajas dibujadas pero sin modo, mezclan: las dibujadas mandan y en los demás cuadros va la automática."""
+    m = (entry or {}).get("box_mode")
+    return m if m in ("auto", "manual") else ("mixed" if (entry or {}).get("boxes") else "auto")
+
+
 def manual_boxes(entry):
     """Cajas de golpe puestas a mano en una casilla: {cuadro (desde 0): [(x1, y1, x2, y2)…]} (relativo al eje).
-    Un cuadro con la lista vacía no pega aunque sea el cuadro del golpe."""
-    out = {}
+    Un cuadro con la lista vacía no pega aunque sea el cuadro del golpe. En modo automático, ninguna."""
+    out = ManualBoxes()
+    mode = box_mode(entry)
+    if mode == "auto":
+        return out
+    out.strict = mode == "manual"
     for k, v in ((entry or {}).get("boxes") or {}).items():
         try:
             out[int(k)] = [tuple(int(round(float(c))) for c in b[:4]) for b in v if len(b) >= 4]
@@ -340,7 +356,9 @@ def make_action(number, title, keys, time, mode, sprites, hit_index=None, kind="
                     f.clsn1, f.clsn2 = list(box), list(box)
                 else:
                     f.clsn2 = auto_boxes(s, two=True)
-                    if manual and i in manual:
+                    if manual is not None and getattr(manual, "strict", False):
+                        f.clsn1 = list(manual.get(i, []))
+                    elif manual and i in manual:
                         f.clsn1 = list(manual[i])
                     elif (hit_index is not None and i == hit_index) or (hit_frames and i in hit_frames):
                         f.clsn1 = hit_box(s, ref)
@@ -1143,7 +1161,8 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
             if not (1 <= rel <= len(keys)):
                 rel = max(1, (len(keys) * 2 + 2) // 3)
             reach = make_action(n, title + " (" + tr("intento") + ")", keys[:1], 4, "once", sprites, hit_index=0,
-                                ref=refs.get("S"), manual={0: manual_boxes(th)[0]} if 0 in manual_boxes(th) else None)
+                                ref=refs.get("S"), manual={0: manual_boxes(th)[0]} if 0 in manual_boxes(th) else (
+                                    manual_boxes(th) if box_mode(th) == "manual" else None))
             full = make_action(n + 10, title, keys, th.get("time", 5), "once", sprites)
             g.actions += [reach, full]
             dmg = int(th.get("damage", 80))

@@ -87,8 +87,11 @@ Cada casilla del modo simple tiene **↔ Voltear** (espejo, para imágenes que m
 **rapidez en números** (ticks por cuadro); el cortador de hojas también tiene «↔ Voltear».
 
 **Cajas de golpe en lo que pega:** el modo simple pone la caja roja (la que hace daño) solo en la punta de lo
-que ataca —el puño, el pie, la rodilla—, comparando con la pose de parado. Con **🟥 Caja de golpe** en cada
-golpe o especial la mueves, la estiras o dibujas otras cuadro por cuadro.
+que ataca —el puño, el pie, la rodilla—, comparando con la pose de parado. En cada golpe o
+especial, **🟥 Caja de daño** escoge entre **Automática** y **A mano**: con **✏ Dibujar…** la mueves, la
+estiras o dibujas otras cuadro por cuadro, y al guardar la animación pasa a «A mano» (solo pega lo que
+dibujaste; lo ves igual en «✋ Alinear y ver cajas»). Si vuelves a «Automática», lo dibujado se guarda por si
+regresas.
 
 **Golpes que avanzan y que cambian al repetir:** cada golpe normal tiene «Avanza:» (un paso adelante o
 atrás mientras pega) y «🔁 Al apretar otra vez» (hasta 3 animaciones más al apretar el mismo botón seguido,

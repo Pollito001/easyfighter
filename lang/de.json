@@ -1872,5 +1872,19 @@
  "Escoge dónde crearlo.": "Wähle, wo er erstellt werden soll.",
  "Usar a {0} de base": "{0} als Basis verwenden",
  "(se queda el de {0})": "(bleibt der von {0})",
- "Se hace una copia de {0} para que la cambies. Puedes dejarle su nombre o ponerle el tuyo: la carpeta y los archivos se llaman igual que el personaje.": "Es wird eine Kopie von {0} gemacht, die du ändern kannst. Du kannst den Namen behalten oder deinen eigenen geben: Ordner und Dateien heißen wie der Charakter."
+ "Se hace una copia de {0} para que la cambies. Puedes dejarle su nombre o ponerle el tuyo: la carpeta y los archivos se llaman igual que el personaje.": "Es wird eine Kopie von {0} gemacht, die du ändern kannst. Du kannst den Namen behalten oder deinen eigenen geben: Ordner und Dateien heißen wie der Charakter.",
+ "Muévela, estírala o dibuja otra. Solo pega lo que está en rojo.": "Verschieben, strecken oder eine weitere zeichnen. Nur was rot ist, trifft.",
+ "Cuadros (💥 = el del golpe · 🟥 = tiene caja de daño):": "Bilder (💥 = das Trefferbild · 🟥 = hat eine Schadensbox):",
+ "↺ Como la automática": "↺ Wie die automatische",
+ "Pone en este cuadro la caja que pondría el editor.": "Setzt auf dieses Bild die Box, die der Editor setzen würde.",
+ "↺ Empezar de nuevo": "↺ Neu anfangen",
+ "Todos los cuadros como los pondría el editor: la caja automática en los que pegan y nada en los demás.": "Alle Bilder so, wie der Editor es machen würde: die automatische Box auf den Trefferbildern und nichts auf den anderen.",
+ "✏ Cajas de daño a mano: {0}": "✏ Schadensboxen von Hand: {0}",
+ "¿Empezar de nuevo? Se pierden las cajas que dibujaste.": "Neu anfangen? Die gezeichneten Boxen gehen verloren.",
+ "🟥 Caja de daño:": "🟥 Schadensbox:",
+ "La caja roja: la parte del dibujo que le hace daño al rival.": "Die rote Box: der Teil der Zeichnung, der dem Gegner Schaden zufügt.",
+ "A mano": "Von Hand",
+ "Automática: el editor la pone sola en la punta de lo que pega (el puño, el pie…). A mano: solo pega lo que dibujes tú.": "Automatisch: Der Editor setzt sie selbst an die Spitze dessen, was trifft (Faust, Fuß…). Von Hand: Nur was du zeichnest, trifft.",
+ "✏ Dibujar…": "✏ Zeichnen…",
+ "Dibuja o mueve la caja de daño cuadro por cuadro. Al guardar, la caja de esta animación pasa a «A mano».": "Zeichne oder verschiebe die Schadensbox Bild für Bild. Beim Speichern wechselt die Box dieser Animation auf „Von Hand“."
 }

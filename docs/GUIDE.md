@@ -70,8 +70,9 @@ The 18 normal attacks (light, medium and heavy punch and kick; standing, crouchi
 throw. For each one you add the animation and pick **which frame hits**. The editor does the rest: damage,
 boxes, sound, who it can hit.
 
-- **🟥 Hit box**: the red box (the one that does damage) goes on the tip of whatever hits (the fist, the
-  foot) on its own. Here you can move it or draw it frame by frame.
+- **🟥 Damage box**: the red box (the one that does damage). On **Automatic** it goes on the tip of
+  whatever hits (the fist, the foot) on its own. **✏ Draw…** lets you move it or draw it frame by frame, and
+  the animation switches to **By hand**: only what you drew hits.
 - **Moves:** if the attack should take a step forward.
 - **🔁 When pressed again**: different animations when you press the same button repeatedly (a flurry, or
   alternating between two).
@@ -154,7 +155,7 @@ macOS: `~/Library/Application Support/ikemen-chareditor/`.
 Use **🎯 Align all to the standing one**, or **✋ Align and show boxes** on the slot that looks wrong.
 
 **An attack doesn't hit the opponent.**
-Check which frame hits and the **🟥 Hit box**: the red box has to touch the opponent.
+Check which frame hits and the **🟥 Damage box**: the red box has to touch the opponent.
 
 **A special won't come out.**
 Check the command in "Data" (the arrows and the button) and try it with **▶ Test**. Some commands need the

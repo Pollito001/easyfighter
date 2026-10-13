@@ -71,8 +71,9 @@ Los 18 golpes normales (puño y patada débil, medio y fuerte; de pie, agachado 
 Para cada uno pones la animación y escoges **en qué cuadro pega**. El editor hace el resto: daño, cajas,
 sonido, a quién le pega.
 
-- **🟥 Caja de golpe**: la caja roja (la que hace daño) va sola en la punta de lo que pega (el puño, el pie).
-  Aquí la mueves o la dibujas cuadro por cuadro.
+- **🟥 Caja de daño**: la caja roja (la que hace daño). En **Automática** va sola en la punta de lo que pega
+  (el puño, el pie). Con **✏ Dibujar…** la mueves o la dibujas cuadro por cuadro, y la animación pasa a
+  **A mano**: solo pega lo que dibujaste.
 - **Avanza:** si el golpe debe dar un paso adelante.
 - **🔁 Al apretar otra vez**: animaciones distintas si aprietas el mismo botón seguido (una ráfaga, o
   alternar entre dos).
@@ -154,7 +155,7 @@ macOS: `~/Library/Application Support/ikemen-chareditor/`.
 Usa **🎯 Alinear todas con la de parado**, o **✋ Alinear y ver cajas** en la casilla que se ve mal.
 
 **Un golpe no le pega al rival.**
-Revisa en qué cuadro pega y la **🟥 Caja de golpe**: la caja roja tiene que tocar al rival.
+Revisa en qué cuadro pega y la **🟥 Caja de daño**: la caja roja tiene que tocar al rival.
 
 **No me sale un especial.**
 Mira el comando en «Datos» (la flecha y el botón) y prueba con **▶ Probar**. Algunos comandos piden la

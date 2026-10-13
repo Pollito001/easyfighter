@@ -131,6 +131,8 @@ class AnimPreview(QWidget):
                 manual = getattr(self, "manual", None) or {}
                 if i in manual:
                     bx = (manual[i], bx[1] if bx else [])
+                elif getattr(getattr(self, "manual", None), "strict", False):
+                    bx = ([], bx[1] if bx else [])
                 if bx:
                     draw_boxes(p, bx[0], bx[1], ox + x * sc, oy + y * sc, sc, 200)
         if self.is_hit(i):
@@ -271,12 +273,27 @@ class FramesBox(QWidget):
         row.addWidget(b3, 1, 1)
         row.addWidget(b5, 2, 0)
         row.addWidget(b6, 2, 1)
-        self.box_btn = QPushButton(tr('🟥 Caja de golpe'))
-        self.box_btn.setToolTip(tr('Pon la caja que hace daño solo en lo que pega (el puño, el pie…), cuadro por '
-                                   'cuadro, para no pegar con otras partes del cuerpo.'))
+        # caja de daño (la roja): automática o dibujada a mano
+        self.box_row = QWidget()
+        br = QHBoxLayout(self.box_row)
+        br.setContentsMargins(0, 0, 0, 0)
+        bl = QLabel(tr('🟥 Caja de daño:'))
+        bl.setToolTip(tr('La caja roja: la parte del dibujo que le hace daño al rival.'))
+        self.box_mode = QComboBox()
+        self.box_mode.addItem(tr('Automática'), "auto")
+        self.box_mode.addItem(tr('A mano'), "manual")
+        self.box_mode.setToolTip(tr('Automática: el editor la pone sola en la punta de lo que pega (el puño, el '
+                                    'pie…). A mano: solo pega lo que dibujes tú.'))
+        self.box_mode.currentIndexChanged.connect(self.on_box_mode)
+        self.box_btn = QPushButton(tr('✏ Dibujar…'))
+        self.box_btn.setToolTip(tr('Dibuja o mueve la caja de daño cuadro por cuadro. Al guardar, la caja de esta '
+                                   'animación pasa a «A mano».'))
         self.box_btn.clicked.connect(self.on_hitbox)
-        self.box_btn.setVisible(show_hit)
-        row.addWidget(self.box_btn, 4, 0, 1, 2)
+        br.addWidget(bl)
+        br.addWidget(self.box_mode, 1)
+        br.addWidget(self.box_btn)
+        self.box_row.setVisible(show_hit)
+        row.addWidget(self.box_row, 4, 0, 1, 2)
         self.copy_btn = QPushButton(tr('📋 Rehacer en el modo simple'))
         self.copy_btn.setToolTip(tr('Cambia el golpe del personaje por uno hecho con el modo simple (con la misma '
                                     'animación y daño). Ojo: se pierde lo especial de su código, como sus combos. '
@@ -343,6 +360,7 @@ class FramesBox(QWidget):
                 hit = manual
             self.preview.ref_kind = getattr(self, "ref_kind", "S")
             self.preview.manual = sg.manual_boxes(self.entry)
+            self.sync_box_mode()
             offs = [0] * len(keys)
             if getattr(self, "step_aware", False) and self.entry.get("step"):
                 hf_ = hit if isinstance(hit, int) else sg.hit_frame_of(self.entry, keys, p.sff.index())
@@ -499,8 +517,12 @@ class FramesBox(QWidget):
             time = next((f.time for f in a.frames if f.time > 0), 5)
         from ui.align_dialog import AlignDialog
         fn = getattr(self, "align_mode_fn", None)
+        if hit is not None and self.keys():
+            hit = self.hit_indices(keys)
         dlg = AlignDialog(self.sm, self.dialog_title, keys, hit,
-                          mode=fn() if fn else getattr(self, "align_mode", "ground"))
+                          mode=fn() if fn else getattr(self, "align_mode", "ground"),
+                          manual=sg.manual_boxes(self.entry) if self.keys() else None,
+                          ref=self.sm.ref_sprite(getattr(self, "ref_kind", "S")) if hit is not None else None)
         dlg.times = [max(1, time)] * len(dlg.keys)
         if dlg.exec() != QDialog.DialogCode.Accepted:
             return
@@ -579,18 +601,43 @@ class FramesBox(QWidget):
         keys = self.keys()
         if not keys:
             QMessageBox.information(self, APP_NAME, tr('Primero pon los cuadros de esta casilla.'))
+            self.sync_box_mode()
             return
         from ui.hitbox_editor import HitboxEditor
         dlg = HitboxEditor(self.sm, self.dialog_title, keys, self.hit_indices(keys), self.entry,
                            getattr(self, "ref_kind", "S"))
         if dlg.exec() != QDialog.DialogCode.Accepted or dlg.result is None:
+            self.sync_box_mode()
             return
-        if dlg.result:
-            self.entry["boxes"] = dlg.result
-        else:
-            self.entry.pop("boxes", None)
+        self.entry["boxes"] = dlg.result
+        self.entry["box_mode"] = "manual"
+        self.sync_box_mode()
         self.refresh()
         self.changed.emit()
+
+    def sync_box_mode(self):
+        if not hasattr(self, "box_mode"):
+            return
+        m = sg.box_mode(self.entry)
+        self.box_mode.blockSignals(True)
+        self.box_mode.setCurrentIndex(1 if m in ("manual", "mixed") else 0)
+        self.box_mode.blockSignals(False)
+
+    def on_box_mode(self, _i):
+        mode = self.box_mode.currentData()
+        if mode == "auto":
+            if sg.box_mode(self.entry) == "auto":
+                return
+            self.entry["box_mode"] = "auto"      # lo dibujado se guarda por si vuelves a «A mano»
+            self.refresh()
+            self.changed.emit()
+            return
+        if self.entry.get("boxes"):
+            self.entry["box_mode"] = "manual"
+            self.refresh()
+            self.changed.emit()
+        else:
+            self.on_hitbox()                     # sin nada dibujado: se abre para dibujarla
 
     def on_mirror(self):
         keys = self.keys()

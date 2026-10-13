@@ -1872,5 +1872,19 @@
  "Escoge dónde crearlo.": "Escolha onde criá-lo.",
  "Usar a {0} de base": "Usar {0} como base",
  "(se queda el de {0})": "(fica o de {0})",
- "Se hace una copia de {0} para que la cambies. Puedes dejarle su nombre o ponerle el tuyo: la carpeta y los archivos se llaman igual que el personaje.": "É feita uma cópia de {0} para você mudar. Pode deixar o nome dele ou colocar o seu: a pasta e os arquivos têm o mesmo nome do personagem."
+ "Se hace una copia de {0} para que la cambies. Puedes dejarle su nombre o ponerle el tuyo: la carpeta y los archivos se llaman igual que el personaje.": "É feita uma cópia de {0} para você mudar. Pode deixar o nome dele ou colocar o seu: a pasta e os arquivos têm o mesmo nome do personagem.",
+ "Muévela, estírala o dibuja otra. Solo pega lo que está en rojo.": "Mova, estique ou desenhe outra. Só acerta o que está em vermelho.",
+ "Cuadros (💥 = el del golpe · 🟥 = tiene caja de daño):": "Quadros (💥 = o do golpe · 🟥 = tem caixa de dano):",
+ "↺ Como la automática": "↺ Como a automática",
+ "Pone en este cuadro la caja que pondría el editor.": "Coloca neste quadro a caixa que o editor colocaria.",
+ "↺ Empezar de nuevo": "↺ Começar de novo",
+ "Todos los cuadros como los pondría el editor: la caja automática en los que pegan y nada en los demás.": "Todos os quadros como o editor faria: a caixa automática nos que acertam e nada nos outros.",
+ "✏ Cajas de daño a mano: {0}": "✏ Caixas de dano à mão: {0}",
+ "¿Empezar de nuevo? Se pierden las cajas que dibujaste.": "Começar de novo? As caixas que você desenhou serão perdidas.",
+ "🟥 Caja de daño:": "🟥 Caixa de dano:",
+ "La caja roja: la parte del dibujo que le hace daño al rival.": "A caixa vermelha: a parte do desenho que causa dano ao rival.",
+ "A mano": "À mão",
+ "Automática: el editor la pone sola en la punta de lo que pega (el puño, el pie…). A mano: solo pega lo que dibujes tú.": "Automática: o editor coloca sozinho na ponta do que acerta (o punho, o pé…). À mão: só acerta o que você desenhar.",
+ "✏ Dibujar…": "✏ Desenhar…",
+ "Dibuja o mueve la caja de daño cuadro por cuadro. Al guardar, la caja de esta animación pasa a «A mano».": "Desenhe ou mova a caixa de dano quadro a quadro. Ao salvar, a caixa desta animação passa para «À mão»."
 }

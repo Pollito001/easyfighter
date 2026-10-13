@@ -109,7 +109,11 @@ class AlignCanvas(QWidget):
         p.drawPixmap(QRectF(o.x() - ax * z, o.y() - ay * z, pm.width() * z, pm.height() * z), pm, QRectF(pm.rect()))
         p.setOpacity(1.0)
         if boxes:
-            c1, c2 = boxes_for(s, ax, ay, hit=(i == dlg.hit_index))
+            hits = dlg.hit_index if isinstance(dlg.hit_index, (set, list, tuple)) else {dlg.hit_index}
+            c1, c2 = boxes_for(s, ax, ay, hit=(i in hits), ref=dlg.ref)
+            man = dlg.manual
+            if man is not None and (i in man or getattr(man, "strict", False)):
+                c1 = list(man.get(i, []))
             draw_boxes(p, c1, c2, o.x(), o.y(), z)
 
     def paintEvent(self, _e):
@@ -144,11 +148,13 @@ class AlignCanvas(QWidget):
 class AlignDialog(QDialog):
     """Ajusta el eje (punto de apoyo) de los sprites de una casilla. Al aceptar: {clave: (x, y)} cambiados."""
 
-    def __init__(self, sm, title, keys, hit_index=None, mode="ground"):
+    def __init__(self, sm, title, keys, hit_index=None, mode="ground", manual=None, ref=None):
         super().__init__(sm.main)
         self.sm = sm
         self.keys = [tuple(k) for k in keys]
         self.hit_index = hit_index
+        self.manual = manual         # cajas de daño dibujadas a mano (relativas al eje)
+        self.ref = ref
         self.axes = {}
         for k in self.keys:
             s = sm.sprite(*k)

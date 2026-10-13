@@ -87,8 +87,11 @@ Every simple-mode slot has **↔ Mirror** (for images facing left) and the **spe
 frame); the sheet cutter has «↔ Mirror» too.
 
 **Hit boxes on what hits:** simple mode puts the red box (the one that does damage) only on the tip of what
-attacks —the fist, the foot, the knee—, comparing with the standing pose. With **🟥 Hit box** on each attack
-or special you move it, stretch it or draw more, frame by frame.
+attacks —the fist, the foot, the knee—, comparing with the standing pose. On each attack or
+special, **🟥 Damage box** picks between **Automatic** and **By hand**: **✏ Draw…** lets you move it, stretch it
+or draw more frame by frame, and when you save the animation switches to "By hand" (only what you drew hits;
+you see the same in "✋ Align and show boxes"). If you go back to "Automatic", your drawing is kept in case you
+switch back.
 
 **Attacks that step and change when repeated:** every normal attack has «Moves:» (a step forward or back
 while hitting) and «🔁 When pressed again» (up to 3 more animations when pressing the same button in a row,

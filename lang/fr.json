@@ -1872,5 +1872,19 @@
  "Escoge dónde crearlo.": "Choisissez où le créer.",
  "Usar a {0} de base": "Partir de {0}",
  "(se queda el de {0})": "(garde celui de {0})",
- "Se hace una copia de {0} para que la cambies. Puedes dejarle su nombre o ponerle el tuyo: la carpeta y los archivos se llaman igual que el personaje.": "Une copie de {0} est faite pour que vous la modifiiez. Vous pouvez garder son nom ou lui donner le vôtre : le dossier et les fichiers portent le nom du personnage."
+ "Se hace una copia de {0} para que la cambies. Puedes dejarle su nombre o ponerle el tuyo: la carpeta y los archivos se llaman igual que el personaje.": "Une copie de {0} est faite pour que vous la modifiiez. Vous pouvez garder son nom ou lui donner le vôtre : le dossier et les fichiers portent le nom du personnage.",
+ "Muévela, estírala o dibuja otra. Solo pega lo que está en rojo.": "Déplacez-la, étirez-la ou dessinez-en une autre. Seul ce qui est en rouge touche.",
+ "Cuadros (💥 = el del golpe · 🟥 = tiene caja de daño):": "Images (💥 = celle du coup · 🟥 = a une boîte de dégâts) :",
+ "↺ Como la automática": "↺ Comme l’automatique",
+ "Pone en este cuadro la caja que pondría el editor.": "Met sur cette image la boîte que mettrait l’éditeur.",
+ "↺ Empezar de nuevo": "↺ Recommencer",
+ "Todos los cuadros como los pondría el editor: la caja automática en los que pegan y nada en los demás.": "Toutes les images comme le ferait l’éditeur : la boîte automatique sur celles qui touchent et rien sur les autres.",
+ "✏ Cajas de daño a mano: {0}": "✏ Boîtes de dégâts à la main : {0}",
+ "¿Empezar de nuevo? Se pierden las cajas que dibujaste.": "Recommencer ? Les boîtes que vous avez dessinées seront perdues.",
+ "🟥 Caja de daño:": "🟥 Boîte de dégâts :",
+ "La caja roja: la parte del dibujo que le hace daño al rival.": "La boîte rouge : la partie du dessin qui fait des dégâts à l’adversaire.",
+ "A mano": "À la main",
+ "Automática: el editor la pone sola en la punta de lo que pega (el puño, el pie…). A mano: solo pega lo que dibujes tú.": "Automatique : l’éditeur la met tout seul au bout de ce qui frappe (le poing, le pied…). À la main : seul ce que vous dessinez touche.",
+ "✏ Dibujar…": "✏ Dessiner…",
+ "Dibuja o mueve la caja de daño cuadro por cuadro. Al guardar, la caja de esta animación pasa a «A mano».": "Dessinez ou déplacez la boîte de dégâts image par image. En enregistrant, la boîte de cette animation passe à « À la main »."
 }

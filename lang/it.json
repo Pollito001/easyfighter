@@ -1872,5 +1872,19 @@
  "Escoge dónde crearlo.": "Scegli dove crearlo.",
  "Usar a {0} de base": "Usa {0} come base",
  "(se queda el de {0})": "(resta quello di {0})",
- "Se hace una copia de {0} para que la cambies. Puedes dejarle su nombre o ponerle el tuyo: la carpeta y los archivos se llaman igual que el personaje.": "Viene fatta una copia di {0} da modificare. Puoi tenere il suo nome o dargli il tuo: la cartella e i file si chiamano come il personaggio."
+ "Se hace una copia de {0} para que la cambies. Puedes dejarle su nombre o ponerle el tuyo: la carpeta y los archivos se llaman igual que el personaje.": "Viene fatta una copia di {0} da modificare. Puoi tenere il suo nome o dargli il tuo: la cartella e i file si chiamano come il personaggio.",
+ "Muévela, estírala o dibuja otra. Solo pega lo que está en rojo.": "Spostala, allungala o disegnane un'altra. Colpisce solo ciò che è in rosso.",
+ "Cuadros (💥 = el del golpe · 🟥 = tiene caja de daño):": "Fotogrammi (💥 = quello del colpo · 🟥 = ha una box di danno):",
+ "↺ Como la automática": "↺ Come quella automatica",
+ "Pone en este cuadro la caja que pondría el editor.": "Mette su questo fotogramma la box che metterebbe l'editor.",
+ "↺ Empezar de nuevo": "↺ Ricomincia",
+ "Todos los cuadros como los pondría el editor: la caja automática en los que pegan y nada en los demás.": "Tutti i fotogrammi come li farebbe l'editor: la box automatica su quelli che colpiscono e niente sugli altri.",
+ "✏ Cajas de daño a mano: {0}": "✏ Box di danno a mano: {0}",
+ "¿Empezar de nuevo? Se pierden las cajas que dibujaste.": "Ricominciare? Le box che hai disegnato andranno perse.",
+ "🟥 Caja de daño:": "🟥 Box di danno:",
+ "La caja roja: la parte del dibujo que le hace daño al rival.": "La box rossa: la parte del disegno che fa danno all'avversario.",
+ "A mano": "A mano",
+ "Automática: el editor la pone sola en la punta de lo que pega (el puño, el pie…). A mano: solo pega lo que dibujes tú.": "Automatica: l'editor la mette da solo sulla punta di ciò che colpisce (il pugno, il piede…). A mano: colpisce solo ciò che disegni tu.",
+ "✏ Dibujar…": "✏ Disegna…",
+ "Dibuja o mueve la caja de daño cuadro por cuadro. Al guardar, la caja de esta animación pasa a «A mano».": "Disegna o sposta la box di danno fotogramma per fotogramma. Salvando, la box di questa animazione passa ad «A mano»."
 }
