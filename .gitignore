@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Copias de seguridad que hace el editor al guardar
+_editor_backups/
+*.tmp
+
+# Ejecutables (PyInstaller / AppImage)
+build/
+dist/
+*.spec
+*.AppImage
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini

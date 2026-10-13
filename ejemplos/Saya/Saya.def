@@ -1,0 +1,30 @@
+; Saya
+[Info]
+name = "Saya"
+displayname = "Saya"
+versiondate = 10,11,2026
+mugenversion = 1.1
+ikemenversion = 1.0
+author = "IKEMEN GO Character Editor"
+pal.defaults = 1
+localcoord = 640,480
+
+[Files]
+cmd = Saya.cmd
+cns = Saya.cns
+st = Saya.cns
+stcommon = common1.cns
+sprite = Saya.sff
+anim = Saya.air
+sound = Saya.snd
+st1 = Saya_simple.st
+
+[Palette Keymap]
+a = 1
+b = 1
+c = 1
+x = 1
+y = 1
+z = 1
+
+[Arcade]

@@ -1,0 +1,22 @@
+Kaito — personaje de ejemplo del IKEMEN GO Character Editor
+==========================================================
+
+Hecho completo con el modo simple del editor (dibujos originales, libres para usar y cambiar).
+Ábrelo con «🥋 Personaje de ejemplo» en la pantalla de inicio o en el menú Archivo.
+
+Botones: x y z = puño débil, medio, fuerte · a b c = patada débil, media, fuerte
+
+Especiales
+  Kikō-ha (bola de energía) ....... ↓↘→ + puño
+  Ryūjin (gancho que sube) ........ →↓↘ + puño
+  Tatsu-geri (patada voladora) .... ↓↙← + patada
+Súper
+  Rengeki (ráfaga de puños) ....... ↓↘→↓↘→ + puño   (1 barra)
+Agarre ............................ adelante + y (de cerca)
+
+Combos al estilo Killer Instinct
+  Especial que pega → puño o patada = autodoble
+    (especial fuerte → autodoble medio, medio → débil, débil → fuerte)
+  Después del autodoble: otro especial (linker) y sigue, hasta 4 autodobles
+  Remate: →↓↘ + puño fuerte después de un autodoble (tumba y cierra el combo)
+  Combo breaker: puño + patada de la misma fuerza del golpe que te acaba de pegar

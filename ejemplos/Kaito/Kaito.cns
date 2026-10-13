@@ -1,0 +1,112 @@
+[Data]
+life = 1000
+power = 3000
+attack = 100
+defence = 100
+fall.defence_up = 50
+liedown.time = 60
+airjuggle = 15
+sparkno = 2
+guard.sparkno = 40
+KO.echo = 0
+volume = 0
+IntPersistIndex = 60
+FloatPersistIndex = 40
+
+[Size]
+xscale = 1
+yscale = 1
+ground.back = 30
+ground.front = 32
+air.back = 24
+air.front = 24
+height = 120
+attack.dist = 320
+proj.attack.dist = 180
+proj.doscale = 0
+head.pos = -10, -180
+mid.pos = -10, -120
+shadowoffset = 0
+draw.offset = 0, 0
+
+[Velocity]
+walk.fwd = 4.8
+walk.back = -4.4
+run.fwd = 9.2, 0
+run.back = -9, -7.6
+jump.neu = 0, -16.8
+jump.back = -5.1
+jump.fwd = 5
+runjump.back = -5.1, -16.2
+runjump.fwd = 8, -16.2
+airjump.neu = 0, -16.2
+airjump.back = -5.1
+airjump.fwd = 5
+air.gethit.groundrecover = -0.3, -7
+air.gethit.airrecover.mul = 0.5, 0.2
+air.gethit.airrecover.add = 0, -9
+air.gethit.airrecover.back = -2
+air.gethit.airrecover.fwd = 0
+air.gethit.airrecover.up = -4
+air.gethit.airrecover.down = 3
+
+[Movement]
+airjump.num = 1
+airjump.height = 70
+yaccel = 0.88
+stand.friction = 0.85
+crouch.friction = 0.82
+stand.friction.threshold = 4
+crouch.friction.threshold = 0.1
+air.gethit.groundlevel = 50
+air.gethit.groundrecover.ground.threshold = -40
+air.gethit.groundrecover.groundlevel = 20
+air.gethit.airrecover.threshold = -2
+air.gethit.airrecover.yaccel = 0.7
+air.gethit.trip.groundlevel = 30
+down.bounce.offset = 0, 40
+down.bounce.yaccel = 0.8
+down.bounce.groundlevel = 24
+down.friction.threshold = 0.1
+
+[Quotes]
+victory1 = "..."
+
+;---------------------------------------------------------------------------
+; Golpe de ejemplo (botón a). Cópialo para hacer más ataques.
+[Statedef 200]
+type = S
+movetype = A
+physics = S
+juggle = 1
+velset = 0, 0
+ctrl = 0
+anim = 200
+poweradd = 20
+sprpriority = 2
+
+[State 200, Golpe]
+type = HitDef
+trigger1 = Time = 0
+attr = S, NA
+damage = 30
+animtype = Light
+guardflag = MA
+hitflag = MAF
+priority = 3, Hit
+pausetime = 8, 8
+sparkno = 0
+sparkxy = -10, -60
+hitsound = 5, 0
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 8
+ground.hittime = 10
+ground.velocity = -4
+air.velocity = -2.5, -3
+
+[State 200, Fin]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1

@@ -1,0 +1,22 @@
+Saya — personaje de ejemplo del IKEMEN GO Character Editor
+=========================================================
+
+Hecha completa con el modo simple del editor, con combos al estilo Street Fighter (sin autodobles).
+Dibujos originales, libres para usar y cambiar. Ábrela con «🥋 Personajes de ejemplo» en la pantalla de
+inicio o en el menú Archivo.
+
+Botones: x y z = puño débil, medio, fuerte · a b c = patada débil, media, fuerte
+
+Especiales
+  Hien (llama) .................... ↓↘→ + puño
+  Shōten-kyaku (patada que sube) .. →↓↘ + patada
+  Senpū-kyaku (patadas girando) ... ↓↙← + patada
+Súper
+  Hōō Renkyaku (ráfaga de patadas)  ↓↘→↓↘→ + patada   (1 barra)
+Agarre ............................ adelante + y (de cerca)
+
+Combos al estilo Street Fighter
+  Los golpes débiles se repiten rápido (débil, débil, débil)
+  Los golpes débiles y medios se cancelan en especiales, y los especiales en el súper
+  En combos largos el daño baja poco a poco
+  Ejemplo: agachado + patada débil, agachado + patada débil, ↓↙← + patada
