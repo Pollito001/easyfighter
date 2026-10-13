@@ -1886,5 +1886,7 @@
  "A mano": "À mão",
  "Automática: el editor la pone sola en la punta de lo que pega (el puño, el pie…). A mano: solo pega lo que dibujes tú.": "Automática: o editor coloca sozinho na ponta do que acerta (o punho, o pé…). À mão: só acerta o que você desenhar.",
  "✏ Dibujar…": "✏ Desenhar…",
- "Dibuja o mueve la caja de daño cuadro por cuadro. Al guardar, la caja de esta animación pasa a «A mano».": "Desenhe ou mova a caixa de dano quadro a quadro. Ao salvar, a caixa desta animação passa para «À mão»."
+ "Dibuja o mueve la caja de daño cuadro por cuadro. Al guardar, la caja de esta animación pasa a «A mano».": "Desenhe ou mova a caixa de dano quadro a quadro. Ao salvar, a caixa desta animação passa para «À mão».",
+ "Tiempo tirado en el suelo": "Tempo caído no chão",
+ "Cuánto se queda tirado después de caer, antes de levantarse (60 ticks = 1 segundo; lo normal es 60). Menos = se levanta antes. Apretando botones el jugador se levanta más rápido. Para que la animación de levantarse sea más rápida, cambia su rapidez en «🤕 Recibir golpes».": "Quanto tempo fica caído depois de cair, antes de levantar (60 ticks = 1 segundo; o normal é 60). Menos = levanta antes. Apertando botões o jogador levanta mais rápido. Para a animação de levantar ser mais rápida, mude a velocidade dela em «🤕 Receber golpes»."
 }

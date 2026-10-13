@@ -2556,7 +2556,14 @@ class CharPage(Page):
         ("attack", 'Ataque (%)', "Data", "attack", 0, 1, 9999, 0),
         ("defence", 'Defensa (%)', "Data", "defence", 0, 1, 9999, 0),
         ("airjumps", 'Saltos extra en el aire', "Movement", "airjump.num", 0, 0, 9, 0),
+        ("liedown", 'Tiempo tirado en el suelo', "Data", "liedown.time", 0, 1, 600, 0),
     ]
+    STAT_TIPS = {
+        "liedown": 'Cuánto se queda tirado después de caer, antes de levantarse (60 ticks = 1 segundo; lo normal '
+                   'es 60). Menos = se levanta antes. Apretando botones el jugador se levanta más rápido. Para que '
+                   'la animación de levantarse sea más rápida, cambia su rapidez en «🤕 Recibir golpes».',
+    }
+    STAT_DEFAULTS = {"liedown": 60}     # si el .cns no la trae, el juego usa esto
 
     def __init__(self, sm):
         super().__init__(sm, tr('👤 Personaje'), tr(
@@ -2586,7 +2593,13 @@ class CharPage(Page):
                 sp.setSingleStep(step)
             sp.setRange(0, top)
             sp.valueChanged.connect(self.on_stat)
-            f.addRow(tr(label) + ":", sp)
+            if key == "liedown":
+                sp.setSuffix(" " + tr('ticks'))
+            lab = QLabel(tr(label) + ":")
+            if key in self.STAT_TIPS:
+                sp.setToolTip(tr(self.STAT_TIPS[key]))
+                lab.setToolTip(tr(self.STAT_TIPS[key]))
+            f.addRow(lab, sp)
             self.stats[key] = sp
         v.addLayout(f)
         self.stats_warn = muted("")
@@ -2677,8 +2690,8 @@ class CharPage(Page):
             sp = self.stats[key]
             sp.blockSignals(True)
             name = f"{_s.lower()}.{ck}" + (".y" if i == 1 else "")
-            if name in consts:
-                val = consts[name]
+            if name in consts or key in self.STAT_DEFAULTS:
+                val = consts.get(name, self.STAT_DEFAULTS.get(key))
                 val = -val if key == "jump" else val
                 sp.setValue(val if isinstance(sp, QDoubleSpinBox) else int(round(val)))
                 sp.setEnabled(True)
@@ -2825,6 +2838,8 @@ class CharPage(Page):
             if not sp.isEnabled():
                 continue
             val = sp.value()
+            if key in self.STAT_DEFAULTS and f"{sec.lower()}.{ck}" not in consts and val == self.STAT_DEFAULTS[key]:
+                continue        # no la trae el .cns y sigue como la del juego: no hace falta escribirla
             if key == "jump":
                 oldy = consts.get("velocity.jump.neu.y", 0) or -1
                 newy = -val
@@ -2962,13 +2977,18 @@ def set_const(text, section, key, index, value):
     """Cambia el valor (índice index de la lista separada por comas) de 'key' dentro de [section]."""
     lines = text.split("\n")
     sec = None
+    last = None              # última línea con algo de [section] (para agregar la clave si no está)
     for i, ln in enumerate(lines):
         m = re.match(r"^\s*\[\s*([^\]]+?)\s*\]", ln)
         if m:
             sec = m.group(1).lower()
+            if sec == section.lower():
+                last = i
             continue
         if sec != section.lower():
             continue
+        if ln.split(";", 1)[0].strip():
+            last = i
         body = ln.split(";", 1)[0]
         if "=" not in body or body.partition("=")[0].strip().lower() != key.lower():
             continue
@@ -2980,6 +3000,10 @@ def set_const(text, section, key, index, value):
         comment = ln[len(body):]
         lines[i] = f"{k.rstrip()} = {', '.join(parts)}" + (("  " + comment.lstrip()) if comment.strip() else "")
         break
+    else:
+        if last is not None:     # la clave no estaba: se agrega al final de su sección
+            parts = ["0"] * index + [f"{value:g}" if isinstance(value, float) else str(value)]
+            lines.insert(last + 1, f"{key} = {', '.join(parts)}")
     return "\n".join(lines)
 
 

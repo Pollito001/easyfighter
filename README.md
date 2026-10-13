@@ -113,7 +113,7 @@ The editor always opens in **simple mode**. The advanced tools are tucked away i
 - **🧸 Simple mode** — make a character without touching code. Everything is a slot: put your images in
   each one (📂, in name order) or pick sprites it already has (🖼), choose the speed and watch it animate.
   The editor builds the animations, hitboxes and code for you.
-  - **👤 Character**: name, author, life, attack, defense, air jumps, **size** (with a preview) and **🔍 enlarge the sprites to that size** (really enlarges them,
+  - **👤 Character**: name, author, life, attack, defense, air jumps, **time lying on the ground** before getting up, **size** (with a preview) and **🔍 enlarge the sprites to that size** (really enlarges them,
     with their animations and boxes, and sets the size back to 100 %), body width,
     height, power bars, shadow and bounce when falling; if it's inside IKEMEN GO/chars, add it to the select
     screen and set its **music** (stage music, victory music and low-life music, in `data/select.def`).

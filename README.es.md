@@ -113,7 +113,7 @@ avanzadas…** (pide confirmación; para volver, el botón «🧸 Volver al modo
 - **🧸 Modo simple** — para hacer un personaje sin tocar código. Todo son casillas: en cada una pones tus
   imágenes (📂, en orden por nombre) o eliges sprites que ya tiene (🖼), escoges la rapidez y la ves
   animada. El editor arma solo las animaciones, las cajas de golpe y el código.
-  - **👤 Personaje**: nombre, autor, vida, ataque, defensa, saltos en el aire, **tamaño** (con vista previa) y **🔍 agrandar los sprites a ese tamaño** (los agranda de verdad,
+  - **👤 Personaje**: nombre, autor, vida, ataque, defensa, saltos en el aire, **tiempo tirado en el suelo** antes de levantarse, **tamaño** (con vista previa) y **🔍 agrandar los sprites a ese tamaño** (los agranda de verdad,
     con sus animaciones y cajas, y deja el tamaño en 100 %),
     ancho del cuerpo, altura, barras de poder, sombra y rebote al caer; si está dentro de IKEMEN GO/chars,
     ponerlo en la pantalla de selección y su **música** (la de su escenario, la de victoria y la de poca vida,

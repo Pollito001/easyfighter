@@ -1886,5 +1886,7 @@
  "A mano": "By hand",
  "Automática: el editor la pone sola en la punta de lo que pega (el puño, el pie…). A mano: solo pega lo que dibujes tú.": "Automatic: the editor puts it on the tip of whatever hits (the fist, the foot…) on its own. By hand: only what you draw hits.",
  "✏ Dibujar…": "✏ Draw…",
- "Dibuja o mueve la caja de daño cuadro por cuadro. Al guardar, la caja de esta animación pasa a «A mano».": "Draw or move the damage box frame by frame. When you save, this animation's box switches to “By hand”."
+ "Dibuja o mueve la caja de daño cuadro por cuadro. Al guardar, la caja de esta animación pasa a «A mano».": "Draw or move the damage box frame by frame. When you save, this animation's box switches to “By hand”.",
+ "Tiempo tirado en el suelo": "Time lying on the ground",
+ "Cuánto se queda tirado después de caer, antes de levantarse (60 ticks = 1 segundo; lo normal es 60). Menos = se levanta antes. Apretando botones el jugador se levanta más rápido. Para que la animación de levantarse sea más rápida, cambia su rapidez en «🤕 Recibir golpes».": "How long it stays down after falling, before getting up (60 ticks = 1 second; the usual is 60). Less = gets up sooner. Pressing buttons makes the player get up faster. To make the getting-up animation faster, change its speed in “🤕 Getting hit”."
 }
