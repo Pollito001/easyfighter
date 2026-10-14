@@ -1888,5 +1888,21 @@
  "✏ Dibujar…": "✏ Desenhar…",
  "Dibuja o mueve la caja de daño cuadro por cuadro. Al guardar, la caja de esta animación pasa a «A mano».": "Desenhe ou mova a caixa de dano quadro a quadro. Ao salvar, a caixa desta animação passa para «À mão».",
  "Tiempo tirado en el suelo": "Tempo caído no chão",
- "Cuánto se queda tirado después de caer, antes de levantarse (60 ticks = 1 segundo; lo normal es 60). Menos = se levanta antes. Apretando botones el jugador se levanta más rápido. Para que la animación de levantarse sea más rápida, cambia su rapidez en «🤕 Recibir golpes».": "Quanto tempo fica caído depois de cair, antes de levantar (60 ticks = 1 segundo; o normal é 60). Menos = levanta antes. Apertando botões o jogador levanta mais rápido. Para a animação de levantar ser mais rápida, mude a velocidade dela em «🤕 Receber golpes»."
+ "Cuánto se queda tirado después de caer, antes de levantarse (60 ticks = 1 segundo; lo normal es 60). Menos = se levanta antes. Apretando botones el jugador se levanta más rápido. Para que la animación de levantarse sea más rápida, cambia su rapidez en «🤕 Recibir golpes».": "Quanto tempo fica caído depois de cair, antes de levantar (60 ticks = 1 segundo; o normal é 60). Menos = levanta antes. Apertando botões o jogador levanta mais rápido. Para a animação de levantar ser mais rápida, mude a velocidade dela em «🤕 Receber golpes».",
+ "Brillo de la pausa": "Brilho da pausa",
+ "Pausa del personaje": "Pausa do personagem",
+ "Con destello (la chispa de luz)": "Com clarão (a faísca de luz)",
+ "La chispa que sale en el personaje al empezar la pausa. Desmárcalo para que solo se congele todo.": "A faísca que aparece no personagem ao começar a pausa. Desmarque para que tudo só congele.",
+ "Solo el personaje se congela un momento: el rival, los proyectiles y todo lo demás siguen moviéndose (como la pausa al pegar, pero solo él).": "Só o personagem congela um momento: o rival, os projéteis e todo o resto continuam se movendo (como a pausa ao acertar, mas só ele).",
+ "Con destello (brilla mientras está en pausa)": "Com clarão (brilha enquanto está em pausa)",
+ "Desmárcalo para que solo se congele, sin brillar.": "Desmarque para que só congele, sem brilhar.",
+ "Color en la pantalla": "Cor na tela",
+ "Toda la pantalla se pinta de un color un momento (un fogonazo).": "A tela inteira fica de uma cor por um momento (um clarão).",
+ "Por detrás de los personajes": "Por trás dos personagens",
+ "Marcado: se pinta solo el fondo y los personajes se siguen viendo encima.": "Marcado: só o fundo fica colorido e os personagens continuam visíveis por cima.",
+ "Transparente / invisible": "Transparente / invisível",
+ "El personaje se ve transparente, brillante como luz o desaparece un rato (bueno para teletransportes y fantasmas).": "O personagem fica transparente, brilhante como luz ou desaparece por um tempo (bom para teletransportes e fantasmas).",
+ "Medio transparente": "Meio transparente",
+ "Brillante (como luz)": "Brilhante (como luz)",
+ "Invisible": "Invisível"
 }

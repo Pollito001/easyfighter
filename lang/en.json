@@ -1888,5 +1888,21 @@
  "✏ Dibujar…": "✏ Draw…",
  "Dibuja o mueve la caja de daño cuadro por cuadro. Al guardar, la caja de esta animación pasa a «A mano».": "Draw or move the damage box frame by frame. When you save, this animation's box switches to “By hand”.",
  "Tiempo tirado en el suelo": "Time lying on the ground",
- "Cuánto se queda tirado después de caer, antes de levantarse (60 ticks = 1 segundo; lo normal es 60). Menos = se levanta antes. Apretando botones el jugador se levanta más rápido. Para que la animación de levantarse sea más rápida, cambia su rapidez en «🤕 Recibir golpes».": "How long it stays down after falling, before getting up (60 ticks = 1 second; the usual is 60). Less = gets up sooner. Pressing buttons makes the player get up faster. To make the getting-up animation faster, change its speed in “🤕 Getting hit”."
+ "Cuánto se queda tirado después de caer, antes de levantarse (60 ticks = 1 segundo; lo normal es 60). Menos = se levanta antes. Apretando botones el jugador se levanta más rápido. Para que la animación de levantarse sea más rápida, cambia su rapidez en «🤕 Recibir golpes».": "How long it stays down after falling, before getting up (60 ticks = 1 second; the usual is 60). Less = gets up sooner. Pressing buttons makes the player get up faster. To make the getting-up animation faster, change its speed in “🤕 Getting hit”.",
+ "Brillo de la pausa": "Pause glow",
+ "Pausa del personaje": "Character pause",
+ "Con destello (la chispa de luz)": "With flash (the spark of light)",
+ "La chispa que sale en el personaje al empezar la pausa. Desmárcalo para que solo se congele todo.": "The spark that appears on the character when the pause starts. Untick it so everything just freezes.",
+ "Solo el personaje se congela un momento: el rival, los proyectiles y todo lo demás siguen moviéndose (como la pausa al pegar, pero solo él).": "Only the character freezes for a moment: the opponent, projectiles and everything else keep moving (like the pause on hit, but only for him).",
+ "Con destello (brilla mientras está en pausa)": "With flash (glows while paused)",
+ "Desmárcalo para que solo se congele, sin brillar.": "Untick it so it just freezes, without glowing.",
+ "Color en la pantalla": "Screen color",
+ "Toda la pantalla se pinta de un color un momento (un fogonazo).": "The whole screen turns a color for a moment (a flash).",
+ "Por detrás de los personajes": "Behind the characters",
+ "Marcado: se pinta solo el fondo y los personajes se siguen viendo encima.": "Ticked: only the background is colored and the characters stay visible on top.",
+ "Transparente / invisible": "Transparent / invisible",
+ "El personaje se ve transparente, brillante como luz o desaparece un rato (bueno para teletransportes y fantasmas).": "The character looks transparent, glows like light or disappears for a while (good for teleports and ghosts).",
+ "Medio transparente": "Half transparent",
+ "Brillante (como luz)": "Glowing (like light)",
+ "Invisible": "Invisible"
 }

@@ -106,8 +106,9 @@ class Sim:
                 # pausa con destello: todo se queda quieto en ese cuadro
                 paused -= 1
                 fr = dict(last)
-                fr["fx"] = [f for f in last["fx"] if f[0] != "superpause"] + [
-                    ("superpause", pause_ev, pause_n - paused - 1, pause_n)]
+                kind = "selfpause" if pause_ev.get("type") == "selfpause" else "superpause"
+                fr["fx"] = [f for f in last["fx"] if f[0] not in ("superpause", "selfpause")] + [
+                    (kind, pause_ev, pause_n - paused - 1, pause_n)]
                 self.frames.append(fr)
                 continue
             for tt, _i, ev in evs:
@@ -174,10 +175,11 @@ class Sim:
                                             follow=bool(sev.val(ev, "follow")), x=x, y=y, t0=t, dur=max(1, dur),
                                             scale=float(sev.val(ev, "scale")), ontop=bool(sev.val(ev, "ontop")),
                                             facing=facing))
-                elif typ == "superpause" and sev.val(ev, "hold"):
+                elif (typ == "superpause" and sev.val(ev, "hold")) or typ == "selfpause":
                     paused = int(sev.val(ev, "ticks"))
                     pause_ev, pause_n = ev, paused
-                elif typ in ("afterimage", "flash", "shake", "superpause", "invuln", "counter"):
+                elif typ in ("afterimage", "flash", "shake", "superpause", "invuln", "counter", "screencolor",
+                             "trans"):
                     n = int(sev.val(ev, "ticks"))
                     timed.append((typ, t, t + n, ev))
                 elif typ == "followup":
@@ -351,6 +353,12 @@ class SpecialCanvas(QWidget):
         # pausa con destello: todo se oscurece
         if "superpause" in fx and sev.val(fx["superpause"][0], "darken"):
             p.fillRect(self.rect().adjusted(-40, -40, 40, 40), QColor(0, 0, 0, 150))
+        # color en la pantalla (por detrás: antes de dibujar al personaje)
+        if "screencolor" in fx:
+            ev, a, n = fx["screencolor"]
+            p.fillRect(self.rect().adjusted(-40, -40, 40, 40),
+                       QColor(int(sev.val(ev, "r")), int(sev.val(ev, "g")), int(sev.val(ev, "b")),
+                              90 if sev.val(ev, "under") else 170))
         p.setPen(QPen(QColor(255, 107, 53, 160), 1))
         p.drawLine(0, int(oy), self.width(), int(oy))
         # rival de prueba
@@ -380,13 +388,24 @@ class SpecialCanvas(QWidget):
                     self.draw_sprite(p, k0, ox + x0 * z, oy + y0 * z, z, sc, alpha=0.12 + 0.05 * i, facing=f0,
                                      pm=self.tinted(k0, (90, 120, 255, 150)))
         # el personaje
-        if fr["key"] is not None:
+        trans = fx.get("trans")
+        hidden = trans is not None and sev.val(trans[0], "mode") == "invisible"
+        if fr["key"] is not None and not hidden:
             pm = None
+            alpha = 1.0
             if "flash" in fx:
                 ev, a, n = fx["flash"]
                 r, g, b = (max(0, min(255, int(sev.val(ev, c)) + 128)) for c in ("r", "g", "b"))
                 pm = self.tinted(fr["key"], (r, g, b, int(150 * (1 - a / max(1, n)))))
-            self.draw_sprite(p, fr["key"], bx, by, z, sc, facing=fr["facing"], pm=pm)
+            if "selfpause" in fx and sev.val(fx["selfpause"][0], "flash"):
+                pm = self.tinted(fr["key"], (255, 255, 255, 110))
+            if trans is not None:
+                if sev.val(trans[0], "mode") == "add":
+                    pm = self.tinted(fr["key"], (255, 255, 255, 120))
+                    alpha = 0.75
+                else:
+                    alpha = 0.5
+            self.draw_sprite(p, fr["key"], bx, by, z, sc, facing=fr["facing"], pm=pm, alpha=alpha)
             # caja de golpe en los cuadros que pegan
             if fr["hit"]:
                 bxs = d.sm.auto_boxes_of(*fr["key"], True)
@@ -453,6 +472,8 @@ class SpecialCanvas(QWidget):
             marks.append("🛡 " + tr('Invencible'))
         if "counter" in fx:
             marks.append("🔁 " + tr('Contraataque'))
+        if "selfpause" in fx:
+            marks.append("⏯ " + tr('Pausa del personaje'))
         if fr["hit"]:
             marks.append("💥 " + tr('Pega'))
         for txt in marks + fr["badges"]:
@@ -568,11 +589,13 @@ class SpecialTest(QDialog):
             elif typ in ("effect",):
                 dur = int(sev.val(ev, "time"))
                 extra = max(extra, t0 + (dur if dur > 0 else 60) - body + 20)
-            elif typ in ("freeze", "afterimage", "flash", "shake", "superpause"):
+            elif typ in ("freeze", "afterimage", "flash", "shake", "superpause", "selfpause", "screencolor",
+                         "trans"):
                 extra = max(extra, t0 + int(sev.val(ev, "ticks")) - body + 20)
         # las pausas que congelan al personaje alargan la prueba
         held = sum(int(sev.val(e, "ticks")) for e in sp.get("events") or []
-                   if e.get("type") == "superpause" and not e.get("raw") and sev.val(e, "hold"))
+                   if not e.get("raw") and ((e.get("type") == "superpause" and sev.val(e, "hold"))
+                                            or e.get("type") == "selfpause"))
         return min(1500, max(30, body + max(30, extra)) + held)
 
     def info_text(self):

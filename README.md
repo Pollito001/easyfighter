@@ -184,7 +184,9 @@ The editor always opens in **simple mode**. The advanced tools are tucked away i
     (behind or in front of the opponent), **turn**, **stay still** (float), **extra hit** (with its damage and
     hit count), **extra projectile** (with its animation, speed, acceleration and spawn point), **effect** (a
     separate animation — fire, aura, sparks… — from the character, the opponent or the screen), **sound**,
-    **invincible**, **counter**, **screen shake**, **color flash**, **after-image trail**, **flash pause**,
+    **invincible**, **counter**, **screen shake**, **color flash**, **after-image trail**, **flash pause** (the spark can be turned off),
+    **character pause** (only he freezes, with or without a glow; the opponent and projectiles keep going), **screen
+    color** (a flash), **transparent / invisible**,
     **power**, **life**, **follow up with another special** (on hit, on a button press or at the end — for
     chains and combos) and **custom code** (for anything not on the list).
   - **🤕 Getting hit**: guarding (standing, crouching, air), hit in the face, in the stomach, crouching,

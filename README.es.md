@@ -189,7 +189,9 @@ avanzadas…** (pide confirmación; para volver, el botón «🧸 Volver al modo
     rival), **voltearse**, **quedarse quieto** (flotar), **otro golpe** (con su daño y cuántas veces pega),
     **otro proyectil** (con su animación, velocidad, aceleración y de dónde sale), **efecto** (una animación
     aparte: fuego, aura, chispas…, desde el personaje, el rival o la pantalla), **sonido**, **invencible**,
-    **contraataque**, **sacudir la pantalla**, **destello de color**, **estela**, **pausa con destello**,
+    **contraataque**, **sacudir la pantalla**, **destello de color**, **estela**, **pausa con destello** (se le puede quitar la chispa),
+    **pausa del personaje** (solo él se congela, con o sin brillo; el rival y los proyectiles siguen), **color en
+    la pantalla** (un fogonazo), **transparente / invisible**,
     **poder**, **vida**, **seguir con otro especial** (si conecta, si aprietas un botón o al terminar: para
     cadenas y combos) y **código propio** (para lo que no esté en la lista).
   - **🤕 Recibir golpes**: cubrirse (de pie, agachado, en el aire), golpe en la cara, en la panza, agachado,

@@ -14,6 +14,7 @@ WHERE_POS = [("p1", "Desde el personaje"), ("p2", "Desde el rival"), ("front", "
 TELEPORT = [("behind", "Detrás del rival"), ("front", "Delante del rival"), ("fwd", "Hacia adelante")]
 FOLLOW_IF = [("hit", "Si el golpe conecta"), ("button", "Si aprietas un botón"), ("end", "Siempre, al terminar")]
 MOVE_MODE = [("set", "Poner esa velocidad"), ("add", "Sumarle a la que lleva")]
+TRANS_MODES = [("half", "Medio transparente"), ("add", "Brillante (como luz)"), ("invisible", "Invisible")]
 HEIGHTS = [("high", "De pie o agachado"), ("low", "Solo agachado (bajo)"), ("overhead", "Solo de pie (desde arriba)"),
            ("unblockable", "No se puede cubrir")]
 
@@ -107,6 +108,27 @@ EVENTS = [
         ("hold", "El personaje se queda quieto en ese cuadro durante la pausa", bool, 0, 1, True,
          "Como en los súper de los juegos: el personaje se queda en un sprite mientras pasa el destello y después "
          "sigue. Sin marcar, su animación sigue corriendo durante la pausa."),
+        ("spark", "Con destello (la chispa de luz)", bool, 0, 1, True,
+         "La chispa que sale en el personaje al empezar la pausa. Desmárcalo para que solo se congele todo."),
+    ]),
+    ("selfpause", "⏯", "Pausa del personaje", "Solo el personaje se congela un momento: el rival, los proyectiles y "
+     "todo lo demás siguen moviéndose (como la pausa al pegar, pero solo él).", [
+        ("ticks", "Cuánto (ticks)", int, 1, 180, 12, "60 ticks = 1 segundo."),
+        ("flash", "Con destello (brilla mientras está en pausa)", bool, 0, 1, True,
+         "Desmárcalo para que solo se congele, sin brillar."),
+    ]),
+    ("screencolor", "🎆", "Color en la pantalla", "Toda la pantalla se pinta de un color un momento (un fogonazo).", [
+        ("ticks", "Cuánto (ticks)", int, 1, 120, 6, ""),
+        ("r", "Rojo", int, 0, 255, 255, ""),
+        ("g", "Verde", int, 0, 255, 255, ""),
+        ("b", "Azul", int, 0, 255, 255, ""),
+        ("under", "Por detrás de los personajes", bool, 0, 1, False,
+         "Marcado: se pinta solo el fondo y los personajes se siguen viendo encima."),
+    ]),
+    ("trans", "👻", "Transparente / invisible", "El personaje se ve transparente, brillante como luz o desaparece "
+     "un rato (bueno para teletransportes y fantasmas).", [
+        ("mode", "Cómo", ("choice", TRANS_MODES), 0, 0, "half", ""),
+        ("ticks", "Cuánto (ticks)", int, 1, 600, 20, ""),
     ]),
     ("power", "⚡", "Poder", "Le da (o le quita) barra de súper. 1000 = 1 barra.", [
         ("amount", "Cuánto", int, -9000, 9000, 100, ""),
@@ -149,7 +171,7 @@ SCTRL_EVENT = {"hitdef": "hit", "projectile": "proj", "velset": "move", "veladd"
                "nothitby": "invuln", "envshake": "shake", "palfx": "flash", "afterimage": "afterimage",
                "superpause": "superpause", "poweradd": "power", "lifeadd": "life", "posfreeze": "freeze",
                "turn": "turn", "explod": "effect", "reversaldef": "counter",
-               "posadd": "posadd"}
+               "posadd": "posadd", "envcolor": "screencolor"}
 
 
 def default(ev_type, field):
@@ -186,7 +208,8 @@ def summary(ev, tr=lambda s: s):
             bits.append(tr('sale volando'))
         if int(val(ev, "speed") or 100) != 100 and t == "move":
             bits.append(f"{val(ev, 'speed')}%")
-    if t in ("invuln", "freeze", "shake", "flash", "afterimage", "superpause", "counter"):
+    if t in ("invuln", "freeze", "shake", "flash", "afterimage", "superpause", "counter", "selfpause",
+             "screencolor", "trans"):
         bits.append(tr('{0} ticks').format(val(ev, "ticks")))
     if t in ("power", "life"):
         bits.append(f"{val(ev, 'amount'):+d}")
@@ -416,7 +439,32 @@ def event_code(ev, ctx):
         # movetime = 0: el personaje también se congela (se queda en ese cuadro) y después sigue
         mt = 0 if val(ev, "hold") else n
         return head + ["type = SuperPause"] + trig + [f"time = {n}", f"movetime = {mt}",
-                                                      f"darken = {1 if val(ev, 'darken') else 0}", ""]
+                                                      f"darken = {1 if val(ev, 'darken') else 0}"] + (
+            [] if val(ev, "spark") else ["anim = -1"]) + [""]
+    if t == "selfpause":
+        n = int(val(ev, "ticks"))
+        # solo él: su propia «pausa al pegar» (el resto del juego sigue)
+        out = []
+        if val(ev, "flash"):
+            out += [f"[State {st}, {tr('Brillo de la pausa')}]", "type = PalFX"] + trig + [
+                f"time = {n}", "add = 110, 110, 110", "mul = 256, 256, 256", "persistent = 0", ""]
+        # persistent = 0: durante la pausa la animación no avanza, así que sin esto se volvería a pausar sin fin
+        return out + head + ["type = ModifyPlayer"] + trig + [f"hitpausetime = {n}", "persistent = 0", ""]
+    if t == "screencolor":
+        return head + ["type = EnvColor"] + trig + [
+            f"value = {int(val(ev, 'r'))}, {int(val(ev, 'g'))}, {int(val(ev, 'b'))}", f"time = {int(val(ev, 'ticks'))}",
+            f"under = {1 if val(ev, 'under') else 0}", ""]
+    if t == "trans":
+        f = int(ev.get("frame") or 1)
+        d = int(ev.get("delay") or 0)
+        n = int(val(ev, "ticks"))
+        rng = [f"trigger1 = AnimElemTime({f}) >= {d}", f"trigger1 = AnimElemTime({f}) < {d + n}"]
+        mode = val(ev, "mode")
+        if mode == "invisible":
+            return head + ["type = AssertSpecial"] + rng + ["flag = invisible", ""]
+        if mode == "add":
+            return head + ["type = Trans"] + rng + ["trans = add", "alpha = 256, 256", ""]
+        return head + ["type = Trans"] + rng + ["trans = addalpha", "alpha = 128, 128", ""]
     if t == "power":
         return head + ["type = PowerAdd"] + trig + [f"value = {int(val(ev, 'amount'))}", ""]
     if t == "life":

@@ -1888,5 +1888,21 @@
  "✏ Dibujar…": "✏ Zeichnen…",
  "Dibuja o mueve la caja de daño cuadro por cuadro. Al guardar, la caja de esta animación pasa a «A mano».": "Zeichne oder verschiebe die Schadensbox Bild für Bild. Beim Speichern wechselt die Box dieser Animation auf „Von Hand“.",
  "Tiempo tirado en el suelo": "Zeit am Boden",
- "Cuánto se queda tirado después de caer, antes de levantarse (60 ticks = 1 segundo; lo normal es 60). Menos = se levanta antes. Apretando botones el jugador se levanta más rápido. Para que la animación de levantarse sea más rápida, cambia su rapidez en «🤕 Recibir golpes».": "Wie lange er nach einem Sturz liegen bleibt, bevor er aufsteht (60 Ticks = 1 Sekunde; normal sind 60). Weniger = steht früher auf. Mit Tastendrücken steht der Spieler schneller auf. Damit die Aufsteh-Animation schneller ist, ändere ihre Geschwindigkeit unter „🤕 Treffer einstecken“."
+ "Cuánto se queda tirado después de caer, antes de levantarse (60 ticks = 1 segundo; lo normal es 60). Menos = se levanta antes. Apretando botones el jugador se levanta más rápido. Para que la animación de levantarse sea más rápida, cambia su rapidez en «🤕 Recibir golpes».": "Wie lange er nach einem Sturz liegen bleibt, bevor er aufsteht (60 Ticks = 1 Sekunde; normal sind 60). Weniger = steht früher auf. Mit Tastendrücken steht der Spieler schneller auf. Damit die Aufsteh-Animation schneller ist, ändere ihre Geschwindigkeit unter „🤕 Treffer einstecken“.",
+ "Brillo de la pausa": "Leuchten der Pause",
+ "Pausa del personaje": "Pause der Figur",
+ "Con destello (la chispa de luz)": "Mit Blitz (der Lichtfunke)",
+ "La chispa que sale en el personaje al empezar la pausa. Desmárcalo para que solo se congele todo.": "Der Funke, der zu Beginn der Pause an der Figur erscheint. Abwählen, damit einfach alles einfriert.",
+ "Solo el personaje se congela un momento: el rival, los proyectiles y todo lo demás siguen moviéndose (como la pausa al pegar, pero solo él).": "Nur die Figur friert kurz ein: Gegner, Projektile und alles andere bewegen sich weiter (wie die Trefferpause, aber nur für sie).",
+ "Con destello (brilla mientras está en pausa)": "Mit Blitz (leuchtet während der Pause)",
+ "Desmárcalo para que solo se congele, sin brillar.": "Abwählen, damit sie nur einfriert, ohne zu leuchten.",
+ "Color en la pantalla": "Bildschirmfarbe",
+ "Toda la pantalla se pinta de un color un momento (un fogonazo).": "Der ganze Bildschirm färbt sich kurz (ein Blitz).",
+ "Por detrás de los personajes": "Hinter den Figuren",
+ "Marcado: se pinta solo el fondo y los personajes se siguen viendo encima.": "Angehakt: Nur der Hintergrund wird gefärbt, die Figuren bleiben darüber sichtbar.",
+ "Transparente / invisible": "Transparent / unsichtbar",
+ "El personaje se ve transparente, brillante como luz o desaparece un rato (bueno para teletransportes y fantasmas).": "Die Figur wird durchsichtig, leuchtet wie Licht oder verschwindet eine Weile (gut für Teleports und Geister).",
+ "Medio transparente": "Halb transparent",
+ "Brillante (como luz)": "Leuchtend (wie Licht)",
+ "Invisible": "Unsichtbar"
 }
