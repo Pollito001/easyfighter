@@ -17,6 +17,10 @@ def main():
         os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
     app = QApplication(sys.argv)
     app.setApplicationName(APP_NAME)
+    icon = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent)) / "icon.png"
+    if icon.is_file():
+        from PyQt6.QtGui import QIcon
+        app.setWindowIcon(QIcon(str(icon)))
     from ui import theme
     theme.apply(app)
     from ui.mainwindow import MainWindow

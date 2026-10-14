@@ -359,6 +359,31 @@ compressed). It uses `ffmpeg` if you have it installed; otherwise the decoder th
 - Themes: Dark (orange), Light, Midnight (blue), Arcade (purple and pink), Forest (green) and High contrast
   (**Theme** menu; changes right away and is remembered).
 
+## Building executables (Windows, macOS, Linux)
+
+So people can use the editor without installing Python, you build an executable. Each system builds its own
+(PyInstaller can't make the Windows one from Linux), so there are two ways:
+
+**On your computer (for your system):**
+```bash
+pip install -r requirements.txt pyinstaller pillow
+python3 packaging/build.py                 # folder + .tar.gz (Linux) or .zip (Windows / macOS)
+python3 packaging/build.py --appimage      # Linux: also an .AppImage (needs appimagetool)
+python3 packaging/build.py --onefile       # a single file (starts slower)
+python3 packaging/build.py --version 1.0   # version in the file names
+```
+Everything ends up in `dist/`.
+
+**All three at once with GitHub:** the repo includes `.github/workflows/build.yml`. In the **Actions** tab →
+**Ejecutables** → **Run workflow**, GitHub builds the Windows, macOS (Apple Silicon) and Linux (.tar.gz and
+.AppImage) ones and leaves them under "Artifacts". If you push a version tag it also creates a **Release**
+with the files ready to download:
+```bash
+git tag v1.0
+git push origin v1.0
+```
+On macOS, since it isn't signed, the first time you open it with right-click → Open.
+
 ## Project layout
 
 ```
@@ -368,6 +393,7 @@ core/              formats: sff.py, air.py, snd.py, deffile.py, codeinfo.py, tem
 ui/                window and tabs
 lang/              translations
 ejemplos/          the example characters (Kaito and Saya)
+packaging/         build.py: builds the executable · .github/workflows: builds it on GitHub
 docs/              the guide and screenshots
 ```
 

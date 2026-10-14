@@ -372,6 +372,31 @@ como de 32 bits o comprimido). Usa `ffmpeg` si lo tienes instalado; si no, el de
 - Temas: Oscuro (naranja), Claro, Medianoche (azul), Arcade (morado y rosa), Bosque (verde) y Alto contraste
   (menú **Tema**; cambia al momento y se queda guardado).
 
+## Crear ejecutables (Windows, macOS, Linux)
+
+Para que alguien use el editor sin instalar Python, se arma un ejecutable. Cada sistema arma el suyo
+(PyInstaller no puede hacer el de Windows desde Linux), así que hay dos formas:
+
+**En tu computadora (el de tu sistema):**
+```bash
+pip install -r requirements.txt pyinstaller pillow
+python3 packaging/build.py                 # carpeta + .tar.gz (Linux) o .zip (Windows / macOS)
+python3 packaging/build.py --appimage      # Linux: además un .AppImage (necesita appimagetool)
+python3 packaging/build.py --onefile       # un solo archivo (abre más lento)
+python3 packaging/build.py --version 1.0   # versión en el nombre de los archivos
+```
+Todo queda en `dist/`.
+
+**Los tres a la vez con GitHub:** el repo trae `.github/workflows/build.yml`. En la pestaña **Actions** →
+**Ejecutables** → **Run workflow**, GitHub arma los de Windows, macOS (Apple Silicon) y Linux (.tar.gz y
+.AppImage) y los deja en «Artifacts». Si subes una etiqueta de versión, además crea un **Release** con los
+archivos para descargar:
+```bash
+git tag v1.0
+git push origin v1.0
+```
+En macOS, como no está firmado, la primera vez se abre con clic derecho → Abrir.
+
 ## Archivos del proyecto
 
 ```
@@ -382,6 +407,7 @@ core/              formatos: sff.py, air.py, snd.py, deffile.py, codeinfo.py, te
 ui/                ventana y pestañas
 lang/              traducciones
 ejemplos/          los personajes de ejemplo (Kaito y Saya)
+packaging/         build.py: arma el ejecutable · .github/workflows: lo arma en GitHub
 docs/              la guía y las capturas
 ```
 
