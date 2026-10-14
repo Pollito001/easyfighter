@@ -157,6 +157,13 @@ def appimage(onefile, version):
     if onefile:
         print("El .AppImage se arma desde la carpeta: corre sin --onefile. Se salta el AppImage.")
         return None
+    if not shutil.which("file"):
+        print("appimagetool necesita el comando «file», que no está instalado. Instálalo y vuelve a correr:\n"
+              "  Manjaro / Arch:   sudo pacman -S file\n"
+              "  Ubuntu / Mint:    sudo apt install file\n"
+              "  Fedora:           sudo dnf install file\n"
+              "Se salta el AppImage (la carpeta y el .tar.gz sí quedaron).")
+        return None
     src = built_path("linux", False)
     appdir = ROOT / "dist" / "AppDir"
     shutil.rmtree(appdir, ignore_errors=True)
@@ -171,7 +178,13 @@ def appimage(onefile, version):
     out = ROOT / "dist" / f"{APP}-{version}-linux-{arch()}.AppImage"
     env = dict(os.environ, ARCH=platform.machine(), APPIMAGE_EXTRACT_AND_RUN="1")
     say("appimagetool")
-    subprocess.run([tool, str(appdir), str(out)], check=True, env=env)
+    try:
+        subprocess.run([tool, str(appdir), str(out)], check=True, env=env)
+    except (OSError, subprocess.CalledProcessError) as e:
+        print(f"appimagetool falló ({e}). Mira el mensaje de arriba. Se salta el AppImage "
+              "(la carpeta y el .tar.gz sí quedaron).")
+        shutil.rmtree(appdir, ignore_errors=True)
+        return None
     out.chmod(out.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     shutil.rmtree(appdir, ignore_errors=True)
     return out
