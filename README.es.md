@@ -18,7 +18,7 @@
 <p align="center"><img src="docs/img/juego_especial.png" width="760" alt="Kaito, el personaje de ejemplo, lanzando su especial en IKEMEN GO"></p>
 
 > 🤖 **Hecho con inteligencia artificial.** El código, los dos personajes de ejemplo (Kaito y Saya, dibujados
-> con código) y la documentación los escribió **Claude**, de Anthropic, en conversación con **Joan**, que puso
+> con código) y la documentación los escribió **Claude**, de Anthropic, en conversación con **Pollito001**, que puso
 > las ideas, decidió cómo debía funcionar, lo probó y pidió los cambios. Se probó en IKEMEN GO, pero puede
 > tener errores: si encuentras uno, abre un *issue*.
 
