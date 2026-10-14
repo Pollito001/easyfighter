@@ -21,8 +21,8 @@
 
 > 🤖 **Hecho con inteligencia artificial.** El código, los dos personajes de ejemplo (Kaito y Saya, dibujados
 > con código) y la documentación los escribió **Claude**, de Anthropic, en conversación con **Pollito001**, que puso
-> las ideas, decidió cómo debía funcionar, lo probó y pidió los cambios. Se probó en IKEMEN GO, pero puede
-> tener errores: si encuentras uno, abre un *issue*.
+> las ideas, decidió cómo debía funcionar, lo probó y pidió los cambios. Es un proyecto personal:
+> se probó en IKEMEN GO, pero puede tener errores.
 
 ## ¿Qué es?
 

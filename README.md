@@ -21,8 +21,8 @@
 
 > 🤖 **Made with artificial intelligence.** The code, the two example characters (Kaito and Saya, drawn with
 > code) and the documentation were written by **Claude**, by Anthropic, in conversation with **Pollito001**, who came
-> up with the ideas, decided how it should work, tested it and asked for the changes. It was tested in IKEMEN
-> GO, but it may have bugs: if you find one, please open an *issue*.
+> up with the ideas, decided how it should work, tested it and asked for the changes. It's a personal project:
+> it was tested in IKEMEN GO, but it may have bugs.
 
 ## What is it?
 
