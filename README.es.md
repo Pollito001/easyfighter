@@ -95,6 +95,11 @@ estiras o dibujas otras cuadro por cuadro, y al guardar la animación pasa a «A
 dibujaste; lo ves igual en «✋ Alinear y ver cajas»). Si vuelves a «Automática», lo dibujado se guarda por si
 regresas.
 
+**Cajas del cuerpo (las azules, donde le pueden pegar):** el editor las pone solas en cada dibujo. En
+«👤 Personaje» escoges si son **2 cajas** (cuerpo y cabeza) o **1 caja** (todo el cuerpo). Y cada casilla tiene
+**🟦 Cuerpo**: **Automático** o **A mano**, con **✏ Dibujar…** para moverlas, estirarlas, dibujar las que quieras,
+dejar un cuadro con una sola caja o sin ninguna (ahí no le pueden pegar).
+
 **Golpes que avanzan y que cambian al repetir:** cada golpe normal tiene «Avanza:» (un paso adelante o
 atrás mientras pega) y «🔁 Al apretar otra vez» (hasta 3 animaciones más al apretar el mismo botón seguido,
 o alternar entre dos).

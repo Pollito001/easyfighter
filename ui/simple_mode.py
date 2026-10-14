@@ -294,6 +294,26 @@ class FramesBox(QWidget):
         br.addWidget(self.box_btn)
         self.box_row.setVisible(show_hit)
         row.addWidget(self.box_row, 4, 0, 1, 2)
+        # cajas del cuerpo (las azules, donde le pueden pegar): automáticas o dibujadas a mano
+        self.hurt_row = QWidget()
+        hr = QHBoxLayout(self.hurt_row)
+        hr.setContentsMargins(0, 0, 0, 0)
+        hl = QLabel(tr('🟦 Cuerpo:'))
+        hl.setToolTip(tr('Las cajas azules: la parte del dibujo donde le pueden pegar.'))
+        self.hurt_mode = QComboBox()
+        self.hurt_mode.addItem(tr('Automático'), "auto")
+        self.hurt_mode.addItem(tr('A mano'), "manual")
+        self.hurt_mode.setToolTip(tr('Automático: el editor las pone solas (1 o 2 cajas, se escoge en «👤 Personaje»). '
+                                     'A mano: solo cuenta lo que dibujes tú.'))
+        self.hurt_mode.currentIndexChanged.connect(self.on_hurt_mode)
+        self.hurt_btn = QPushButton(tr('✏ Dibujar…'))
+        self.hurt_btn.setToolTip(tr('Dibuja o mueve las cajas del cuerpo cuadro por cuadro. Al guardar, el cuerpo '
+                                    'de esta animación pasa a «A mano».'))
+        self.hurt_btn.clicked.connect(self.on_hurtbox)
+        hr.addWidget(hl)
+        hr.addWidget(self.hurt_mode, 1)
+        hr.addWidget(self.hurt_btn)
+        row.addWidget(self.hurt_row, 5, 0, 1, 2)
         self.copy_btn = QPushButton(tr('📋 Rehacer en el modo simple'))
         self.copy_btn.setToolTip(tr('Cambia el golpe del personaje por uno hecho con el modo simple (con la misma '
                                     'animación y daño). Ojo: se pierde lo especial de su código, como sus combos. '
@@ -361,6 +381,7 @@ class FramesBox(QWidget):
             self.preview.ref_kind = getattr(self, "ref_kind", "S")
             self.preview.manual = sg.manual_boxes(self.entry)
             self.sync_box_mode()
+            self.sync_hurt_mode()
             offs = [0] * len(keys)
             if getattr(self, "step_aware", False) and self.entry.get("step"):
                 hf_ = hit if isinstance(hit, int) else sg.hit_frame_of(self.entry, keys, p.sff.index())
@@ -480,6 +501,9 @@ class FramesBox(QWidget):
             return
         if [list(k) for k in keys] != self.entry.get("frames"):
             self.entry.pop("boxes", None)      # otros cuadros: las cajas hechas a mano eran de los de antes
+            if self.entry.pop("hurt", None) is not None or self.entry.pop("hurt_mode", None):
+                self.entry.pop("hurt_mode", None)
+                sg.set_hurt(self.sm.cfg)
         self.entry["frames"] = [list(k) for k in keys]
         if group is not None:
             self.entry["group"] = group
@@ -615,6 +639,45 @@ class FramesBox(QWidget):
         self.refresh()
         self.changed.emit()
 
+    def on_hurtbox(self):
+        keys = self.keys()
+        if not keys:
+            QMessageBox.information(self, APP_NAME, tr('Primero pon los cuadros de esta casilla.'))
+            self.sync_hurt_mode()
+            return
+        from ui.hitbox_editor import HitboxEditor
+        hits = self.hit_indices(keys) if self.show_hit else set()
+        dlg = HitboxEditor(self.sm, self.dialog_title, keys, hits, self.entry, getattr(self, "ref_kind", "S"),
+                           body=True)
+        if dlg.exec() != QDialog.DialogCode.Accepted or dlg.result is None:
+            self.sync_hurt_mode()
+            return
+        self.entry["hurt"] = dlg.result
+        self.entry["hurt_mode"] = "manual"
+        self.sync_hurt_mode()
+        self.sm.hurt_changed()
+
+    def sync_hurt_mode(self):
+        if not hasattr(self, "hurt_mode"):
+            return
+        self.hurt_mode.blockSignals(True)
+        self.hurt_mode.setCurrentIndex(1 if self.entry.get("hurt_mode") == "manual" else 0)
+        self.hurt_mode.blockSignals(False)
+
+    def on_hurt_mode(self, _i):
+        mode = self.hurt_mode.currentData()
+        if mode == "auto":
+            if self.entry.get("hurt_mode") != "manual":
+                return
+            self.entry["hurt_mode"] = "auto"      # lo dibujado se guarda por si vuelves a «A mano»
+            self.sm.hurt_changed()
+            return
+        if self.entry.get("hurt"):
+            self.entry["hurt_mode"] = "manual"
+            self.sm.hurt_changed()
+        else:
+            self.on_hurtbox()                     # sin nada dibujado: se abre para dibujarlas
+
     def sync_box_mode(self):
         if not hasattr(self, "box_mode"):
             return
@@ -653,6 +716,10 @@ class FramesBox(QWidget):
         self.sm.mirror_sprites(keys)
         if self.entry.get("boxes"):
             self.entry.pop("boxes", None)      # los dibujos cambiaron de lado: las cajas a mano ya no sirven
+        if self.entry.get("hurt"):
+            self.entry.pop("hurt", None)
+            self.entry.pop("hurt_mode", None)
+            sg.set_hurt(self.sm.cfg)
         self.refresh()
         self.changed.emit()
 
@@ -2633,6 +2700,16 @@ class CharPage(Page):
             lab.setToolTip(tr(tip))
             f.addRow(lab, sp)
             self.body[key] = sp
+        self.hurt_count = QComboBox()
+        self.hurt_count.addItem(tr('2 cajas (cuerpo y cabeza)'), 2)
+        self.hurt_count.addItem(tr('1 caja (todo el cuerpo)'), 1)
+        tip = tr('Las cajas azules: donde le pueden pegar. El editor las pone solas en cada dibujo; aquí escoges '
+                 'cuántas. Para dibujarlas tú en una animación: «🟦 Cuerpo» en su casilla.')
+        self.hurt_count.setToolTip(tip)
+        self.hurt_count.currentIndexChanged.connect(self.on_hurt_count)
+        lab = QLabel(tr('Cajas del cuerpo (automáticas):'))
+        lab.setToolTip(tip)
+        f.addRow(lab, self.hurt_count)
         v.addLayout(f)
         self.bake_btn = QPushButton(tr('🔍 Agrandar los sprites a este tamaño'))
         self.bake_btn.setToolTip(tr('Agranda de verdad todos los sprites, animaciones y cajas a este tamaño y deja '
@@ -2717,6 +2794,9 @@ class CharPage(Page):
                 missing.append(key)
             sp.blockSignals(False)
         self.body_view.update()
+        self.hurt_count.blockSignals(True)
+        self.hurt_count.setCurrentIndex(max(0, self.hurt_count.findData(sg.hurt_count(self.sm.cfg))))
+        self.hurt_count.blockSignals(False)
         self.bake_btn.setEnabled(self.body["size"].isEnabled() and self.body["size"].value() != 100)
         self.stats_warn.setText(tr('Algunos datos no están en el .cns del personaje.') if missing else "")
         self._binding = False
@@ -2800,6 +2880,12 @@ class CharPage(Page):
         if y:
             out["bounce"] = 0.4 * CharPage.k_now / y * 100
         return out
+
+    def on_hurt_count(self, _i):
+        if self._binding:
+            return
+        self.sm.cfg["hurt_boxes"] = int(self.hurt_count.currentData())
+        self.sm.hurt_changed()
 
     def on_body(self, *_a):
         self.body_view.update()
@@ -3048,7 +3134,8 @@ class SimpleMode(QObject):
         self.char_page = CharPage(self)
         self.moves_page = AnimsPage(self, tr('🚶 Moverse y saltar'), tr(
             'Las animaciones básicas. Para cada casilla pon tus imágenes (en orden) o elige sprites que ya '
-            'tiene. Las cajas para recibir golpes se ponen solas.'), ("basic", "jump", "show"))
+            'tiene. Las cajas para recibir golpes se ponen solas (o dibújalas tú con «🟦 Cuerpo»).'),
+            ("basic", "jump", "show"))
         self.attacks_page = AttacksPage(self)
         self.specials_page = SpecialsPage(self)
         self.hurt_page = AnimsPage(self, tr('🤕 Recibir golpes y cubrirse'), tr(
@@ -3112,16 +3199,41 @@ class SimpleMode(QObject):
             self.cache[key] = sg.reference_sprites(self.cfg, p.sff.index(), p.air).get(kind) if p else None
         return self.cache[key]
 
-    def auto_boxes_of(self, g, n, hit=False, ref_kind="S"):
-        key = ("boxes", g, n, hit, ref_kind if hit else None)
+    def auto_boxes_of(self, g, n, hit=False, ref_kind="S", body_auto=False):
+        """(caja de golpe, cajas del cuerpo) como las pone el modo simple. body_auto: las del cuerpo
+        automáticas aunque ese dibujo tenga unas dibujadas a mano."""
+        two = sg.HURT["two"]
+        key = ("boxes", g, n, hit, ref_kind if hit else None, two)
         if key not in self.cache:
             s = self.sprite(g, n)
             if s is None:
                 self.cache[key] = None
             else:
                 from ui.align_dialog import boxes_for
-                self.cache[key] = boxes_for(s, s.x, s.y, hit, self.ref_sprite(ref_kind) if hit else None)
-        return self.cache[key]
+                self.cache[key] = boxes_for(s, s.x, s.y, hit, self.ref_sprite(ref_kind) if hit else None, two=two)
+        res = self.cache[key]
+        mh = None if body_auto else sg.HURT["by_key"].get((int(g), int(n)))
+        if res is not None and mh is not None:
+            res = (res[0], list(mh))
+        return res
+
+    def hurt_changed(self):
+        """Cambiaron las cajas del cuerpo (cuántas automáticas o las de una animación): se rehacen las
+        animaciones del modo simple y el código."""
+        sg.set_hurt(self.cfg)
+        self.cache = {}
+        if not self.main.project:
+            return
+        for key in sg.ANIM_SLOTS:
+            if sg.own_frames(self.cfg, key)[0]:
+                try:
+                    self.anim_slot_changed(key)
+                except Exception:
+                    import traceback
+                    traceback.print_exc()
+        self.moves_changed()
+        for w in self.findChildren(FramesBox):
+            w.preview.update()
 
     def align_all(self):
         p = self.main.project
@@ -3278,6 +3390,7 @@ class SimpleMode(QObject):
         p = self.main.project
         self.code_timer.stop()
         self.cfg = sg.load_config(p.def_path) if p else sg._fill({})
+        sg.set_hurt(self.cfg)
         self.pending_drop = []
         self._orig = None
         self.motion.forget()

@@ -1,7 +1,9 @@
 """«🟥 Caja de golpe»: dónde pega cada cuadro de un golpe o especial (el puño, el pie…), con el ratón.
 
 La caja roja es la que hace daño. Si no la tocas, el editor la pone solo en la punta de lo que pega; si la
-mueves, la estiras o dibujas otra, ese cuadro queda con tus cajas («a mano»)."""
+mueves, la estiras o dibujas otra, ese cuadro queda con tus cajas («a mano»).
+
+Con body=True edita las cajas azules (el cuerpo: donde le pueden pegar) de cualquier animación."""
 import copy
 
 from PyQt6.QtCore import QPointF, QRectF, QSize, Qt, pyqtSignal
@@ -74,20 +76,21 @@ class BoxCanvas(QWidget):
         p.setPen(QPen(QColor(255, 107, 53, 120), 1))
         p.drawLine(QPointF(0, o.y()), QPointF(self.width(), o.y()))
         p.drawLine(QPointF(o.x(), o.y() - 8), QPointF(o.x(), o.y() + 8))
-        # cuerpo (azul, de guía)
+        # de guía: el cuerpo (azul) al editar la de golpe, o la de golpe (roja) al editar el cuerpo
+        guide, edit = (CLSN1, CLSN2) if self.dlg.body else (CLSN2, CLSN1)
         for b in self.dlg.body_boxes():
-            c = QColor(CLSN2)
+            c = QColor(guide)
             c.setAlpha(40)
             p.setBrush(c)
-            p.setPen(QPen(QColor(CLSN2), 1, Qt.PenStyle.DotLine))
+            p.setPen(QPen(QColor(guide), 1, Qt.PenStyle.DotLine))
             p.drawRect(self.rect_of(b))
-        # golpe (rojo): las tuyas sólidas, las automáticas punteadas
+        # las que se editan: las tuyas sólidas, las automáticas punteadas
         manual = self.dlg.is_manual()
         for i, b in enumerate(self.dlg.boxes()):
-            c = QColor(CLSN1)
+            c = QColor(edit)
             c.setAlpha(80 if manual else 50)
             p.setBrush(c)
-            p.setPen(QPen(QColor(255, 255, 255) if i == self.sel else QColor(CLSN1), 2,
+            p.setPen(QPen(QColor(255, 255, 255) if i == self.sel else QColor(edit), 2,
                           Qt.PenStyle.SolidLine if manual else Qt.PenStyle.DashLine))
             r = self.rect_of(b)
             p.drawRect(r)
@@ -100,9 +103,14 @@ class BoxCanvas(QWidget):
             p.setBrush(Qt.BrushStyle.NoBrush)
             p.drawRect(self.rect_of(self.drag[3]))
         p.setPen(QColor(theme.MUTED))
-        txt = tr('Muévela, estírala o dibuja otra. Solo pega lo que está en rojo.')
-        if not self.dlg.boxes():
-            txt = tr('Este cuadro no pega. Arrastra en el dibujo para ponerle una caja.')
+        if self.dlg.body:
+            txt = tr('Muévelas, estíralas o dibuja otra. Solo le pueden pegar en lo azul.')
+            if not self.dlg.boxes():
+                txt = tr('En este cuadro no le pueden pegar. Arrastra en el dibujo para ponerle una caja.')
+        else:
+            txt = tr('Muévela, estírala o dibuja otra. Solo pega lo que está en rojo.')
+            if not self.dlg.boxes():
+                txt = tr('Este cuadro no pega. Arrastra en el dibujo para ponerle una caja.')
         p.drawText(10, 20, txt)
         p.end()
 
@@ -205,25 +213,40 @@ class BoxCanvas(QWidget):
 
 
 class HitboxEditor(QDialog):
-    def __init__(self, sm, title, keys, hits, entry, ref_kind="S"):
+    def __init__(self, sm, title, keys, hits, entry, ref_kind="S", body=False):
         super().__init__(sm.main)
         self.sm = sm
         self.keys = list(keys)
         self.hits = set(hits)
         self.ref_kind = ref_kind
+        self.body = body
         from core import simple_gen as sg
-        self.manual = {i: [list(b) for b in v] for i, v in sg.manual_boxes(entry).items()}
-        if sg.box_mode(entry) != "manual":
-            # empieza con lo que había: las automáticas en los cuadros que pegan (y lo ya dibujado)
-            for i in self.hits:
-                if 0 <= i < len(self.keys) and i not in self.manual:
-                    self.manual[i] = self.auto(i)
+        # cajas de golpe de la animación (de guía al editar el cuerpo)
+        self.red = sg.manual_boxes(entry)
+        if body:
+            # el cuerpo: lo ya dibujado (aunque esté en «Automático») y las automáticas en los demás cuadros
+            drawn = {}
+            for k_, v in (entry.get("hurt") or {}).items():
+                try:
+                    drawn[int(k_)] = [[int(round(float(c))) for c in b[:4]] for b in v if len(b) >= 4]
+                except (TypeError, ValueError):
+                    pass
+            self.manual = {i: drawn[i] if i in drawn else self.auto(i) for i in range(len(self.keys))}
+        else:
+            self.manual = {i: [list(b) for b in v] for i, v in self.red.items()}
+            if sg.box_mode(entry) != "manual":
+                # empieza con lo que había: las automáticas en los cuadros que pegan (y lo ya dibujado)
+                for i in self.hits:
+                    if 0 <= i < len(self.keys) and i not in self.manual:
+                        self.manual[i] = self.auto(i)
         self.result = None
-        self.setWindowTitle(tr('✏ Cajas de daño a mano: {0}').format(title))
+        self.setWindowTitle((tr('✏ Cajas del cuerpo a mano: {0}') if body else
+                             tr('✏ Cajas de daño a mano: {0}')).format(title))
         self.resize(1000, 640)
         lay = QHBoxLayout(self)
         left = QVBoxLayout()
-        lab = QLabel(tr('Cuadros (💥 = el del golpe · 🟥 = tiene caja de daño):'))
+        lab = QLabel(tr('Cuadros (💥 = el del golpe · 🟦 = tiene cajas del cuerpo):') if body else
+                     tr('Cuadros (💥 = el del golpe · 🟥 = tiene caja de daño):'))
         lab.setWordWrap(True)
         left.addWidget(lab)
         self.list = QListWidget()
@@ -235,7 +258,11 @@ class HitboxEditor(QDialog):
         lw.setFixedWidth(220)
         lay.addWidget(lw)
         right = QVBoxLayout()
-        hint = QLabel(tr('La caja roja es la que hace daño. Ponla solo en lo que pega (el puño, el pie…). '
+        hint = QLabel(tr('Las cajas azules son el cuerpo: donde le pueden pegar. Cúbrelo con una, dos o las que '
+                         'quieras. Arrastra una caja para moverla, sus bordes o esquinas para estirarla, o arrastra '
+                         'en un lugar vacío para dibujar otra. Supr borra la escogida. Rueda del ratón: zoom.')
+                      if body else
+                      tr('La caja roja es la que hace daño. Ponla solo en lo que pega (el puño, el pie…). '
                          'Arrastra la caja para moverla, sus bordes o esquinas para estirarla, o arrastra en un '
                          'lugar vacío para dibujar otra. Supr borra la escogida. Rueda del ratón: zoom.'))
         hint.setWordWrap(True)
@@ -244,15 +271,25 @@ class HitboxEditor(QDialog):
         self.canvas.changed.connect(self.fill_list)
         right.addWidget(self.canvas, 1)
         row = QHBoxLayout()
-        for txt, tip, fn in ((tr('↺ Como la automática'), tr('Pone en este cuadro la caja que pondría el editor.'),
-                              self.on_auto),
-                             (tr('🚫 Sin caja'), tr('Este cuadro no pega (aunque sea el cuadro del golpe).'),
-                              self.on_none),
-                             (tr('⧉ Igual en el siguiente'), tr('Copia las cajas de este cuadro al siguiente.'),
-                              self.on_copy_next),
-                             (tr('↺ Empezar de nuevo'), tr('Todos los cuadros como los pondría el editor: la caja '
-                                                           'automática en los que pegan y nada en los demás.'),
-                              self.on_all_auto)):
+        if body:
+            btns = ((tr('↺ Como la automática'), tr('Pone en este cuadro las cajas que pondría el editor.'),
+                     self.on_auto),
+                    (tr('▭ Una sola caja'), tr('Una caja que cubre todo el dibujo de este cuadro.'), self.on_one),
+                    (tr('🚫 Sin caja'), tr('En este cuadro no le pueden pegar (es invencible).'), self.on_none),
+                    (tr('⧉ Igual en el siguiente'), tr('Copia las cajas de este cuadro al siguiente.'),
+                     self.on_copy_next),
+                    (tr('↺ Empezar de nuevo'), tr('Todos los cuadros con las cajas automáticas.'), self.on_all_auto))
+        else:
+            btns = ((tr('↺ Como la automática'), tr('Pone en este cuadro la caja que pondría el editor.'),
+                     self.on_auto),
+                    (tr('🚫 Sin caja'), tr('Este cuadro no pega (aunque sea el cuadro del golpe).'),
+                     self.on_none),
+                    (tr('⧉ Igual en el siguiente'), tr('Copia las cajas de este cuadro al siguiente.'),
+                     self.on_copy_next),
+                    (tr('↺ Empezar de nuevo'), tr('Todos los cuadros como los pondría el editor: la caja '
+                                                  'automática en los que pegan y nada en los demás.'),
+                     self.on_all_auto))
+        for txt, tip, fn in btns:
             b = QPushButton(txt)
             b.setToolTip(tip)
             b.clicked.connect(fn)
@@ -270,7 +307,7 @@ class HitboxEditor(QDialog):
         lay.addLayout(right, 1)
         self.cur = 0
         self.fill_list()
-        first = min(self.hits) if self.hits else 0
+        first = min(self.hits) if (self.hits and not body) else 0
         self.list.setCurrentRow(max(0, min(first, len(self.keys) - 1)))
 
     # ---- datos del cuadro actual
@@ -284,11 +321,19 @@ class HitboxEditor(QDialog):
 
     def auto(self, i):
         g, n = self.keys[i]
-        bx = self.sm.auto_boxes_of(g, n, i in self.hits, self.ref_kind)
-        return [list(b) for b in (bx[0] if bx else [])]
+        bx = self.sm.auto_boxes_of(g, n, i in self.hits, self.ref_kind, body_auto=True)
+        return [list(b) for b in ((bx[1] if self.body else bx[0]) if bx else [])]
 
     def body_boxes(self):
+        """Las de guía: el cuerpo al editar la de golpe, o la de golpe al editar el cuerpo."""
         g, n = self.keys[self.cur]
+        if self.body:
+            if self.cur in self.red or getattr(self.red, "strict", False):
+                return self.red.get(self.cur, [])
+            if self.cur not in self.hits:
+                return []
+            bx = self.sm.auto_boxes_of(g, n, True, self.ref_kind)
+            return bx[0] if bx else []
         bx = self.sm.auto_boxes_of(g, n, False, self.ref_kind)
         return bx[1] if bx else []
 
@@ -319,7 +364,9 @@ class HitboxEditor(QDialog):
             if i in self.hits:
                 mark.append("💥")
             if self.manual.get(i):
-                mark.append("🟥")
+                mark.append("🟦" if self.body else "🟥")
+            elif self.body:
+                mark.append("🚫")
             it = QListWidgetItem(f"{tr('Cuadro {0}').format(i + 1)}  {' '.join(mark)}")
             pm = self.sm.pixmap(g, n)
             if pm is not None:
@@ -346,6 +393,17 @@ class HitboxEditor(QDialog):
         self.fill_list()
         self.canvas.update()
 
+    def on_one(self):
+        g, n = self.keys[self.cur]
+        s = self.sm.sprite(g, n)
+        if s is None:
+            return
+        from core.boxes import auto_boxes
+        self.manual[self.cur] = [list(b) for b in auto_boxes(s, two=False)]
+        self.canvas.sel = None
+        self.fill_list()
+        self.canvas.update()
+
     def on_none(self):
         self.manual[self.cur] = []
         self.canvas.sel = None
@@ -363,11 +421,19 @@ class HitboxEditor(QDialog):
         if self.manual and QMessageBox.question(self, APP_NAME, tr('¿Empezar de nuevo? Se pierden las cajas que '
                                                                    'dibujaste.')) != QMessageBox.StandardButton.Yes:
             return
-        self.manual = {i: self.auto(i) for i in self.hits if 0 <= i < len(self.keys)}
+        if self.body:
+            self.manual = {i: self.auto(i) for i in range(len(self.keys))}
+        else:
+            self.manual = {i: self.auto(i) for i in self.hits if 0 <= i < len(self.keys)}
         self.canvas.sel = None
         self.fill_list()
         self.canvas.update()
 
     def on_ok(self):
+        if self.body:
+            # todos los cuadros (uno sin cajas es a propósito: ahí no le pueden pegar)
+            self.result = {str(i): self.manual.get(i, []) for i in range(len(self.keys))}
+            self.accept()
+            return
         self.result = {str(i): v for i, v in sorted(self.manual.items()) if v}
         self.accept()

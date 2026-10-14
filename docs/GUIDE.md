@@ -56,6 +56,7 @@ Each animation is a **slot**: standing, walking, crouching, jumping, running, wi
 | **↔ Mirror** | For images that face left (the character always faces right). |
 | **Speed** | Ticks per frame: 60 ticks = 1 second. Fewer = faster. |
 | **✋ Align and show boxes** | Moves frames that ended up misaligned and shows the boxes. |
+| **🟦 Body** | The blue boxes (where it can be hit): automatic or, with **✏ Draw…**, by hand. In «👤 Character» you pick whether the automatic ones are 1 or 2. |
 
 > 💡 Start with **Standing**: it's the reference. Once you have several, **🎯 Align all to the standing one**
 > lines them up so the character doesn't "jump" between animations.

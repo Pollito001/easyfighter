@@ -57,6 +57,7 @@ Cada animación es una **casilla**: parado, caminar, agacharse, saltar, correr, 
 | **↔ Voltear** | Para imágenes que miran hacia la izquierda (el personaje siempre mira a la derecha). |
 | **Rapidez** | Ticks por cuadro: 60 ticks = 1 segundo. Menos = más rápido. |
 | **✋ Alinear y ver cajas** | Mueve los cuadros si quedaron desalineados y te enseña las cajas. |
+| **🟦 Cuerpo** | Las cajas azules (donde le pueden pegar): automáticas o, con **✏ Dibujar…**, a mano. En «👤 Personaje» escoges si las automáticas son 1 o 2. |
 
 > 💡 Empieza por **Parado**: es la guía. Cuando tengas varias, **🎯 Alinear todas con la de parado** las
 > pone en el mismo lugar para que el personaje no «brinque» entre animaciones.

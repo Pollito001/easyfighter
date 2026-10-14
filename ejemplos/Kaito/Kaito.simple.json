@@ -1077,7 +1077,8 @@
     "time": 3,
     "group": 1060
    },
-   "state": 1000
+   "state": 1000,
+   "pause": 2
   },
   {
    "name": "Ryūjin",
@@ -1129,7 +1130,7 @@
    "events": [
     {
      "type": "move",
-     "frame": 1,
+     "frame": 2,
      "mode": "set",
      "x": 1.8,
      "y": 8.5,
@@ -1142,7 +1143,8 @@
    "evmode": 2,
    "proj": {},
    "proj_hit": {},
-   "state": 1100
+   "state": 1100,
+   "pause": 2
   },
   {
    "name": "Tatsu-geri",
@@ -1210,7 +1212,8 @@
    "proj": {},
    "proj_hit": {},
    "state": 1200,
-   "ender_state": 4020
+   "ender_state": 4020,
+   "pause": 2
   },
   {
    "name": "Rengeki",

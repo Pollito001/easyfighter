@@ -18,12 +18,12 @@ CLSN2 = QColor(80, 160, 255)
 CLSN1 = QColor(255, 70, 70)
 
 
-def boxes_for(sprite, ax, ay, hit=False, ref=None):
+def boxes_for(sprite, ax, ay, hit=False, ref=None, two=True):
     """(clsn1, clsn2) automáticas de un sprite con el eje (ax, ay) — igual que las que pone el modo simple.
     ref: pose normal, para que la caja de golpe vaya solo en lo que pega."""
     fake = SimpleNamespace(pixels=sprite.pixels, x=ax, y=ay)
     try:
-        c2 = auto_boxes(fake, two=True)
+        c2 = auto_boxes(fake, two=two)
         c1 = hit_box(fake, ref) if hit else []
     except Exception:
         c1, c2 = [], []
@@ -110,7 +110,11 @@ class AlignCanvas(QWidget):
         p.setOpacity(1.0)
         if boxes:
             hits = dlg.hit_index if isinstance(dlg.hit_index, (set, list, tuple)) else {dlg.hit_index}
-            c1, c2 = boxes_for(s, ax, ay, hit=(i in hits), ref=dlg.ref)
+            from core import simple_gen as sg
+            c1, c2 = boxes_for(s, ax, ay, hit=(i in hits), ref=dlg.ref, two=sg.HURT["two"])
+            mh = sg.HURT["by_key"].get((int(key[0]), int(key[1])))
+            if mh is not None:
+                c2 = list(mh)
             man = dlg.manual
             if man is not None and (i in man or getattr(man, "strict", False)):
                 c1 = list(man.get(i, []))

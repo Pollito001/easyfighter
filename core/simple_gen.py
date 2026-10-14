@@ -317,6 +317,55 @@ def manual_boxes(entry):
     return out
 
 
+# cajas del cuerpo (las azules, donde le pueden pegar): cuántas pone el editor solo y las dibujadas a mano.
+# Se arman de la configuración del personaje antes de generar (set_hurt).
+HURT = {"two": True, "by_key": {}}
+
+
+def hurt_count(cfg):
+    """Cajas del cuerpo automáticas: 1 (todo el cuerpo) o 2 (cuerpo y cabeza, lo de siempre)."""
+    try:
+        return 1 if int((cfg or {}).get("hurt_boxes", 2)) == 1 else 2
+    except (TypeError, ValueError):
+        return 2
+
+
+def manual_hurt(entry):
+    """Cajas del cuerpo puestas a mano en una casilla: {cuadro (desde 0): [(x1, y1, x2, y2)…]}, o None si son
+    automáticas. Un cuadro con la lista vacía no tiene cuerpo (no le pueden pegar)."""
+    if (entry or {}).get("hurt_mode") != "manual":
+        return None
+    out = {}
+    for k, v in ((entry or {}).get("hurt") or {}).items():
+        try:
+            out[int(k)] = [tuple(int(round(float(c))) for c in b[:4]) for b in v if len(b) >= 4]
+        except (TypeError, ValueError):
+            pass
+    return out
+
+
+def set_hurt(cfg):
+    """Prepara HURT con lo del personaje: la cantidad automática y las cajas a mano de cada dibujo."""
+    by_key = {}
+
+    def walk(o):
+        if isinstance(o, dict):
+            mh = manual_hurt(o) if o.get("frames") else None
+            if mh is not None:
+                keys = _frames(o)
+                for i, bx in mh.items():
+                    if 0 <= i < len(keys):
+                        by_key[keys[i]] = list(bx)
+            for v in o.values():
+                walk(v)
+        elif isinstance(o, list):
+            for v in o:
+                walk(v)
+    walk(cfg or {})
+    HURT["two"] = hurt_count(cfg) == 2
+    HURT["by_key"] = by_key
+
+
 def reference_sprites(cfg, sprites, air=None):
     """Poses normales para encontrar la parte que pega: de pie (parado), agachado y en el aire."""
     out = {}
@@ -355,7 +404,8 @@ def make_action(number, title, keys, time, mode, sprites, hit_index=None, kind="
                     box = auto_boxes(s, two=False)
                     f.clsn1, f.clsn2 = list(box), list(box)
                 else:
-                    f.clsn2 = auto_boxes(s, two=True)
+                    mh = HURT["by_key"].get((int(g), int(n)))
+                    f.clsn2 = list(mh) if mh is not None else auto_boxes(s, two=HURT["two"])
                     if manual is not None and getattr(manual, "strict", False):
                         f.clsn1 = list(manual.get(i, []))
                     elif manual and i in manual:
@@ -368,6 +418,23 @@ def make_action(number, title, keys, time, mode, sprites, hit_index=None, kind="
     if a.frames and mode == "hold":
         a.frames[-1].time = -1
     return a
+
+
+def rise_hitbox(act, manual=None):
+    """Gancho que sube: la caja automática de la punta (el puño arriba) baja hasta el hombro y va desde el
+    centro del cuerpo, para que le pegue al rival que está enfrente y no solo por encima de su cabeza."""
+    manual = manual or {}
+    for i, f in enumerate(act.frames):
+        if not f.clsn1 or i in manual or getattr(manual, "strict", False):
+            continue
+        tops = [b[1] for b in f.clsn2] + [b[1] for b in f.clsn1]
+        h = -min(tops) if tops and min(tops) < 0 else 0
+        if h <= 0:
+            continue
+        out = []
+        for x1, y1, x2, y2 in f.clsn1:
+            out.append((min(x1, 0), y1, x2, max(y2, int(round(y1 + 0.45 * h)))))
+        f.clsn1 = out
 
 
 # casillas que, si quedan vacías, se llenan con otra: destino → (origen, al revés)
@@ -437,6 +504,7 @@ def _slot_build(key, keys, time, sprites):
 def anim_slot_actions(key, cfg, sprites, source=None):
     """Acciones (Action) que salen de una casilla de animación (y de las que dependen de ella).
     source(k) → (cuadros, rapidez) de lo que el personaje ya tenía, para casillas no puestas en el modo simple."""
+    set_hurt(cfg)
     fb = fallbacks(cfg)
 
     def src_of(k):
@@ -968,6 +1036,7 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
     """Arma todo. taken_*: números que ya usa el personaje fuera del modo simple.
     Escribe en cfg los números elegidos (para que no cambien la próxima vez)."""
     g = Gen()
+    set_hurt(cfg)
     al = _Alloc(taken_states, taken_actions)
     refs = reference_sprites(cfg, sprites, air)     # poses normales: la caja de golpe va en lo que pega
     voices = cfg.get("voices", {})
@@ -1585,6 +1654,8 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
         hold = (typ == "rise" and not sp.get("evmode")) or use == "air" or (sp.get("evmode") and flies)
         body = make_action(n, name, keys, sp.get("time", 4), "hold" if hold else "once", sprites,
                            hit_frames=hit_frames, ref=refs.get("A" if use == "air" else "S"), manual=manual_boxes(sp))
+        if typ == "rise":
+            rise_hitbox(body, manual_boxes(sp))
         g.actions.append(body)
         if proj:
             g.actions.append(make_action(n + 50, f"{name} ({tr('proyectil')})", pkeys,
@@ -1613,6 +1684,9 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
                 t_ += max(1, f_.time) if f_.time > 0 else 10
             if last is not None:
                 after_hit = (t_ - last) + KI_GRACE + 6
+            if throws_proj(sp):
+                # el proyectil: aturdido lo justo para seguir con el autodoble si estás cerca (no para llegar corriendo)
+                after_hit = max(after_hit, KI_GRACE + 12)
         if user_hf and len(runs) > 1 and body.frames:
             # cuadros que pegan escogidos a mano: el rival sigue aturdido hasta el próximo golpe (cuenta en el combo)
             starts, t_, prev_red = [], 0, False

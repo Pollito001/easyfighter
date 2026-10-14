@@ -880,14 +880,15 @@ animtype = Light
 guardflag = MA
 hitflag = MAF
 priority = 4, Hit
-pausetime = 12, 12
+pausetime = 2, 2
 sparkno = 0
 guard.sparkno = 40
 hitsound = 5, 0
 guardsound = 6, 0
 ground.type = High
-ground.slidetime = 12
-ground.hittime = 16
+ground.slidetime = 2
+ground.hittime = 32
+air.hittime = 32
 ground.velocity = -9
 air.velocity = -5.4, -6
 
@@ -934,14 +935,15 @@ animtype = Medium
 guardflag = MA
 hitflag = MAF
 priority = 4, Hit
-pausetime = 12, 12
+pausetime = 2, 2
 sparkno = 1
 guard.sparkno = 40
 hitsound = 5, 1
 guardsound = 6, 0
 ground.type = High
-ground.slidetime = 12
-ground.hittime = 16
+ground.slidetime = 2
+ground.hittime = 32
+air.hittime = 32
 ground.velocity = -9
 air.velocity = -5.4, -6
 
@@ -988,14 +990,15 @@ animtype = Heavy
 guardflag = MA
 hitflag = MAF
 priority = 4, Hit
-pausetime = 12, 12
+pausetime = 2, 2
 sparkno = 2
 guard.sparkno = 40
 hitsound = 5, 2
 guardsound = 6, 0
 ground.type = High
-ground.slidetime = 12
-ground.hittime = 16
+ground.slidetime = 2
+ground.hittime = 32
+air.hittime = 32
 ground.velocity = -9
 air.velocity = -5.4, -6
 
@@ -1034,13 +1037,13 @@ animtype = Light
 guardflag = MA
 hitflag = MAF
 priority = 5, Hit
-pausetime = 12, 12
+pausetime = 2, 2
 sparkno = 0
 guard.sparkno = 40
 hitsound = 5, 0
 guardsound = 6, 0
 ground.type = High
-ground.slidetime = 12
+ground.slidetime = 2
 ground.hittime = 44
 air.hittime = 44
 sparkxy = -10, -192
@@ -1052,13 +1055,13 @@ fall.recover = 1
 
 [State 1100, Despegar]
 type = StateTypeSet
-trigger1 = AnimElem = 1
+trigger1 = AnimElem = 2
 statetype = A
 physics = A
 
 [State 1100, Moverse / impulso]
 type = VelSet
-trigger1 = AnimElem = 1
+trigger1 = AnimElem = 2
 x = 2.7
 y = -14.45
 
@@ -1097,13 +1100,13 @@ animtype = Medium
 guardflag = MA
 hitflag = MAF
 priority = 5, Hit
-pausetime = 12, 12
+pausetime = 2, 2
 sparkno = 1
 guard.sparkno = 40
 hitsound = 5, 1
 guardsound = 6, 0
 ground.type = High
-ground.slidetime = 12
+ground.slidetime = 2
 ground.hittime = 44
 air.hittime = 44
 sparkxy = -10, -192
@@ -1115,13 +1118,13 @@ fall.recover = 1
 
 [State 1101, Despegar]
 type = StateTypeSet
-trigger1 = AnimElem = 1
+trigger1 = AnimElem = 2
 statetype = A
 physics = A
 
 [State 1101, Moverse / impulso]
 type = VelSet
-trigger1 = AnimElem = 1
+trigger1 = AnimElem = 2
 x = 3.6
 y = -17
 
@@ -1160,13 +1163,13 @@ animtype = Heavy
 guardflag = MA
 hitflag = MAF
 priority = 5, Hit
-pausetime = 12, 12
+pausetime = 2, 2
 sparkno = 2
 guard.sparkno = 40
 hitsound = 5, 2
 guardsound = 6, 0
 ground.type = High
-ground.slidetime = 12
+ground.slidetime = 2
 ground.hittime = 44
 air.hittime = 44
 sparkxy = -10, -192
@@ -1178,13 +1181,13 @@ fall.recover = 1
 
 [State 1102, Despegar]
 type = StateTypeSet
-trigger1 = AnimElem = 1
+trigger1 = AnimElem = 2
 statetype = A
 physics = A
 
 [State 1102, Moverse / impulso]
 type = VelSet
-trigger1 = AnimElem = 1
+trigger1 = AnimElem = 2
 x = 4.5
 y = -19.55
 
@@ -1217,13 +1220,13 @@ animtype = Light
 guardflag = MA
 hitflag = MAF
 priority = 5, Hit
-pausetime = 12, 12
+pausetime = 2, 2
 sparkno = 0
 guard.sparkno = 40
 hitsound = 5, 0
 guardsound = 6, 0
 ground.type = High
-ground.slidetime = 12
+ground.slidetime = 2
 ground.hittime = 34
 air.hittime = 34
 sparkxy = -10, -58
@@ -1269,13 +1272,13 @@ animtype = Medium
 guardflag = MA
 hitflag = MAF
 priority = 5, Hit
-pausetime = 12, 12
+pausetime = 2, 2
 sparkno = 1
 guard.sparkno = 40
 hitsound = 5, 1
 guardsound = 6, 0
 ground.type = High
-ground.slidetime = 12
+ground.slidetime = 2
 ground.hittime = 34
 air.hittime = 34
 sparkxy = -10, -58
@@ -1321,13 +1324,13 @@ animtype = Heavy
 guardflag = MA
 hitflag = MAF
 priority = 5, Hit
-pausetime = 12, 12
+pausetime = 2, 2
 sparkno = 2
 guard.sparkno = 40
 hitsound = 5, 2
 guardsound = 6, 0
 ground.type = High
-ground.slidetime = 12
+ground.slidetime = 2
 ground.hittime = 34
 air.hittime = 34
 sparkxy = -10, -58
@@ -2055,13 +2058,13 @@ animtype = Heavy
 guardflag = MA
 hitflag = MAF
 priority = 5, Hit
-pausetime = 12, 12
+pausetime = 2, 2
 sparkno = 2
 guard.sparkno = 40
 hitsound = 5, 2
 guardsound = 6, 0
 ground.type = High
-ground.slidetime = 12
+ground.slidetime = 2
 ground.hittime = 34
 air.hittime = 34
 sparkxy = -10, -58

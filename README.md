@@ -95,6 +95,11 @@ or draw more frame by frame, and when you save the animation switches to "By han
 you see the same in "✋ Align and show boxes"). If you go back to "Automatic", your drawing is kept in case you
 switch back.
 
+**Body boxes (the blue ones, where it can be hit):** the editor adds them to every drawing. In «👤 Character»
+you choose **2 boxes** (body and head) or **1 box** (whole body). And every slot has **🟦 Body**: **Automatic**
+or **By hand**, with **✏ Draw…** to move them, stretch them, draw as many as you like, or leave a frame with a
+single box or none (it can't be hit there).
+
 **Attacks that step and change when repeated:** every normal attack has «Moves:» (a step forward or back
 while hitting) and «🔁 When pressed again» (up to 3 more animations when pressing the same button in a row,
 or alternating between two).
