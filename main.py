@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""IKEMEN GO Character Editor — editor de personajes para IKEMEN GO."""
+"""EasyFighter — editor de personajes para IKEMEN GO (y MUGEN), sin código."""
 import os
 import sys
 from pathlib import Path

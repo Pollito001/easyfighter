@@ -160,7 +160,7 @@ class TestDialog(QDialog):
 
 
 MOD_NAME = "chareditor_test.lua"
-MOD_CODE = """-- IKEMEN GO Character Editor: modo de prueba.
+MOD_CODE = """-- EasyFighter (editor de personajes): modo de prueba.
 -- Solo hace algo si el juego se abre desde el editor con «Nadie se muere» (bandera -chareditor_nodie):
 -- la pelea va en modo entrenamiento (la vida se rellena sola y nadie cae KO). Se puede borrar sin problema.
 if getCommandLineValue('-chareditor_nodie') ~= nil then

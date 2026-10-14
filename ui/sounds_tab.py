@@ -27,7 +27,7 @@ class SoundsTab(QWidget):
         self.undo = QUndoStack(self)
         self.undo.cleanChanged.connect(self.modifiedChanged)
         self.player = None
-        self._tmp = Path(tempfile.gettempdir()) / "ikemen_chareditor_preview.wav"
+        self._tmp = Path(tempfile.gettempdir()) / "easyfighter_preview.wav"
         self._block = False
         lay = QVBoxLayout(self)
         top = QHBoxLayout()

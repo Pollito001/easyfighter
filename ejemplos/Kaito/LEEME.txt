@@ -1,4 +1,4 @@
-Kaito — personaje de ejemplo del IKEMEN GO Character Editor
+Kaito — personaje de ejemplo de EasyFighter
 ==========================================================
 
 Hecho completo con el modo simple del editor (dibujos originales, libres para usar y cambiar).

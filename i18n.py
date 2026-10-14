@@ -1,9 +1,9 @@
 """
-Idiomas de IKEMEN GO Character Editor / IKEMEN GO Character Editor languages.
+Idiomas de EasyFighter / EasyFighter languages.
 
 The program text is written in Spanish in the source code; every visible text goes through tr().
 English is the default language. Translations live in lang/<code>.json as {"Spanish text": "translation"}.
-To add a language: copy lang/en.json to lang/<code>.json (or to ~/.config/ikemen-chareditor/lang/),
+To add a language: copy lang/en.json to lang/<code>.json (or to ~/.config/easyfighter/lang/),
 set "_name" and translate the values.
 """
 import json
@@ -14,11 +14,19 @@ from pathlib import Path
 HERE = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
 LANG_DIR = HERE / "lang"
 if sys.platform == "win32":
-    CONFIG_DIR = Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming")) / "ikemen-chareditor"
+    CONFIG_DIR = Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming")) / "easyfighter"
 elif sys.platform == "darwin":
-    CONFIG_DIR = Path.home() / "Library" / "Application Support" / "ikemen-chareditor"
+    CONFIG_DIR = Path.home() / "Library" / "Application Support" / "easyfighter"
 else:
-    CONFIG_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "ikemen-chareditor"
+    CONFIG_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "easyfighter"
+# antes se llamaba «IKEMEN GO Character Editor»: su configuración (recientes, idioma, tema…) se pasa a la carpeta nueva
+_OLD_DIR = CONFIG_DIR.parent / "ikemen-chareditor"
+if not CONFIG_DIR.exists() and _OLD_DIR.is_dir():
+    try:
+        import shutil
+        shutil.copytree(_OLD_DIR, CONFIG_DIR)
+    except OSError:
+        pass
 SETTINGS_FILE = CONFIG_DIR / "settings.json"
 DEFAULT_LANG = "en"
 SOURCE_LANG = "es"  # idioma en que está escrito el código
@@ -28,7 +36,7 @@ LANG = DEFAULT_LANG
 
 
 def _lang_files():
-    """Archivos de idioma: los que vienen con la app y los del usuario (~/.config/ikemen-chareditor/lang)."""
+    """Archivos de idioma: los que vienen con la app y los del usuario (~/.config/easyfighter/lang)."""
     found = {}
     for d in (LANG_DIR, CONFIG_DIR / "lang"):
         if d.is_dir():

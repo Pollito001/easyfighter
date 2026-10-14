@@ -2274,7 +2274,7 @@ def play_sound(owner, p, v):
         QMessageBox.information(owner, APP_NAME, tr('Tu instalación de PyQt6 no trae sonido (QtMultimedia).'))
         return
     import tempfile
-    tmp = Path(tempfile.gettempdir()) / "ikemen_chareditor_voice.wav"
+    tmp = Path(tempfile.gettempdir()) / "easyfighter_voice.wav"
     tmp.write_bytes(s.data)
     owner._player = QSoundEffect(owner)
     owner._player.setSource(QUrl.fromLocalFile(str(tmp)))

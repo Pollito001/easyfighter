@@ -1,4 +1,4 @@
-Saya — personaje de ejemplo del IKEMEN GO Character Editor
+Saya — personaje de ejemplo de EasyFighter
 =========================================================
 
 Hecha completa con el modo simple del editor, con combos al estilo Street Fighter (sin autodobles).

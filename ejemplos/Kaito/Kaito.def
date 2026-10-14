@@ -5,7 +5,7 @@ displayname = "Kaito"
 versiondate = 10,11,2026
 mugenversion = 1.1
 ikemenversion = 1.0
-author = "IKEMEN GO Character Editor"
+author = "EasyFighter"
 pal.defaults = 1
 localcoord = 640,480
 

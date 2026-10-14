@@ -1,4 +1,4 @@
-<h1 align="center">IKEMEN GO Character Editor</h1>
+<h1 align="center">EasyFighter</h1>
 
 <p align="center">
   <b>Haz personajes de pelea para IKEMEN GO sin escribir código.</b><br>
@@ -13,6 +13,8 @@
   <img alt="Hecho con IA" src="https://img.shields.io/badge/hecho%20con-IA%20(Claude)-8A2BE2">
 </p>
 
+<p align="center"><sub>Una herramienta independiente, hecha por fans. No es oficial ni está afiliada a los proyectos IKEMEN GO o MUGEN.</sub></p>
+
 <p align="center"><i>English: <a href="README.md">README.md</a></i></p>
 
 <p align="center"><img src="docs/img/juego_especial.png" width="760" alt="Kaito, el personaje de ejemplo, lanzando su especial en IKEMEN GO"></p>
@@ -24,8 +26,8 @@
 
 ## ¿Qué es?
 
-Un editor de personajes para **IKEMEN GO** (también abre personajes de MUGEN), al estilo de Fighter Factory,
-pero pensado para que **cualquiera** pueda hacer un personaje:
+**EasyFighter** es un editor de personajes para **IKEMEN GO** (también abre personajes de MUGEN), al estilo de
+Fighter Factory, pero pensado para que **cualquiera** pueda hacer un personaje:
 
 - 🧸 **Modo simple:** casillas para cada animación (parado, caminar, golpes, especiales…). Pones tus imágenes
   o una hoja de sprites y el editor arma las animaciones, las cajas de golpe y todo el código.

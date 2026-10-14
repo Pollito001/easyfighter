@@ -148,8 +148,8 @@ En la carpeta que escogiste (por ejemplo `IKEMEN_GO/chars/MiPersonaje/`): `.def`
 pusiste en el modo simple).
 
 **¿Dónde guarda el editor su configuración?**
-Linux: `~/.config/ikemen-chareditor/` · Windows: `%APPDATA%\ikemen-chareditor\` ·
-macOS: `~/Library/Application Support/ikemen-chareditor/`.
+Linux: `~/.config/easyfighter/` · Windows: `%APPDATA%\easyfighter\` ·
+macOS: `~/Library/Application Support/easyfighter/`.
 
 **El personaje flota, se hunde o «brinca» al cambiar de animación.**
 Usa **🎯 Alinear todas con la de parado**, o **✋ Alinear y ver cajas** en la casilla que se ve mal.

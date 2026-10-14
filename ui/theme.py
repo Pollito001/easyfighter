@@ -192,7 +192,7 @@ def _arrows():
         folder = Path(i18n.CONFIG_DIR) / "theme"
         folder.mkdir(parents=True, exist_ok=True)
     except OSError:
-        folder = Path(tempfile.gettempdir()) / "ikemen_chareditor_theme"
+        folder = Path(tempfile.gettempdir()) / "easyfighter_theme"
         folder.mkdir(parents=True, exist_ok=True)
     for name, up, col in (("up", True, CUR["TEXT"]), ("down", False, CUR["TEXT"]), ("up_hot", True, CUR["ACCENT"]),
                           ("down_hot", False, CUR["ACCENT"]), ("up_off", True, CUR["ARROWOFF"]), ("down_off", False, CUR["ARROWOFF"])):

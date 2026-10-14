@@ -269,7 +269,7 @@ class SimTab(QWidget):
         try:
             import tempfile
             from PyQt6.QtMultimedia import QSoundEffect
-            tmp = Path(tempfile.gettempdir()) / f"ikemen_chareditor_sim_{g}_{n}.wav"
+            tmp = Path(tempfile.gettempdir()) / f"easyfighter_sim_{g}_{n}.wav"
             tmp.write_bytes(s.data)
             self.player = QSoundEffect(self)
             self.player.setSource(QUrl.fromLocalFile(str(tmp)))

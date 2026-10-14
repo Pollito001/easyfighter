@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
 
 from i18n import tr
 
-APP_NAME = "IKEMEN GO Character Editor"
+APP_NAME = "EasyFighter"
 
 
 def read_audio(parent, path):

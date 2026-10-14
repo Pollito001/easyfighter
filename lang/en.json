@@ -1904,5 +1904,6 @@
  "El personaje se ve transparente, brillante como luz o desaparece un rato (bueno para teletransportes y fantasmas).": "The character looks transparent, glows like light or disappears for a while (good for teleports and ghosts).",
  "Medio transparente": "Half transparent",
  "Brillante (como luz)": "Glowing (like light)",
- "Invisible": "Invisible"
+ "Invisible": "Invisible",
+ "Crea personajes para IKEMEN GO y MUGEN sin escribir código.": "Create characters for IKEMEN GO and MUGEN without writing code."
 }

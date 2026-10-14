@@ -148,8 +148,8 @@ In the folder you picked (for example `IKEMEN_GO/chars/MyCharacter/`): `.def`, `
 set up in simple mode).
 
 **Where does the editor keep its settings?**
-Linux: `~/.config/ikemen-chareditor/` · Windows: `%APPDATA%\ikemen-chareditor\` ·
-macOS: `~/Library/Application Support/ikemen-chareditor/`.
+Linux: `~/.config/easyfighter/` · Windows: `%APPDATA%\easyfighter\` ·
+macOS: `~/Library/Application Support/easyfighter/`.
 
 **The character floats, sinks or "jumps" when switching animations.**
 Use **🎯 Align all to the standing one**, or **✋ Align and show boxes** on the slot that looks wrong.

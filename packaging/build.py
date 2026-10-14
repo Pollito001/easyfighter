@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Arma el ejecutable del IKEMEN GO Character Editor para el sistema donde lo corres.
+"""Arma el ejecutable de EasyFighter para el sistema donde lo corres.
 
 PyInstaller no puede hacer ejecutables para otros sistemas: el de Windows se arma en Windows, el de macOS en
 un Mac y el de Linux en Linux. Para tener los tres sin tener las tres computadoras, usa el workflow de GitHub
@@ -27,8 +27,8 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-APP = "IKEMEN-GO-Character-Editor"
-PRETTY = "IKEMEN GO Character Editor"
+APP = "EasyFighter"
+PRETTY = "EasyFighter"
 DATA = ["lang", "ejemplos", "icon.png", "LICENSE", "README.md", "README.es.md"]
 
 
@@ -109,7 +109,7 @@ def pyinstaller(osn, onefile, work):
     if ic is not None:
         args += ["--icon", str(ic)]
     if osn == "macos":
-        args += ["--osx-bundle-identifier", "io.github.ikemen-chareditor"]
+        args += ["--osx-bundle-identifier", "io.github.pollito001.easyfighter"]
     say("PyInstaller (toma unos minutos)")
     subprocess.run(args, check=True, cwd=ROOT)
 
