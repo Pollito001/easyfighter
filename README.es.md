@@ -221,7 +221,9 @@ avanzadas…** (pide confirmación; para volver, el botón «🧸 Volver al modo
     (con el botón fuerte, como en KI) y solo sale después de un autodoble, que ya no se interrumpe.
     Como en Killer Instinct 2: máximo de **autodobles por combo** (4; el último tumba), **caer encima con un
     golpe en el aire** abre autodobles, el **remate cierra el combo** y el **combo breaker de KI2** (un botón de
-    la fuerza del golpe: puño si fue alto, patada si fue bajo).
+    la fuerza del golpe: puño si fue alto, patada si fue bajo). El autodoble solo sale con el rival **cerca**
+    (es parte del combo: no corre hasta él), y cada especial o súper tiene la casilla **Abre autodobles** en sus
+    ⚙ Ajustes (los especiales la traen marcada; los súper no: sin ella cierran el combo y tumban).
   - **Poses de más**: en «Intro y final» hay casillas opcionales para **otras poses de victoria y de
     derrota**; al ganar (o perder por tiempo) sale una al azar. Lo que tiene «Lo tiene» sin marcar (correr,
     salto atrás, recuperarse en el aire o movimientos del personaje) ya **no responde** a su comando.

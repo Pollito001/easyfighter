@@ -450,7 +450,7 @@ value = GameTime
 [State -1, SM: Autodoble (Medio): reloj]
 type = MapSet
 trigger1 = movehit
-trigger1 = StateNo = 620 || StateNo = 650 || StateNo = 1002 || StateNo = 1003 || StateNo = 1102 || StateNo = 1103 || StateNo = 1202 || StateNo = 1203 || StateNo = 3300
+trigger1 = StateNo = 620 || StateNo = 650 || StateNo = 1002 || StateNo = 1003 || StateNo = 1102 || StateNo = 1103 || StateNo = 1202 || StateNo = 1203
 map = "sm_ad1t"
 value = GameTime
 
@@ -541,6 +541,7 @@ triggerall = Map(sm_adn) < 4
 triggerall = NumEnemy
 triggerall = EnemyNear, StateType != A
 triggerall = EnemyNear, StateNo = [5000, 5019]
+triggerall = P2BodyDist X <= 89 * const(size.xscale) - const(size.ground.front) + 24
 trigger1 = movehit
 trigger1 = StateNo = 1001 || (StateNo = 1101 && AnimElemTime(2) > 0) || (StateNo = 1201 && AnimElemTime(2) > 0) || StateNo = 610 || StateNo = 640
 trigger2 = ctrl
@@ -562,8 +563,9 @@ triggerall = Map(sm_adn) < 4
 triggerall = NumEnemy
 triggerall = EnemyNear, StateType != A
 triggerall = EnemyNear, StateNo = [5000, 5019]
+triggerall = P2BodyDist X <= 94 * const(size.xscale) - const(size.ground.front) + 24
 trigger1 = movehit
-trigger1 = StateNo = 1002 || StateNo = 1003 || (StateNo = 1102 && AnimElemTime(2) > 0) || (StateNo = 1103 && AnimElemTime(2) > 0) || (StateNo = 1202 && AnimElemTime(2) > 0) || (StateNo = 1203 && AnimElemTime(2) > 0) || (StateNo = 3300 && AnimElemTime(2) > 20) || StateNo = 620 || StateNo = 650
+trigger1 = StateNo = 1002 || StateNo = 1003 || (StateNo = 1102 && AnimElemTime(2) > 0) || (StateNo = 1103 && AnimElemTime(2) > 0) || (StateNo = 1202 && AnimElemTime(2) > 0) || (StateNo = 1203 && AnimElemTime(2) > 0) || StateNo = 620 || StateNo = 650
 trigger2 = ctrl
 trigger2 = GameTime - Map(sm_ad1t) <= 20
 trigger2 = NumEnemy
@@ -583,6 +585,7 @@ triggerall = Map(sm_adn) < 4
 triggerall = NumEnemy
 triggerall = EnemyNear, StateType != A
 triggerall = EnemyNear, StateNo = [5000, 5019]
+triggerall = P2BodyDist X <= 97 * const(size.xscale) - const(size.ground.front) + 24
 trigger1 = movehit
 trigger1 = StateNo = 1000 || (StateNo = 1100 && AnimElemTime(2) > 0) || (StateNo = 1200 && AnimElemTime(2) > 0) || StateNo = 600 || StateNo = 630
 trigger2 = ctrl

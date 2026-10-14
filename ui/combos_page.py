@@ -613,7 +613,7 @@ class CombosPage(Page):
         cfg = self.sm.cfg
         out = []
         for i, sp in enumerate(cfg.get("specials", [])):
-            if sp.get("kind") == "ender" or not (sg._frames(sp) or sp.get("type") == "converted"):
+            if not sg.opens_autodouble(sp) or not (sg._frames(sp) or sp.get("type") == "converted"):
                 continue
             icon = "⭐" if sp.get("kind") == "super" else "🔥"
             out.append((sg.special_ref(i, sp), f"{icon} {sp.get('name') or '?'}", sg.special_anim(sp)))

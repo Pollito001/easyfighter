@@ -91,7 +91,8 @@ sonido, a quién le pega.
 - **Proyectil:** la animación del proyectil y la de cuando choca.
 - **⏱ Eventos:** cosas que pasan en un cuadro: moverse, otro golpe, sonido, efectos…
 - **⚙ Ajustes:** golpes, empuje, si **lo tumba** (con el último golpe o con cada uno), cómo se cubre,
-  invencibilidad, poder que gana o gasta…
+  invencibilidad, poder que gana o gasta… **Abre autodobles** deja seguir el combo con un autodoble después de
+  él (estilo Killer Instinct; solo con el rival cerca). Los especiales la traen marcada y los súper no.
 
 Con **▶ Probar** lo ves en acción contra un rival de prueba sin salir del editor.
 

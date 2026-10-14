@@ -90,7 +90,8 @@ boxes, sound, who it can hit.
 - **Projectile:** the projectile animation and the one when it hits.
 - **⏱ Events:** things that happen on a frame: moving, another hit, a sound, effects…
 - **⚙ Settings:** hits, push, whether it **knocks down** (with the last hit or with every hit), how it's
-  blocked, invincibility, power gained or spent…
+  blocked, invincibility, power gained or spent… **Opens auto-doubles** lets the combo continue with an
+  auto-double after it (Killer Instinct style; only with the opponent close). Ticked on specials, unticked on supers.
 
 **▶ Test** shows it in action against a test opponent without leaving the editor.
 

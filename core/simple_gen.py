@@ -607,6 +607,10 @@ SPECIAL_FIELDS = [
     ("darken", 'Oscurecer la pantalla', bool, 0, 1, "super_old", 'Oscurece el fondo durante la pausa.'),
     ("cancel", 'Se puede hacer cancelando un golpe', bool, 0, 1, "all", 'Se puede hacer justo después de un golpe normal que conectó.'),
     ("cancel_specials", 'Se puede hacer cancelando un especial', bool, 0, 1, "super", 'El súper sale justo después de un especial que conectó.'),
+    ("ad_open", 'Abre autodobles', bool, 0, 1, "adopen",
+     'Solo con un estilo de combos con autodobles: después de que pega (con el rival cerca) puedes seguir el '
+     'combo con un autodoble. En un súper, el rival se queda de pie; si no lo marcas, el súper cierra el combo y '
+     'lo tumba.'),
     ("proj_vy", 'Velocidad hacia arriba', float, -40, 40, "proj", 'El proyectil sube (positivo) o baja (negativo).'),
     ("proj_ax", 'Aceleración', float, -5, 5, "proj", 'El proyectil va más rápido (o más lento) con el tiempo.'),
     ("proj_ay", 'Caída', float, -5, 5, "proj", 'Negativo = cae como una granada.'),
@@ -614,13 +618,21 @@ SPECIAL_FIELDS = [
     ("counter_window", 'Ventana del contraataque (ticks)', int, 1, 120, "counter", 'Cuánto tiempo puede atrapar el golpe del rival.'),
     ("grab_range", 'Alcance del agarre', int, 5, 200, "grab", 'Qué tan cerca tiene que estar el rival.'),
 ]
+def opens_autodouble(sp):
+    """¿Después de este especial / súper puede salir un autodoble? (los remates nunca; el súper si se escoge)"""
+    kind = sp.get("kind") or "special"
+    if kind == "ender":
+        return False
+    return bool(spec(sp, "ad_open"))
+
+
 def launch_mode(sp, cb=None):
     """Cuándo tumba / lanza el especial: "no", "last" (con el último golpe) o "all" (con cada golpe)."""
     v = sp.get("launch")
     if v is None:
         super_ = sp.get("kind") == "super"
-        if super_ and cb is not None and cb.get("autodouble"):
-            return "no"      # con autodobles el súper es opener: el rival se queda de pie para seguir
+        if super_ and cb is not None and cb.get("autodouble") and opens_autodouble(sp):
+            return "no"      # el súper abre autodobles: el rival se queda de pie para seguir
         if sp.get("type") == "rise":
             return "all"     # el gancho se lo lleva para arriba desde el primer golpe
         return "last" if super_ else "no"
@@ -651,7 +663,8 @@ def spec(sp, key):
             "proj_hits_life": 0, "dash_speed": 6.5, "rise_x": 1.8, "rise_y": 8.5, "rise_frame": 1, "rise_speed": 100, "power_gain": 40, "power_cost": 1,
             "superpause": 30, "darken": True, "cancel": True, "proj_vel": 7.0 if super_ else 5.0,
             "use_where": "ground", "cancel_specials": True, "proj_vy": 0.0, "proj_ax": 0.0, "proj_ay": 0.0,
-            "ex_cost": 500, "counter_window": 14, "grab_range": 25, "stop_on_hit": False}.get(key)
+            "ex_cost": 500, "counter_window": 14, "grab_range": 25, "stop_on_hit": False,
+            "ad_open": not super_}.get(key)
 
 
 def throws_proj(sp):
@@ -694,6 +707,8 @@ def field_applies(where, sp):
         return False   # eso ahora son eventos (pestaña «⏱ Eventos»)
     if where == "super_old":
         return super_
+    if where == "adopen":
+        return sp.get("kind") != "ender"
     return (where == "all" or (where == "hitting" and typ not in ("none", "grab")) or
             (where == "proj" and typ == "proj") or (where == "dash" and typ == "dash") or
             (where == "rise" and typ == "rise") or (where == "special" and not super_) or
@@ -1268,7 +1283,8 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
         spec_states[special_ref(idx, sp)] = mine
         if kind_ == "ender":
             continue
-        opener_states += mine
+        if opens_autodouble(sp):
+            opener_states += mine
         if kind_ == "super":
             states_by_v.setdefault(2, []).extend(mine)
             continue
@@ -1589,7 +1605,7 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
         versions = [1] if single else [i for i in range(4) if vflags[i]] or [1]
         # para el autodoble: el rival sigue aturdido hasta que termina el especial (y un poquito más)
         after_hit = 0
-        if cb is not None and cb["autodouble"] and not ender_ and body.frames:
+        if cb is not None and cb["autodouble"] and opens_autodouble(sp) and not ender_ and body.frames:
             t_, last = 0, None
             for f_ in body.frames:
                 if f_.clsn1:
@@ -1597,9 +1613,6 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
                 t_ += max(1, f_.time) if f_.time > 0 else 10
             if last is not None:
                 after_hit = (t_ - last) + KI_GRACE + 6
-        if cb is not None and cb["autodouble"] and not ender_ and throws_proj(sp):
-            # el proyectil pega lejos: el rival sigue aturdido mientras el autodoble llega corriendo
-            after_hit = max(after_hit, KI_GRACE + 36)
         if user_hf and len(runs) > 1 and body.frames:
             # cuadros que pegan escogidos a mano: el rival sigue aturdido hasta el próximo golpe (cuenta en el combo)
             starts, t_, prev_red = [], 0, False
@@ -1917,8 +1930,9 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
             if sp_.get("kind") in ("super",) or not fk_ or sp_.get("type") in ("converted", "none", "counter"):
                 continue
             link_time = max(link_time, min(40, (hit_frame_of(sp_, fk_, sprites) + 1) * int(sp_.get("time", 4)) + 4))
-        step_max = _fmt(round(8 * k, 2))
+        step_max = _fmt(round(3 * k, 2))
         near = round(10 * k)
+        ad_step = 12              # lo que se puede acercar con el pasito del primer golpe
         buttons_of = {"punch": lambda s_: [BUTTONS[s_]], "kick": lambda s_: [BUTTONS[s_ + 3]],
                       "any": lambda s_: [BUTTONS[s_], BUTTONS[s_ + 3]]}
         for i, ad in enumerate(raw_list):
@@ -2004,23 +2018,13 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
                      "fall = 1", "air.fall = 1", "fall.recover = 0", ""]
 
             # acercarse al rival (si quedó lejos, por ejemplo después de una embestida)
-            approach = (f"x = ifelse(P2BodyDist X > {near + 40}, {step_max}, "
-                        f"ifelse(P2BodyDist X > {near}, (P2BodyDist X - {near}) / 5.0, 0))")
+            # un pasito si quedó un poco separado (nunca corre: de lejos el autodoble no sale)
+            approach = (f"x = ifelse(P2BodyDist X > {near}, "
+                        f"ifelse((P2BodyDist X - {near}) / 5.0 > {step_max}, {step_max}, (P2BodyDist X - {near}) / 5.0), 0)")
             for j, a_ in enumerate(anims):
                 box_ = next((f.clsn1 for f in a_.frames if f.clsn1), [])
                 if j == 0:
                     first_ = a_.number
-                    dash_ = next((n_ for n_ in (100, 20) if find_act(n_) is not None), None)
-                    if dash_ is not None:
-                        # el rival quedó lejos (proyectil, empujón): corre hasta él antes del primer golpe
-                        sd += [f"[State {st}, {tr('Correr hasta el rival')}]", "type = ChangeAnim",
-                               "trigger1 = Time = 0", f"trigger1 = P2BodyDist X > {near + 40}", f"value = {dash_}", "",
-                               f"[State {st}, {tr('Correr hasta el rival')} (2)]", "type = VelSet",
-                               f"trigger1 = Anim = {dash_}", f"x = {step_max}", "",
-                               f"[State {st}, {tr('Llegó')}]", "type = ChangeAnim", f"trigger1 = Anim = {dash_}",
-                               f"trigger1 = P2BodyDist X <= {near + 10} || Time >= 45", f"value = {first_}", "",
-                               f"[State {st}, {tr('Llegó')} (2)]", "type = VelSet", f"trigger1 = Anim = {first_}",
-                               "trigger1 = AnimElemTime(1) = 0", "trigger1 = Time > 0", "x = 0", ""]
                     sd += [f"[State {st}, {tr('Acercarse')}]", "type = VelSet", "trigger1 = Time = 0", approach, ""]
                     ad_hit(f"{tr('Golpe')} 1", [f"trigger1 = Anim = {first_}", "trigger1 = AnimElemTime(1) = 0"],
                            box_, 0)
@@ -2058,6 +2062,11 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
             if not from_states:
                 continue
             btns = buttons_of.get(ad.get("button", "any"), buttons_of["any"])(s_)
+            # alcance: hasta dónde llega la caja roja del primer golpe (más un pasito); más lejos no sale
+            box0 = next((f.clsn1 for f in anims[0].frames if f.clsn1), [])
+            reach_px = max([max(bx[0], bx[2]) for bx in box0] or [round(40 * k)])
+            reach = (f"P2BodyDist X <= {reach_px} * const(size.xscale) - const(size.ground.front) + "
+                     f"{round(ad_step * k)}")
             # especiales y súper con proyectil: el golpe lo da el proyectil (MoveContact no lo cuenta)
             pids = sorted({state_proj[x] for x in from_states if x in state_proj})
             proj_hit = " || ".join(f"(ProjHitTime({pid}) >= 0 && ProjHitTime({pid}) <= {KI_GRACE})" for pid in pids)
@@ -2072,6 +2081,8 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
                 # solo con el rival en el suelo recibiendo el golpe (de pie o agachado): no en el aire ni cubriéndose
                 "triggerall = NumEnemy", "triggerall = EnemyNear, StateType != A",
                 "triggerall = EnemyNear, StateNo = [5000, 5019]",
+                # cerca: el autodoble es parte del combo, no corre hasta el rival
+                "triggerall = " + reach,
                 # después del último golpe del especial (no lo corta)…
                 "trigger1 = movehit", "trigger1 = " + after_last_hit(from_states),
                 # … o apenas termina, con el rival todavía aturdido

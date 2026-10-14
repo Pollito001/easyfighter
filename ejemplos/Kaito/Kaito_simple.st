@@ -189,7 +189,7 @@ guardsound = 6, 0
 ground.type = High
 ground.slidetime = 11
 ground.hittime = 15
-sparkxy = -10, -96
+sparkxy = -10, -94
 ground.velocity = -9
 air.velocity = -5.4, -6
 
@@ -229,7 +229,7 @@ guardsound = 6, 0
 ground.type = High
 ground.slidetime = 14
 ground.hittime = 18
-sparkxy = -10, -153
+sparkxy = -10, -150
 ground.velocity = -12
 air.velocity = -7.2, -6
 
@@ -429,7 +429,7 @@ guardsound = 6, 0
 ground.type = Low
 ground.slidetime = 11
 ground.hittime = 15
-sparkxy = -10, -60
+sparkxy = -10, -58
 ground.velocity = -9
 air.velocity = -5.4, -6
 
@@ -469,7 +469,7 @@ guardsound = 6, 0
 ground.type = Trip
 ground.slidetime = 14
 ground.hittime = 18
-sparkxy = -10, -71
+sparkxy = -10, -69
 ground.velocity = -9.6, -13
 air.velocity = -8.4, -12
 fall = 1
@@ -579,7 +579,7 @@ guardsound = 6, 0
 ground.type = High
 ground.slidetime = 14
 ground.hittime = 28
-sparkxy = -10, -164
+sparkxy = -10, -166
 ground.velocity = -12
 air.velocity = -7.2, -6
 air.hittime = 28
@@ -647,7 +647,7 @@ guardsound = 6, 0
 ground.type = High
 ground.slidetime = 11
 ground.hittime = 28
-sparkxy = -10, -98
+sparkxy = -10, -94
 ground.velocity = -9
 air.velocity = -5.4, -6
 air.hittime = 28
@@ -887,8 +887,7 @@ hitsound = 5, 0
 guardsound = 6, 0
 ground.type = High
 ground.slidetime = 12
-ground.hittime = 56
-air.hittime = 56
+ground.hittime = 16
 ground.velocity = -9
 air.velocity = -5.4, -6
 
@@ -942,8 +941,7 @@ hitsound = 5, 1
 guardsound = 6, 0
 ground.type = High
 ground.slidetime = 12
-ground.hittime = 56
-air.hittime = 56
+ground.hittime = 16
 ground.velocity = -9
 air.velocity = -5.4, -6
 
@@ -997,8 +995,7 @@ hitsound = 5, 2
 guardsound = 6, 0
 ground.type = High
 ground.slidetime = 12
-ground.hittime = 56
-air.hittime = 56
+ground.hittime = 16
 ground.velocity = -9
 air.velocity = -5.4, -6
 
@@ -1229,7 +1226,7 @@ ground.type = High
 ground.slidetime = 12
 ground.hittime = 34
 air.hittime = 34
-sparkxy = -10, -60
+sparkxy = -10, -58
 ground.velocity = -9
 air.velocity = -5.4, -6
 
@@ -1281,7 +1278,7 @@ ground.type = High
 ground.slidetime = 12
 ground.hittime = 34
 air.hittime = 34
-sparkxy = -10, -60
+sparkxy = -10, -58
 ground.velocity = -9
 air.velocity = -5.4, -6
 
@@ -1333,7 +1330,7 @@ ground.type = High
 ground.slidetime = 12
 ground.hittime = 34
 air.hittime = 34
-sparkxy = -10, -60
+sparkxy = -10, -58
 ground.velocity = -9
 air.velocity = -5.4, -6
 
@@ -1371,7 +1368,7 @@ sprpriority = 2
 type = HitDef
 trigger1 = AnimElemTime(2) >= 0
 trigger1 = (AnimElemTime(2) % 5) = 0
-trigger1 = AnimElemTime(2) < 25
+trigger1 = AnimElemTime(2) < 20
 attr = S, HA
 damage = 44, 5
 animtype = Heavy
@@ -1385,11 +1382,34 @@ hitsound = 5, 2
 guardsound = 6, 0
 ground.type = High
 ground.slidetime = 14
-ground.hittime = 30
-air.hittime = 30
+ground.hittime = 18
 sparkxy = -10, -147
 ground.velocity = -1.2
 air.velocity = -0.72, -6
+
+[State 3300, Último golpe (lo tumba)]
+type = HitDef
+trigger1 = AnimElemTime(2) = 20
+attr = S, HA
+damage = 44, 5
+animtype = Heavy
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 14, 14
+sparkno = 2
+guard.sparkno = 40
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 14
+ground.hittime = 18
+sparkxy = -10, -147
+ground.velocity = -0.96, -13
+air.velocity = -0.84, -12
+fall = 1
+air.fall = 1
+fall.recover = 1
 
 [State 3300, Pausa con destello]
 type = SuperPause
@@ -1435,7 +1455,7 @@ guardsound = 6, 0
 ground.type = High
 ground.slidetime = 12
 ground.hittime = 16
-sparkxy = -10, -148
+sparkxy = -10, -147
 ground.velocity = -9, -12
 air.velocity = -9, -10
 fall = 1
@@ -1468,34 +1488,10 @@ trigger1 = Time = 0
 map = "sm_adn"
 value = 1
 
-[State 750, Correr hasta el rival]
-type = ChangeAnim
-trigger1 = Time = 0
-trigger1 = P2BodyDist X > 60
-value = 100
-
-[State 750, Correr hasta el rival (2)]
-type = VelSet
-trigger1 = Anim = 100
-x = 16
-
-[State 750, Llegó]
-type = ChangeAnim
-trigger1 = Anim = 100
-trigger1 = P2BodyDist X <= 30 || Time >= 45
-value = 201
-
-[State 750, Llegó (2)]
-type = VelSet
-trigger1 = Anim = 201
-trigger1 = AnimElemTime(1) = 0
-trigger1 = Time > 0
-x = 0
-
 [State 750, Acercarse]
 type = VelSet
 trigger1 = Time = 0
-x = ifelse(P2BodyDist X > 60, 16, ifelse(P2BodyDist X > 20, (P2BodyDist X - 20) / 5.0, 0))
+x = ifelse(P2BodyDist X > 20, ifelse((P2BodyDist X - 20) / 5.0 > 6, 6, (P2BodyDist X - 20) / 5.0), 0)
 
 [State 750, Golpe 1]
 type = HitDef
@@ -1562,7 +1558,7 @@ value = 230
 type = VelSet
 trigger1 = Anim = 230
 trigger1 = AnimElemTime(1) = 0
-x = ifelse(P2BodyDist X > 60, 16, ifelse(P2BodyDist X > 20, (P2BodyDist X - 20) / 5.0, 0))
+x = ifelse(P2BodyDist X > 20, ifelse((P2BodyDist X - 20) / 5.0 > 6, 6, (P2BodyDist X - 20) / 5.0), 0)
 
 [State 750, Golpe 2 (último autodoble del combo)]
 type = HitDef
@@ -1680,34 +1676,10 @@ trigger1 = Time = 0
 map = "sm_adn"
 value = 1
 
-[State 751, Correr hasta el rival]
-type = ChangeAnim
-trigger1 = Time = 0
-trigger1 = P2BodyDist X > 60
-value = 100
-
-[State 751, Correr hasta el rival (2)]
-type = VelSet
-trigger1 = Anim = 100
-x = 16
-
-[State 751, Llegó]
-type = ChangeAnim
-trigger1 = Anim = 100
-trigger1 = P2BodyDist X <= 30 || Time >= 45
-value = 210
-
-[State 751, Llegó (2)]
-type = VelSet
-trigger1 = Anim = 210
-trigger1 = AnimElemTime(1) = 0
-trigger1 = Time > 0
-x = 0
-
 [State 751, Acercarse]
 type = VelSet
 trigger1 = Time = 0
-x = ifelse(P2BodyDist X > 60, 16, ifelse(P2BodyDist X > 20, (P2BodyDist X - 20) / 5.0, 0))
+x = ifelse(P2BodyDist X > 20, ifelse((P2BodyDist X - 20) / 5.0 > 6, 6, (P2BodyDist X - 20) / 5.0), 0)
 
 [State 751, Golpe 1]
 type = HitDef
@@ -1774,7 +1746,7 @@ value = 240
 type = VelSet
 trigger1 = Anim = 240
 trigger1 = AnimElemTime(1) = 0
-x = ifelse(P2BodyDist X > 60, 16, ifelse(P2BodyDist X > 20, (P2BodyDist X - 20) / 5.0, 0))
+x = ifelse(P2BodyDist X > 20, ifelse((P2BodyDist X - 20) / 5.0 > 6, 6, (P2BodyDist X - 20) / 5.0), 0)
 
 [State 751, Golpe 2 (último autodoble del combo)]
 type = HitDef
@@ -1795,7 +1767,7 @@ hitsound = 5, 1
 guardsound = 6, 0
 ground.type = High
 ground.slidetime = 11
-sparkxy = -10, -96
+sparkxy = -10, -94
 ground.hittime = 46
 air.hittime = 46
 ground.velocity = -7.2, -12
@@ -1829,7 +1801,7 @@ hitsound = 5, 1
 guardsound = 6, 0
 ground.type = High
 ground.slidetime = 11
-sparkxy = -10, -96
+sparkxy = -10, -94
 ground.hittime = 46
 air.hittime = 46
 ground.velocity = 0
@@ -1856,7 +1828,7 @@ hitsound = 5, 1
 guardsound = 6, 0
 ground.type = High
 ground.slidetime = 11
-sparkxy = -10, -96
+sparkxy = -10, -94
 ground.hittime = 46
 air.hittime = 46
 ground.velocity = -12, -10
@@ -1892,34 +1864,10 @@ trigger1 = Time = 0
 map = "sm_adn"
 value = 1
 
-[State 752, Correr hasta el rival]
-type = ChangeAnim
-trigger1 = Time = 0
-trigger1 = P2BodyDist X > 60
-value = 100
-
-[State 752, Correr hasta el rival (2)]
-type = VelSet
-trigger1 = Anim = 100
-x = 16
-
-[State 752, Llegó]
-type = ChangeAnim
-trigger1 = Anim = 100
-trigger1 = P2BodyDist X <= 30 || Time >= 45
-value = 220
-
-[State 752, Llegó (2)]
-type = VelSet
-trigger1 = Anim = 220
-trigger1 = AnimElemTime(1) = 0
-trigger1 = Time > 0
-x = 0
-
 [State 752, Acercarse]
 type = VelSet
 trigger1 = Time = 0
-x = ifelse(P2BodyDist X > 60, 16, ifelse(P2BodyDist X > 20, (P2BodyDist X - 20) / 5.0, 0))
+x = ifelse(P2BodyDist X > 20, ifelse((P2BodyDist X - 20) / 5.0 > 6, 6, (P2BodyDist X - 20) / 5.0), 0)
 
 [State 752, Golpe 1]
 type = HitDef
@@ -1986,7 +1934,7 @@ value = 250
 type = VelSet
 trigger1 = Anim = 250
 trigger1 = AnimElemTime(1) = 0
-x = ifelse(P2BodyDist X > 60, 16, ifelse(P2BodyDist X > 20, (P2BodyDist X - 20) / 5.0, 0))
+x = ifelse(P2BodyDist X > 20, ifelse((P2BodyDist X - 20) / 5.0 > 6, 6, (P2BodyDist X - 20) / 5.0), 0)
 
 [State 752, Golpe 2 (último autodoble del combo)]
 type = HitDef
@@ -2007,7 +1955,7 @@ hitsound = 5, 2
 guardsound = 6, 0
 ground.type = High
 ground.slidetime = 14
-sparkxy = -10, -153
+sparkxy = -10, -150
 ground.hittime = 54
 air.hittime = 54
 ground.velocity = -7.2, -12
@@ -2041,7 +1989,7 @@ hitsound = 5, 2
 guardsound = 6, 0
 ground.type = High
 ground.slidetime = 14
-sparkxy = -10, -153
+sparkxy = -10, -150
 ground.hittime = 54
 air.hittime = 54
 ground.velocity = 0
@@ -2068,7 +2016,7 @@ hitsound = 5, 2
 guardsound = 6, 0
 ground.type = High
 ground.slidetime = 14
-sparkxy = -10, -153
+sparkxy = -10, -150
 ground.hittime = 54
 air.hittime = 54
 ground.velocity = -12, -10
@@ -2116,7 +2064,7 @@ ground.type = High
 ground.slidetime = 12
 ground.hittime = 34
 air.hittime = 34
-sparkxy = -10, -60
+sparkxy = -10, -58
 ground.velocity = -9, -12
 air.velocity = -9, -10
 fall = 1

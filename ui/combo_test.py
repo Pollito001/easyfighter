@@ -184,6 +184,8 @@ class ComboTest(QDialog):
             ref = sg.special_ref(i, sp)
             self.kind[ref] = sp.get("kind") or "special"
             self.kind[ref + "#type"] = sp.get("type", "proj")
+            self.kind[ref + "#ad"] = sg.opens_autodouble(sp)
+            self.kind[ref + "#proj"] = sg.throws_proj(sp)
             if sp.get("kind") == "ender" and sg._frames(sp):
                 t = f"💥 {sp.get('name') or tr('Remate')}"
                 self.enders.append((ref, t, sg.special_anim(sp)))
@@ -278,6 +280,10 @@ class ComboTest(QDialog):
                 return tr('ese autodoble ya no está')
             if prev is None or prev[0] != "sp":
                 return tr('el autodoble va después de un especial')
+            if self.kind.get(prev[1] + "#ad") is False:
+                return tr('este movimiento no abre autodobles (en sus ⚙ Ajustes: «Abre autodobles»)')
+            if self.kind.get(prev[1] + "#proj"):
+                return tr('el proyectil pega de lejos: el autodoble solo sale si estás cerca del rival')
             if self.kind.get(prev[1] + "#type") == "rise":
                 return tr('el gancho deja al rival en el aire: el autodoble solo sale con el rival en el suelo')
             if ad.get("open") and ad["open"] != prev[1]:

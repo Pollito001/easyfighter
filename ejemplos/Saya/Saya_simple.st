@@ -349,7 +349,7 @@ guardsound = 6, 0
 ground.type = Low
 ground.slidetime = 14
 ground.hittime = 18
-sparkxy = -10, -127
+sparkxy = -10, -126
 ground.velocity = -12
 air.velocity = -7.2, -6
 
@@ -389,7 +389,7 @@ guardsound = 6, 0
 ground.type = Low
 ground.slidetime = 8
 ground.hittime = 12
-sparkxy = -10, -50
+sparkxy = -10, -48
 ground.velocity = -6
 air.velocity = -3.6, -6
 
@@ -469,7 +469,7 @@ guardsound = 6, 0
 ground.type = Trip
 ground.slidetime = 14
 ground.hittime = 18
-sparkxy = -10, -72
+sparkxy = -10, -71
 ground.velocity = -9.6, -13
 air.velocity = -8.4, -12
 fall = 1
@@ -544,7 +544,7 @@ guardsound = 6, 0
 ground.type = High
 ground.slidetime = 11
 ground.hittime = 15
-sparkxy = -10, -156
+sparkxy = -10, -155
 ground.velocity = -9
 air.velocity = -5.4, -6
 
@@ -643,7 +643,7 @@ guardsound = 6, 0
 ground.type = High
 ground.slidetime = 11
 ground.hittime = 15
-sparkxy = -10, -98
+sparkxy = -10, -94
 ground.velocity = -9
 air.velocity = -5.4, -6
 
@@ -676,7 +676,7 @@ guardsound = 6, 0
 ground.type = High
 ground.slidetime = 14
 ground.hittime = 18
-sparkxy = -10, -110
+sparkxy = -10, -109
 ground.velocity = -12
 air.velocity = -7.2, -6
 
@@ -1160,7 +1160,7 @@ ground.type = High
 ground.slidetime = 12
 ground.hittime = 16
 air.hittime = 14
-sparkxy = -10, -69
+sparkxy = -10, -72
 ground.velocity = -9
 air.velocity = -5.4, -6
 
@@ -1213,7 +1213,7 @@ ground.type = High
 ground.slidetime = 12
 ground.hittime = 16
 air.hittime = 14
-sparkxy = -10, -69
+sparkxy = -10, -72
 ground.velocity = -9
 air.velocity = -5.4, -6
 
@@ -1266,7 +1266,7 @@ ground.type = High
 ground.slidetime = 12
 ground.hittime = 16
 air.hittime = 14
-sparkxy = -10, -69
+sparkxy = -10, -72
 ground.velocity = -9
 air.velocity = -5.4, -6
 
@@ -1304,7 +1304,28 @@ sprpriority = 2
 type = HitDef
 trigger1 = AnimElemTime(2) >= 0
 trigger1 = (AnimElemTime(2) % 5) = 0
-trigger1 = AnimElemTime(2) < 25
+trigger1 = AnimElemTime(2) < 20
+attr = S, HA
+damage = 46, 6
+animtype = Heavy
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 14, 14
+sparkno = 2
+guard.sparkno = 40
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 14
+ground.hittime = 18
+sparkxy = -10, -102
+ground.velocity = -1.6
+air.velocity = -0.96, -6
+
+[State 3300, Último golpe (lo tumba)]
+type = HitDef
+trigger1 = AnimElemTime(2) = 20
 attr = S, HA
 damage = 46, 6
 animtype = Heavy

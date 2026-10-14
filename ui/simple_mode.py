@@ -1596,6 +1596,12 @@ class SpecialCard(QFrame):
 
     def on_adv(self, key, value):
         self.sp[key] = value
+        if key == "ad_open" and "launch" not in self.sp and "launch" in self.adv:
+            # «lo tumba» de fábrica cambia: abre autodobles → se queda de pie; si no → lo tumba
+            w = self.adv["launch"][1]
+            w.blockSignals(True)
+            w.setCurrentIndex(max(0, w.findData(self.adv_value("launch"))))
+            w.blockSignals(False)
         self.refresh_head()
         self.sm.moves_changed()
 

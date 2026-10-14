@@ -215,7 +215,10 @@ The editor always opens in **simple mode**. The advanced tools are tucked away i
     heavy button, like KI) and only comes out after an auto-double, which is no longer interrupted.
     Like Killer Instinct 2: a max of **auto-doubles per combo** (4; the last one knocks down), a **jump-in air
     attack** opens auto-doubles, the **ender closes the combo** and the **KI2 combo breaker** (one button of
-    the hit's strength: punch if it was high, kick if it was low).
+    the hit's strength: punch if it was high, kick if it was low). An auto-double only comes out with the
+    opponent **close** (it's part of the combo: the character doesn't run to them), and every special or super has an
+    **Opens auto-doubles** box in its ⚙ Settings (ticked on specials, unticked on supers: without it they end the
+    combo and knock down).
   - **Extra poses**: «Intro and ending» has optional slots for **more victory and defeat poses**; when
     winning (or losing on time) one is picked at random. Moves with «Has it» unticked (run, back hop, air
     recovery or the character's own moves) **no longer respond** to their command.

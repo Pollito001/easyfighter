@@ -77,7 +77,9 @@ STYLES = [
      'débil → fuerte. También abre un golpe en el aire al caer encima. De ahí cancelas en otro especial (linker) '
      'y repites (hasta 4 autodobles); la versión fuerte de un especial después de un autodoble es el remate '
      '(ender): tumba al rival y cierra el combo. El que lo recibe lo rompe '
-     'con puño + patada de la misma fuerza del golpe que le acaba de pegar; si falla, queda bloqueado 3 segundos.',
+     'con puño + patada de la misma fuerza del golpe que le acaba de pegar; si falla, queda bloqueado 3 segundos. '
+     'El autodoble solo sale con el rival cerca (no corre hasta él) y un súper solo abre autodobles si lo marcas '
+     'en sus ⚙ Ajustes.',
      {"chain": "none", "autodouble": True, "ad_rule": "classic", "enders": True, "ad_limit": 16,
       "ad_max": 4, "ad_air_open": True, "breaker": True, "breaker_mode": "strength", "breaker_hits": 2}),
 ]
