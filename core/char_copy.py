@@ -38,7 +38,7 @@ def copy_character(src_def, dest, base, name=None, author=None):
     old = src_def.stem
     dest = Path(dest)
     shutil.copytree(src_def.parent, dest, dirs_exist_ok=True,
-                    ignore=shutil.ignore_patterns("_editor_backups", "__pycache__"))
+                    ignore=shutil.ignore_patterns("_editor_backups", "_editor_history", "__pycache__"))
     mapping = {}
     if base != old:
         for f in list(dest.iterdir()):

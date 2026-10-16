@@ -70,10 +70,11 @@ down.bounce.groundlevel = 24
 down.friction.threshold = 0.1
 
 [Quotes]
-victory1 = "..."
+; frases de victoria (EasyFighter)
+victory1 = "¡Entrena más y vuelve a buscarme!"
+victory2 = "Mi puño no conoce el descanso."
+victory3 = "Buena pelea. La próxima vez, cúbrete."
 
-;---------------------------------------------------------------------------
-; Golpe de ejemplo (botón a). Cópialo para hacer más ataques.
 [Statedef 200]
 type = S
 movetype = A

@@ -175,6 +175,21 @@ command = /B
 time = 1
 
 [Command]
+name = "sm_FF"
+command = F, F
+time = 10
+
+[Command]
+name = "sm_BB"
+command = B, B
+time = 10
+
+[Command]
+name = "sm_s"
+command = s
+time = 1
+
+[Command]
 name = "sm_brk0"
 command = x+a
 time = 1
@@ -244,25 +259,25 @@ time = 20
 buffer.time = 8
 
 [Command]
-name = "sm_sp3"
+name = "sm_sp3_0"
 command = ~D, DF, F, D, DF, F, x
 time = 30
 buffer.time = 8
 
 [Command]
-name = "sm_sp3"
+name = "sm_sp3_1"
 command = ~D, DF, F, D, DF, F, y
 time = 30
 buffer.time = 8
 
 [Command]
-name = "sm_sp3"
+name = "sm_sp3_2"
 command = ~D, DF, F, D, DF, F, z
 time = 30
 buffer.time = 8
 
 [Command]
-name = "sm_sp4"
+name = "sm_sp4_2"
 command = ~F, D, DF, z
 time = 30
 buffer.time = 8
@@ -272,6 +287,90 @@ buffer.time = 8
 
 ; >>> SIMPLE-MODE moves >>>
 ; Esto lo escribe el modo simple del editor: no lo cambies a mano, se rehace solo.
+[State -1, SM: IA: Kikō-ha]
+type = ChangeState
+value = 1002
+triggerall = AILevel > 0
+triggerall = RoundState = 2
+triggerall = NumEnemy
+triggerall = EnemyNear, Alive
+triggerall = NumProjID(1000) = 0
+trigger1 = statetype != A
+trigger1 = ctrl
+trigger1 = P2BodyDist X > 220
+trigger1 = Random < 20 * AILevel / 4
+
+[State -1, SM: IA: Ryūjin]
+type = ChangeState
+value = 1102
+triggerall = AILevel > 0
+triggerall = RoundState = 2
+triggerall = NumEnemy
+triggerall = EnemyNear, Alive
+trigger1 = statetype != A
+trigger1 = ctrl
+trigger1 = P2StateType = A && P2BodyDist X < 140 && P2Dist Y < -40
+trigger1 = Random < 40 * AILevel / 4
+
+[State -1, SM: IA: Tatsu-geri]
+type = ChangeState
+value = 1202
+triggerall = AILevel > 0
+triggerall = RoundState = 2
+triggerall = NumEnemy
+triggerall = EnemyNear, Alive
+trigger1 = statetype != A
+trigger1 = ctrl
+trigger1 = P2BodyDist X = [60, 220]
+trigger1 = Random < 20 * AILevel / 4
+trigger2 = MoveHit
+trigger2 = StateNo = [200, 699]
+trigger2 = statetype != A
+trigger2 = Random < 350 * AILevel / 8
+
+[State -1, SM: IA: Rengeki]
+type = ChangeState
+value = 3302
+triggerall = AILevel > 0
+triggerall = RoundState = 2
+triggerall = NumEnemy
+triggerall = EnemyNear, Alive
+triggerall = power >= 1000
+trigger1 = statetype != A
+trigger1 = ctrl
+trigger1 = P2BodyDist X < 60
+trigger1 = Random < 20 * AILevel / 4
+trigger2 = MoveHit
+trigger2 = StateNo = [200, 699]
+trigger2 = statetype != A
+trigger2 = Random < 350 * AILevel / 8
+
+[State -1, SM: IA: golpes de cerca]
+type = ChangeState
+value = ifelse(Random % 6 = 0, 201, ifelse(Random % 5 = 0, 210, ifelse(Random % 4 = 0, 220, ifelse(Random % 3 = 0, 230, ifelse(Random % 2 = 0, 240, 250)))))
+triggerall = AILevel > 0
+triggerall = RoundState = 2
+triggerall = NumEnemy
+triggerall = EnemyNear, Alive
+trigger1 = statetype = S
+trigger1 = ctrl
+trigger1 = P2BodyDist X < 60
+trigger1 = Random < 60 * AILevel / 4
+
+[State -1, SM: IA: Agarre]
+type = ChangeState
+value = 800
+triggerall = AILevel > 0
+triggerall = RoundState = 2
+triggerall = NumEnemy
+triggerall = EnemyNear, Alive
+trigger1 = statetype = S
+trigger1 = ctrl
+trigger1 = P2BodyDist X < 24
+trigger1 = P2StateType != A
+trigger1 = P2MoveType != H
+trigger1 = Random < 20 * AILevel / 4
+
 [State -1, SM: Tatsu-geri (Remate)]
 type = ChangeState
 triggerall = Map(sm_end) = 0
@@ -289,8 +388,8 @@ trigger2 = EnemyNear, MoveType = H
 [State -1, SM: Ryūjin Remate (Remate)]
 type = ChangeState
 triggerall = Map(sm_end) = 0
-value = 3900
-triggerall = command = "sm_sp4"
+value = 3902
+triggerall = command = "sm_sp4_2"
 trigger1 = statetype != A
 trigger1 = movecontact
 trigger1 = (StateNo = 750 && Anim = 230 && AnimElemTime(2) > 0) || (StateNo = 751 && Anim = 240 && AnimElemTime(2) > 0) || (StateNo = 752 && Anim = 250 && AnimElemTime(2) > 0)
@@ -300,11 +399,41 @@ trigger2 = GameTime - Map(sm_adt) <= 20
 trigger2 = NumEnemy
 trigger2 = EnemyNear, MoveType = H
 
-[State -1, SM: Rengeki]
+[State -1, SM: Rengeki (débil)]
 type = ChangeState
 triggerall = Map(sm_end) = 0
 value = 3300
-triggerall = command = "sm_sp3"
+triggerall = command = "sm_sp3_0"
+triggerall = power >= 1000
+trigger1 = statetype != A
+trigger1 = ctrl
+trigger2 = statetype != A
+trigger2 = movecontact
+trigger2 = (stateno = [200, 699] || (StateNo = 750 && Anim = 230 && AnimElemTime(2) > 0) || (StateNo = 751 && Anim = 240 && AnimElemTime(2) > 0) || (StateNo = 752 && Anim = 250 && AnimElemTime(2) > 0))
+trigger3 = statetype != A
+trigger3 = movecontact
+trigger3 = stateno = 1000 || stateno = 1001 || stateno = 1002 || stateno = 1003 || stateno = 1100 || stateno = 1101 || stateno = 1102 || stateno = 1103 || stateno = 1200 || stateno = 1201 || stateno = 1202 || stateno = 1203
+
+[State -1, SM: Rengeki (medio)]
+type = ChangeState
+triggerall = Map(sm_end) = 0
+value = 3301
+triggerall = command = "sm_sp3_1"
+triggerall = power >= 1000
+trigger1 = statetype != A
+trigger1 = ctrl
+trigger2 = statetype != A
+trigger2 = movecontact
+trigger2 = (stateno = [200, 699] || (StateNo = 750 && Anim = 230 && AnimElemTime(2) > 0) || (StateNo = 751 && Anim = 240 && AnimElemTime(2) > 0) || (StateNo = 752 && Anim = 250 && AnimElemTime(2) > 0))
+trigger3 = statetype != A
+trigger3 = movecontact
+trigger3 = stateno = 1000 || stateno = 1001 || stateno = 1002 || stateno = 1003 || stateno = 1100 || stateno = 1101 || stateno = 1102 || stateno = 1103 || stateno = 1200 || stateno = 1201 || stateno = 1202 || stateno = 1203
+
+[State -1, SM: Rengeki (fuerte)]
+type = ChangeState
+triggerall = Map(sm_end) = 0
+value = 3302
+triggerall = command = "sm_sp3_2"
 triggerall = power >= 1000
 trigger1 = statetype != A
 trigger1 = ctrl
@@ -420,7 +549,7 @@ trigger2 = (stateno = [200, 699] || (StateNo = 750 && Anim = 230 && AnimElemTime
 [State -1, SM: Remate: cierra el combo]
 type = MapSet
 trigger1 = movecontact
-trigger1 = StateNo = 3900 || StateNo = 4020
+trigger1 = StateNo = 3902 || StateNo = 4020
 map = "sm_end"
 value = 1
 

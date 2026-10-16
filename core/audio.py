@@ -7,6 +7,8 @@ el decodificador que trae PyQt6 (QtMultimedia)."""
 import shutil
 import struct
 import subprocess
+
+from core.sysenv import clean_env
 from pathlib import Path
 
 EXTS = [".wav", ".ogg", ".mp3", ".flac", ".opus", ".m4a", ".aac", ".wma", ".aiff", ".aif"]
@@ -58,7 +60,7 @@ def _ffmpeg(path):
         try:
             out = subprocess.run([probe, "-v", "error", "-select_streams", "a:0", "-show_entries",
                                   "stream=channels,sample_rate", "-of", "csv=p=0", str(path)],
-                                 capture_output=True, timeout=30, **_NOWIN).stdout.decode().strip().split(",")
+                                 capture_output=True, timeout=30, env=clean_env(), **_NOWIN).stdout.decode().strip().split(",")
             rate, ch = int(out[0]), int(out[1])
             cmd[cmd.index("-ac") + 1] = "1" if ch == 1 else "2"
             if rate > MAX_RATE:
@@ -66,7 +68,7 @@ def _ffmpeg(path):
         except (OSError, ValueError, IndexError, subprocess.SubprocessError):
             pass
     try:
-        r = subprocess.run(cmd, capture_output=True, timeout=120, **_NOWIN)
+        r = subprocess.run(cmd, capture_output=True, timeout=120, env=clean_env(), **_NOWIN)
     except (OSError, subprocess.SubprocessError):
         return None
     if r.returncode != 0 or not r.stdout.startswith(b"RIFF"):

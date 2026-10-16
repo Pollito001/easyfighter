@@ -37,6 +37,8 @@ Fighter Factory, pero pensado para que **cualquiera** pueda hacer un personaje:
   combo breaker).
 - 🎨 **Colores alternativos** con un clic por parte (piel, ropa, pelo…), 🔊 **voces** en WAV, OGG o MP3 y
   🧩 un **cortador de hojas de sprites**.
+- 🤖 **IA para la computadora**, 📊 **datos de cuadros**, ✅ **revisión** antes de compartir, 🕘 **historial de
+  versiones** y 📦 un **.zip listo para compartir**.
 - ▶ **Probar en IKEMEN GO** con un botón, y 🛠 herramientas avanzadas (sprites, animaciones y código a
   mano) para quien las necesite.
 - 🌎 En español, English, Português, Français, Deutsch e Italiano.
@@ -264,6 +266,34 @@ avanzadas…** (pide confirmación; para volver, el botón «🧸 Volver al modo
 - **🛠 Modo avanzado** — todo lo de abajo, a mano, como en Fighter Factory. Si abres algo que hace el modo simple
   (el `_simple.st`, lo que está entre las marcas «SIMPLE-MODE» del `.cmd` o una de sus animaciones) sale un
   aviso amarillo, y al primer cambio te recuerda que eso se vuelve a armar y lo editado a mano se pierde.
+
+### 🆕 Más movimientos, IA y terminar el personaje
+
+- **Más movimientos** (todos opcionales: si dejas la casilla vacía, no lo tiene): **burla** con el botón Start
+  (en «Intro y final»), **dash en el aire** con → → o ← ← (en «Saltar»), **agarre en el aire** (en «👊 Golpes») y,
+  en las ⚙ Ajustes de cada especial, **rebota en la pared**: el rival sale disparado, rebota en la orilla de la
+  pantalla y cae para seguir el combo.
+- **Especiales nuevos:** **llama a un ayudante** (un tipo nuevo: aparece delante, avanza y pega; su animación va
+  en la pestaña «🧍 Ayudante»), **varios proyectiles a la vez** en abanico y **rayo** (el proyectil se queda delante
+  como un rayo largo y pega varias veces), en las ⚙ Ajustes de los proyectiles.
+- **Versiones en súper y remates:** igual que los especiales, el súper y el remate pueden tener versión débil,
+  media y fuerte (cada una con su botón, más fuerte = más daño y más rápida). El remate «de un especial» sigue
+  saliendo solo con el botón fuerte.
+- **🔊 Voces del combo:** en «🔊 Voces → 🔗 Combos» agregas una casilla por cantidad de golpes (➕): al llegar a 3
+  golpes suena una, a los 5 otra… Si un golpe salta varias, suena la más alta.
+- **🏆 Frases de victoria** en «👤 Personaje» (una por línea; el juego escoge una al azar).
+- **🤖 IA (CPU):** cómo pelea cuando lo maneja la computadora: agresividad, si hace combos, si usa el súper y
+  cuándo usa cada especial (de cerca, a media distancia, de lejos, contra un rival que salta o nunca;
+  «Automático» escoge según lo que hace). Solo cambia al CPU (`AILevel > 0`), nunca al jugador.
+- **🏁 Revisar y compartir:**
+  - **✅ Revisar el personaje**: animaciones vacías, especiales a medias, comandos repetidos, voces con sonidos
+    que ya no están, retratos que faltan y errores del código. Doble clic en uno para ir a arreglarlo.
+  - **📊 Datos de cuadros**: de cada golpe y especial, en cuántos ticks pega, cuánto dura pegando, cuánto tarda en
+    recuperarse y la ventaja al pegar y al ser bloqueado (aproximada).
+  - **🕘 Historial de versiones**: fotos de la carpeta del personaje en `_editor_history` (una sola al guardar,
+    como mucho cada 15 minutos, o a mano). «↩ Volver a esta» primero guarda otra foto, así que se puede deshacer.
+  - **📦 Compartir**: un `.zip` limpio (sin `_editor_backups` ni `_editor_history`) con un `COMANDOS.txt` con sus
+    movimientos.
 
 ### 🧩 Cortador de hojas de sprites
 

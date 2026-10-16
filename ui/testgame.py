@@ -228,7 +228,10 @@ def test_character(parent, project):
             flags["creationflags"] = 0x00000008  # DETACHED_PROCESS
         else:
             flags["start_new_session"] = True
-        subprocess.Popen(args, cwd=str(ik), stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, **flags)
+        from core.sysenv import clean_env
+        # sin las bibliotecas del editor empaquetado (AppImage / PyInstaller): IKEMEN GO usa las del sistema
+        subprocess.Popen(args, cwd=str(ik), stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+                         env=clean_env(), **flags)
         if hasattr(parent, "status"):
             parent.status.setText(tr('▶ IKEMEN GO abierto: {0}').format(" ".join(args[1:])))
     except OSError as e:

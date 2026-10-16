@@ -410,10 +410,10 @@ class FramesBox(QWidget):
                                         boxes=[(f.clsn1, f.clsn2) for f in a.frames])
                 self.status.setText(tr('Usa lo que ya tenía (acción {0}).').format(self.fallback))
                 self.report("info", "ℹ " + tr('Usa lo que ya tenía'), (a.frames[0].group, a.frames[0].number))
-            elif getattr(self, "slot_key", None) in sg.OPTIONAL_EMPTY:
+            elif getattr(self, "slot_key", None) in sg.OPTIONAL_EMPTY or getattr(self, "optional", False):
                 self.preview.set_frames([], empty_text=tr('Opcional'))
                 self.status.setText(tr('⚪ Opcional: si la llenas, sale al azar con las demás.')
-                                    if self.slot_key in sg.EXTRA_POSES else tr('⚪ Opcional'))
+                                    if getattr(self, "slot_key", None) in sg.EXTRA_POSES else tr('⚪ Opcional'))
                 self.report("info", "ℹ " + tr('Opcional'))
             else:
                 self.preview.set_frames([], empty_text=tr('Vacía\nPon imágenes o sprites'))
@@ -1099,6 +1099,31 @@ class AttacksPage(Page):
         f.addRow(tr('Daño:'), self.throw_dmg)
         v.addLayout(f)
         self.fold(box, grid, 0, 0)
+        # agarre en el aire (opcional)
+        box = FoldCard(sm, tr('Agarre en el aire'), tr('Opcional: en el aire, cerca de un rival que también va por '
+                                                       'el aire, → + el botón. Lo agarra y lo estrella contra el '
+                                                       'suelo. Si la dejas vacía, no tiene agarre en el aire.'))
+        v = box.v
+        self.athrow_fb = FramesBox(sm, tr('Agarre en el aire'), 850, default_time=4, show_hit=True,
+                                   hit_label=tr('Lo lanza en el cuadro:'))
+        self.athrow_fb.status_hook = box.set_status
+        self.athrow_fb.ref_kind = "A"
+        self.athrow_fb.optional = True
+        self.cards["air_throw"] = box
+        self.athrow_fb.changed.connect(sm.moves_changed)
+        v.addWidget(self.athrow_fb, 1)
+        f = QFormLayout()
+        self.athrow_btn = QComboBox()
+        for b in sg.BUTTONS:
+            self.athrow_btn.addItem(f"→ + {b}", b)
+        self.athrow_btn.currentIndexChanged.connect(self.on_athrow_opts)
+        self.athrow_dmg = QSpinBox()
+        self.athrow_dmg.setRange(0, 999)
+        self.athrow_dmg.valueChanged.connect(self.on_athrow_opts)
+        f.addRow(tr('Botón:'), self.athrow_btn)
+        f.addRow(tr('Daño:'), self.athrow_dmg)
+        v.addLayout(f)
+        self.fold(box, grid, 0, 1)
         self.finish()
         self._binding = False
 
@@ -1117,6 +1142,11 @@ class AttacksPage(Page):
         th.setdefault("button", "y")
         self.throw_btn.setCurrentIndex(max(0, self.throw_btn.findData(th.get("button", "y"))))
         self.throw_dmg.setValue(int(th.get("damage", 80)))
+        ath = cfg.setdefault("air_throw", {})
+        self.athrow_fb.bind(ath)
+        ath.setdefault("button", "y")
+        self.athrow_btn.setCurrentIndex(max(0, self.athrow_btn.findData(ath.get("button", "y"))))
+        self.athrow_dmg.setValue(int(ath.get("damage", 70)))
         self._binding = False
 
     def bind_damage(self, key):
@@ -1198,6 +1228,15 @@ class AttacksPage(Page):
             return
         self.sm.cfg["normals"].setdefault(key, {})["damage"] = int(val)
         if self.boxes[key][0].keys():
+            self.sm.moves_changed()
+
+    def on_athrow_opts(self, *_a):
+        if self._binding:
+            return
+        ath = self.sm.cfg.setdefault("air_throw", {})
+        ath["button"] = self.athrow_btn.currentData()
+        ath["damage"] = self.athrow_dmg.value()
+        if self.athrow_fb.keys():
             self.sm.moves_changed()
 
     def on_throw_opts(self, *_a):
@@ -1418,11 +1457,11 @@ class SpecialCard(QFrame):
                               'sube con el «extra del remate» de la pestaña de combos.')))
             f.addRow(muted(tr('Si escoges «Remate de» un especial, usa su mismo comando con el botón fuerte.')))
             self.ender_of.currentIndexChanged.connect(self.on_ender_of)
-            self.sync_ender_of()
-        elif sp.get("kind") != "super":
+        if not conv:
+            special = sp.get("kind") not in ("super", "ender")
             vr = QHBoxLayout()
             vals = list(sp.get("versions", [1, 1, 1])) + [1, 1, 1, 0][len(sp.get("versions", [1, 1, 1])):]
-            for i, name in enumerate(sg.VERSION_NAMES):
+            for i, name in enumerate(sg.VERSION_NAMES if special else sg.STRENGTH):
                 c = QCheckBox(tr(name))
                 c.setChecked(bool(vals[i]))
                 c.toggled.connect(self.on_opts)
@@ -1432,12 +1471,19 @@ class SpecialCard(QFrame):
                 vr.addWidget(c)
                 self.versions.append(c)
             vr.addStretch(1)
-            f.addRow(tr('Versiones:'), vr)
-            f.addRow(muted(tr('Cada versión sale con su botón (débil, medio o fuerte): más fuerte = más daño '
-                              'y más rápido. La EX sale con dos botones juntos.')))
-        else:
-            f.addRow(muted(tr('El súper gasta barras de poder (cuántas, en «Ajustes») y sale con cualquiera de los '
-                              '3 botones. Su pausa con la pantalla oscura está en «⏱ Eventos».')))
+            self.versions_lbl = QLabel(tr('Versiones:'))
+            f.addRow(self.versions_lbl, vr)
+            if special:
+                f.addRow(muted(tr('Cada versión sale con su botón (débil, medio o fuerte): más fuerte = más daño '
+                                  'y más rápido. La EX sale con dos botones juntos.')))
+            else:
+                f.addRow(muted(tr('Cada versión sale con su botón (débil, medio o fuerte): más fuerte = más daño '
+                                  'y más rápido.')))
+        if sp.get("kind") == "ender" and not conv:
+            self.sync_ender_of()
+        if sp.get("kind") == "super":
+            f.addRow(muted(tr('El súper gasta barras de poder (cuántas, en «Ajustes»). Su pausa con la pantalla '
+                              'oscura está en «⏱ Eventos».')))
         if not conv:
             self.voice = special_voice_picker(sm, sp)
             f.addRow(tr('Voz:'), self.voice)
@@ -1471,19 +1517,22 @@ class SpecialCard(QFrame):
         self.proj_tab = QWidget()
         pc = QHBoxLayout(self.proj_tab)
         c1 = QVBoxLayout()
-        c1.addWidget(title_label(tr('El proyectil')))
+        self.proj_title = title_label(tr('El proyectil'))
+        c1.addWidget(self.proj_title)
         self.proj = FramesBox(sm, tr('Proyectil'), base + 50, default_time=4, small=True)
         self.proj.bind(sp.setdefault("proj", {}))
         self.proj.changed.connect(sm.moves_changed)
         c1.addWidget(self.proj, 1)
         c2 = QVBoxLayout()
-        c2.addWidget(title_label(tr('Al chocar (opcional)')))
+        self.proj_hit_title = title_label(tr('Al chocar (opcional)'))
+        c2.addWidget(self.proj_hit_title)
         self.proj_hit = FramesBox(sm, tr('Proyectil al chocar'), base + 60, default_time=3, small=True)
         self.proj_hit.bind(sp.setdefault("proj_hit", {}))
         self.proj_hit.changed.connect(sm.moves_changed)
         c2.addWidget(self.proj_hit, 1)
         c3 = QVBoxLayout()
-        c3.addWidget(title_label(tr('Posición del proyectil')))
+        self.proj_pos_title = title_label(tr('Posición del proyectil'))
+        c3.addWidget(self.proj_pos_title)
         pf = QFormLayout()
         self.p_auto = QCheckBox(tr('Automática'))
         self.p_auto.setToolTip(tr('Sale de la mano o el pie que pega'))
@@ -1615,7 +1664,13 @@ class SpecialCard(QFrame):
         typ = self.sp.get("type", "proj")
         if hasattr(self, "hits_row"):
             self.hits_row.rebuild()
-        self.body_w.setTabVisible(self.body_w.indexOf(self.proj_tab), typ == "proj")
+        self.body_w.setTabVisible(self.body_w.indexOf(self.proj_tab), typ in ("proj", "helper"))
+        helper = typ == "helper"
+        self.body_w.setTabText(self.body_w.indexOf(self.proj_tab), tr('🧍 Ayudante') if helper else tr('🔥 Proyectil'))
+        self.proj_title.setText(tr('El ayudante (su animación)') if helper else tr('El proyectil'))
+        self.proj_pos_title.setText(tr('Dónde aparece') if helper else tr('Posición del proyectil'))
+        self.proj_hit_title.setVisible(not helper)
+        self.proj_hit.setVisible(not helper)
         self.body_w.setTabVisible(self.body_w.indexOf(self.cond_tab), typ == "converted" and
                                   bool(self.sp.get("ventry")))
         self.body_w.setTabVisible(self.body_w.indexOf(self.adv_tab), typ != "converted")
@@ -1810,6 +1865,9 @@ class SpecialCard(QFrame):
             sp["motion"], sp["family"] = base.get("motion"), base.get("family")
         for w in (self.motion, self.family):
             w.setEnabled(not on)
+        for c in getattr(self, "versions", []):
+            c.setEnabled(not on)            # el remate de un especial sale solo con el botón fuerte
+            c.setToolTip(tr('El remate de un especial sale solo con el botón fuerte.') if on else "")
 
     def on_ender_of(self, *_a):
         self.sp["ender_of"] = self.ender_of.currentData() or ""
@@ -1844,7 +1902,7 @@ class SpecialsPage(Page):
             'tu personaje (y la del proyectil si lanza uno) y listo. Se pueden hacer cancelando un golpe '
             'normal que conectó.'))
         row = QHBoxLayout()
-        add = QPushButton(tr('➕ Agregar especial'))
+        add = QPushButton(tr('🔥 Agregar especial'))
         add.setObjectName("primary")
         add.clicked.connect(lambda: self.add("special"))
         add2 = QPushButton(tr('⚡ Agregar súper'))
@@ -1864,7 +1922,7 @@ class SpecialsPage(Page):
         self.host = QVBoxLayout()
         self.host.setSpacing(10)
         self.lay.addLayout(self.host)
-        self.empty = muted(tr('Todavía no tiene especiales. Toca «➕ Agregar especial».'))
+        self.empty = muted(tr('Todavía no tiene especiales. Toca «🔥 Agregar especial».'))
         self.lay.addWidget(self.empty)
         self.orig_title = QLabel(tr('🎮 Los que ya tiene el personaje'))
         self.orig_title.setObjectName("SectionTitle")
@@ -2354,6 +2412,20 @@ def play_sound(owner, p, v):
     owner._player.play()
 
 
+def free_combo_slot(sm, item):
+    """Dónde guardar el sonido de una voz del combo: su lugar de antes o uno libre del grupo 903."""
+    p = sm.main.project
+    cur = item.get("snd")
+    others = [o.get("snd") for o in sm.cfg.get("combo_voices", []) if o is not item]
+    if isinstance(cur, list) and cur[0] == 903 and cur not in others:
+        return tuple(cur)
+    used = {(x.group, x.number) for x in p.snd.sounds} if p else set()
+    n = 0
+    while (903, n) in used:
+        n += 1
+    return 903, n
+
+
 def free_voice_slot(sm, sp):
     """Dónde guardar el WAV propio de un especial: su lugar de antes si era suyo, o uno libre del grupo 900."""
     p = sm.main.project
@@ -2460,8 +2532,100 @@ class VoicesPage(Page):
             self.vsections[skey] = (head, body, stitle, keys)
             head.setChecked(skey not in folded)
             body.setVisible(skey not in folded)
+        # voces del combo: una casilla por cada cantidad de golpes (se agregan con el botón)
+        head, body = self.fold_section("combos", folded)
+        bl = QVBoxLayout(body)
+        bl.setContentsMargins(0, 0, 0, 0)
+        bl.setSpacing(8)
+        bl.addWidget(muted(tr('Un sonido cuando tu combo llega a cierta cantidad de golpes (por ejemplo, a los 3 '
+                              'golpes dice «¡Bien!» y a los 5 «¡Increíble!»). Toca «➕ Agregar» para cada cantidad. '
+                              'Si un golpe salta varias cantidades a la vez, suena solo la más alta.')))
+        self.combo_box = QFrame()
+        self.combo_box.setObjectName("Card")
+        self.combo_grid = QGridLayout(self.combo_box)
+        self.combo_grid.setContentsMargins(10, 10, 10, 10)
+        self.combo_grid.setHorizontalSpacing(14)
+        self.combo_grid.setColumnStretch(1, 1)
+        bl.addWidget(self.combo_box)
+        arow = QHBoxLayout()
+        add = QPushButton(tr('➕ Agregar cantidad de golpes'))
+        add.clicked.connect(self.add_combo_voice)
+        arow.addWidget(add)
+        arow.addStretch(1)
+        bl.addLayout(arow)
         self.update_heads()
         self.finish()
+
+    def fold_section(self, skey, folded, stitle='🔗 Combos (por cantidad de golpes)'):
+        head = QToolButton()
+        head.setObjectName("SectionTitle")
+        head.setAutoRaise(True)
+        head.setCheckable(True)
+        head.setCursor(Qt.CursorShape.PointingHandCursor)
+        head.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
+        head.setStyleSheet("QToolButton { background: transparent; border: none; padding: 2px 0; }"
+                           "QToolButton:hover { text-decoration: underline; }")
+        head.setToolTip(tr('Clic para abrir o cerrar esta sección.'))
+        body = QWidget()
+        head.toggled.connect(lambda on, skey=skey: self.on_fold(skey, on))
+        self.lay.addWidget(head)
+        self.lay.addWidget(body)
+        self.vsections[skey] = (head, body, stitle, [])
+        head.setChecked(skey not in folded)
+        body.setVisible(skey not in folded)
+        return head, body
+
+    # ---- voces del combo
+    def combo_list(self):
+        return self.sm.cfg.setdefault("combo_voices", [])
+
+    def add_combo_voice(self):
+        lst = self.combo_list()
+        n = max([int(x.get("hits", 0)) for x in lst] + [1]) + 1
+        lst.append({"hits": min(99, n)})
+        self.fill_combo_voices()
+        self.update_heads()
+        self.sm.moves_changed()
+
+    def remove_combo_voice(self, item):
+        lst = self.combo_list()
+        if item in lst:
+            lst.remove(item)
+        self.fill_combo_voices()
+        self.update_heads()
+        self.sm.moves_changed()
+
+    def fill_combo_voices(self):
+        g = self.combo_grid
+        while g.count():
+            it = g.takeAt(0)
+            if it.widget() is not None:
+                it.widget().deleteLater()
+        lst = self.combo_list() if hasattr(self.sm, "cfg") else []
+        self.combo_box.setVisible(bool(lst))
+        for r, item in enumerate(lst):
+            lead = QWidget()
+            ll = QHBoxLayout(lead)
+            ll.setContentsMargins(0, 0, 0, 0)
+            ll.addWidget(QLabel(tr('Al llegar a')))
+            sp = QSpinBox()
+            sp.setRange(2, 99)
+            sp.setValue(int(item.get("hits", 3)))
+            sp.setSuffix(" " + tr('golpes'))
+            sp.setKeyboardTracking(False)
+            sp.valueChanged.connect(lambda v, item=item: (item.__setitem__("hits", int(v)), self.sm.moves_changed()))
+            ll.addWidget(sp)
+            pk = VoicePicker(self.sm, lambda item=item: item.get("snd"),
+                             lambda val, item=item: item.__setitem__("snd", val) if val else item.pop("snd", None),
+                             lambda item=item: free_combo_slot(self.sm, item))
+            pk.changed.connect(self.update_heads)
+            rm = QPushButton("🗑")
+            rm.setFixedWidth(34)
+            rm.setToolTip(tr('Quitar esta casilla'))
+            rm.clicked.connect(lambda _c, item=item: self.remove_combo_voice(item))
+            g.addWidget(lead, r, 0)
+            g.addWidget(pk, r, 1)
+            g.addWidget(rm, r, 2)
 
     # ---- secciones plegables
     def on_fold(self, skey, on):
@@ -2480,6 +2644,12 @@ class VoicesPage(Page):
         for skey, (head, _b, stitle, keys) in self.vsections.items():
             done = sum(1 for k in keys if voices.get(k))
             total = len(keys)
+            if skey == "combos":
+                lst = self.sm.cfg.get("combo_voices", []) if hasattr(self.sm, "cfg") else []
+                done, total = sum(1 for x in lst if x.get("snd")), len(lst)
+                head.setText(f"{'▾' if head.isChecked() else '▸'}  {tr(stitle)}   "
+                             f"({tr('{0} de {1} puestas').format(done, total)})")
+                continue
             if skey == "specials":
                 moves = [o for o in self.sm.cfg.get("specials", []) if o.get("type") != "converted"] \
                     if hasattr(self.sm, "cfg") else []
@@ -2498,6 +2668,7 @@ class VoicesPage(Page):
         for pk in self.pickers.values():
             pk.refresh()
         self.fill_moves()
+        self.fill_combo_voices()
         self.update_heads()
 
     def refresh_moves(self):
@@ -2753,8 +2924,30 @@ class CharPage(Page):
             self.music[key] = (lab, b, rm)
         v.addLayout(f)
         self.fold(box, grid, 0, 0)
+        box, v = card(tr('🏆 Frases de victoria'), tr(
+            'Lo que dice tu personaje en la pantalla de victoria (el juego escoge una al azar). Una frase por '
+            'línea, hasta 100.'))
+        self.quotes = QPlainTextEdit()
+        self.quotes.setPlaceholderText(tr('Ej.: ¡Entrena más y vuelve a buscarme!'))
+        self.quotes.setMinimumHeight(110)
+        self.quotes.textChanged.connect(lambda: None if self._binding else self.quote_timer.start())
+        self.quote_timer = QTimer(self)
+        self.quote_timer.setSingleShot(True)
+        self.quote_timer.setInterval(600)
+        self.quote_timer.timeout.connect(self.apply_quotes)
+        v.addWidget(self.quotes)
+        grid.addWidget(box, 1, 0)
         self.finish()
         self._binding = False
+
+    def apply_quotes(self):
+        doc = self.cns_doc()
+        if doc is None:
+            return
+        old = doc.toPlainText()
+        text = sg.write_quotes(old, self.quotes.toPlainText().splitlines())
+        if text != old:
+            set_doc_text(doc, text)
 
     # ---- datos del .def
     def bind(self, _cfg):
@@ -2799,6 +2992,9 @@ class CharPage(Page):
         self.hurt_count.blockSignals(False)
         self.bake_btn.setEnabled(self.body["size"].isEnabled() and self.body["size"].value() != 100)
         self.stats_warn.setText(tr('Algunos datos no están en el .cns del personaje.') if missing else "")
+        doc = self.cns_doc()
+        self.quotes.setPlainText("\n".join(sg.read_quotes(doc.toPlainText())) if doc is not None else "")
+        self.quotes.setEnabled(doc is not None)
         self._binding = False
         self.refresh_game()
 
@@ -3145,9 +3341,12 @@ class SimpleMode(QObject):
         self.colors_page = ColorsHost(self)
         from ui.combos_page import CombosPage
         self.combos_page = CombosPage(self)
+        from ui.extra_pages import AIPage, FinishPage
+        self.ai_page = AIPage(self)
+        self.finish_page = FinishPage(self)
         self.import_mode = QComboBox()
         self.pages = [self.char_page, self.moves_page, self.attacks_page, self.specials_page, self.combos_page,
-                      self.hurt_page, self.colors_page, self.voices_page]
+                      self.hurt_page, self.colors_page, self.voices_page, self.ai_page, self.finish_page]
         for pg in (self.moves_page, self.attacks_page, self.specials_page, self.hurt_page):
             pg.lay.insertLayout(2, self.colors_row(pg))
 
@@ -3232,8 +3431,9 @@ class SimpleMode(QObject):
                     import traceback
                     traceback.print_exc()
         self.moves_changed()
-        for w in self.findChildren(FramesBox):
-            w.preview.update()
+        for pg in self.pages:
+            for w in pg.findChildren(FramesBox):
+                w.preview.update()
 
     def align_all(self):
         p = self.main.project
@@ -3362,7 +3562,11 @@ class SimpleMode(QObject):
         return [(self.char_page, tr('👤 Personaje')), (self.moves_page, tr('🚶 Moverse y saltar')),
                 (self.attacks_page, tr('👊 Golpes')), (self.specials_page, tr('🔥 Especiales y súper')),
                 (self.combos_page, tr('🔗 Combos')), (self.hurt_page, tr('🤕 Recibir golpes')), (self.colors_page, tr('🎨 Colores')),
-                (self.voices_page, tr('🔊 Voces'))]
+                (self.voices_page, tr('🔊 Voces')), (self.ai_page, tr('🤖 IA (CPU)'))]
+
+    def nav_pages_end(self):
+        """Las que van después de «Selección»."""
+        return [(self.finish_page, tr('🏁 Revisar y compartir'))]
 
     # ---- como una pestaña
     def is_modified(self):
@@ -3982,6 +4186,7 @@ class SimpleMode(QObject):
         self.main.sim.states = {}
         self._orig = None
         self.drop_unused()
+        self.last_problems = list(gen.problems)
         if gen.problems:
             self.main.status.setText(tr('⚠ No encontré números libres para: {0}').format(", ".join(gen.problems)))
         self.main.update_title()

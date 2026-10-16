@@ -77,6 +77,8 @@ class MainWindow(QMainWindow):
         for w, label in self.simple.nav_pages():
             self.tabs.addTab(w, label)
         self.tabs.addTab(self.select, tr('🎴 Selección'))
+        for w, label in self.simple.nav_pages_end():
+            self.tabs.addTab(w, label)
         # modo avanzado
         self.tabs.addTab(self.def_tab, tr('📝 Datos'))
         self.tabs.addTab(self.sprites, tr('🖼 Sprites'))
@@ -119,7 +121,7 @@ class MainWindow(QMainWindow):
 
     # ---- modo simple / avanzado
     def simple_widgets(self):
-        return [w for w, _l in self.simple.nav_pages()] + [self.select]
+        return [w for w, _l in self.simple.nav_pages()] + [self.select] + [w for w, _l in self.simple.nav_pages_end()]
 
     def advanced_widgets(self):
         return [self.def_tab, self.sprites, self.anims, self.code, self.sim, self.moves, self.sounds]
@@ -401,8 +403,22 @@ class MainWindow(QMainWindow):
             self.def_tab.save()
         self.update_title()
         if ok:
+            self.auto_snapshot()
             self.status.setText(tr('✅ Guardado: {0}').format(self.project.folder))
         return ok
+
+    def auto_snapshot(self):
+        """Una foto en el historial de versiones al guardar (como mucho cada 15 minutos)."""
+        if not self.project or not load_settings().get("auto_snapshot", True):
+            return
+        from core import finish
+        try:
+            age = finish.last_snapshot_age(self.project.folder)
+            if age is None or age >= 15:
+                finish.snapshot(self.project.folder, tr('Al guardar'))
+                finish.prune(self.project.folder, 20)
+        except OSError:
+            pass
 
     def confirm_discard(self):
         if not self.project or not self.is_modified():

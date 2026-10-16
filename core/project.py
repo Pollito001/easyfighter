@@ -134,7 +134,7 @@ class Project:
             seen.add(self.def_path.resolve())
             out.insert(0, ("def", self.def_path))
         for p in sorted(self.folder.rglob("*")):
-            if "_editor_backups" in p.parts:
+            if "_editor_backups" in p.parts or "_editor_history" in p.parts:
                 continue
             if p.is_file() and p.suffix.lower() in CODE_EXT and p.resolve() not in seen:
                 seen.add(p.resolve())

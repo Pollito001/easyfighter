@@ -84,7 +84,7 @@ sonido, a quién le pega.
 
 ## Paso 5 · 🔥 Especiales y súper
 
-**➕ Agregar especial**, **⚡ Agregar súper** o **💥 Agregar remate**. Cada uno tiene pestañas:
+**🔥 Agregar especial**, **⚡ Agregar súper** o **💥 Agregar remate**. Cada uno tiene pestañas:
 
 - **Datos:** nombre, **comando** (↓↘→, →↓↘, cargar…, o crea uno tuyo con 🎮), botón, **qué hace**
   (proyectil, golpe en el lugar, embestida, gancho, agarre, contraataque…), daño y su voz.
@@ -129,6 +129,9 @@ Colores alternativos: los que salen al escogerlo con otro botón en la selecció
 Un sonido para cada cosa (al pegar, al hacer un especial, al recibir un golpe, al ganar…). Acepta WAV, OGG,
 MP3, FLAC… y los convierte solo a WAV. Cada especial, súper o remate puede tener su propia voz.
 
+En **🔗 Combos (por cantidad de golpes)** toca **➕ Agregar cantidad de golpes** para cada voz del combo: por
+ejemplo, una a los 3 golpes y otra a los 5.
+
 ![Voces](img/08_voces_es.png)
 
 ## Paso 10 · Probar y guardar
@@ -139,6 +142,22 @@ MP3, FLAC… y los convierte solo a WAV. Cada especial, súper o remate puede te
   `_editor_backups/` dentro de la carpeta del personaje.
 
 ![En el juego](img/juego_especial.png)
+
+## Paso 11 · 🤖 IA (CPU)
+
+Marca **Usar la IA de EasyFighter** para que la computadora pelee mejor con tu personaje: escoge qué tan
+agresiva es, si hace combos, si usa el súper y cuándo usa cada especial. A ti, cuando juegas con él, no te
+cambia nada.
+
+## Paso 12 · 🏁 Revisar y compartir
+
+1. **🔍 Revisar ahora**: te dice si falta algo (doble clic en un problema para ir a arreglarlo).
+2. **📊 Calcular**: los datos de cuadros de cada golpe, para balancearlo.
+3. **🕘 Historial de versiones**: el editor guarda fotos al guardar; con **↩ Volver a esta** regresas a una.
+4. **📦 Crear el .zip…**: el personaje listo para compartir, con un `COMANDOS.txt`.
+
+> 💡 También hay **🏆 Frases de victoria** en «👤 Personaje», y movimientos opcionales: **burla**, **dash en el
+> aire**, **agarre en el aire**, **rebote en la pared**, **ayudante**, **rayo** y **varios proyectiles**.
 
 ---
 

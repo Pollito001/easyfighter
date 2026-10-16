@@ -562,7 +562,9 @@
   "win3": {},
   "win4": {},
   "lose2": {},
-  "lose3": {}
+  "lose3": {},
+  "air_dash": {},
+  "taunt": {}
  },
  "normals": {
   "S_x": {
@@ -1461,5 +1463,16 @@
   "scale_min": 30,
   "extra_stun": 0,
   "x_state": 770
- }
+ },
+ "ai": {
+  "on": true,
+  "aggr": 5,
+  "combos": true,
+  "supers": true,
+  "moves": {}
+ },
+ "air_throw": {
+  "button": "y"
+ },
+ "combo_voices": []
 }

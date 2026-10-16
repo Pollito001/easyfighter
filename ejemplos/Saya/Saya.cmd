@@ -175,6 +175,21 @@ command = /B
 time = 1
 
 [Command]
+name = "sm_FF"
+command = F, F
+time = 10
+
+[Command]
+name = "sm_BB"
+command = B, B
+time = 10
+
+[Command]
+name = "sm_s"
+command = s
+time = 1
+
+[Command]
 name = "sm_sp0_0"
 command = ~D, DF, F, x
 time = 20
@@ -229,19 +244,19 @@ time = 20
 buffer.time = 8
 
 [Command]
-name = "sm_sp3"
+name = "sm_sp3_0"
 command = ~D, DF, F, D, DF, F, a
 time = 30
 buffer.time = 8
 
 [Command]
-name = "sm_sp3"
+name = "sm_sp3_1"
 command = ~D, DF, F, D, DF, F, b
 time = 30
 buffer.time = 8
 
 [Command]
-name = "sm_sp3"
+name = "sm_sp3_2"
 command = ~D, DF, F, D, DF, F, c
 time = 30
 buffer.time = 8
@@ -251,10 +266,122 @@ buffer.time = 8
 
 ; >>> SIMPLE-MODE moves >>>
 ; Esto lo escribe el modo simple del editor: no lo cambies a mano, se rehace solo.
-[State -1, SM: Hōō Renkyaku]
+[State -1, SM: IA: Hien]
+type = ChangeState
+value = 1002
+triggerall = AILevel > 0
+triggerall = RoundState = 2
+triggerall = NumEnemy
+triggerall = EnemyNear, Alive
+triggerall = NumProjID(1000) = 0
+trigger1 = statetype != A
+trigger1 = ctrl
+trigger1 = P2BodyDist X > 220
+trigger1 = Random < 20 * AILevel / 4
+
+[State -1, SM: IA: Shōten-kyaku]
+type = ChangeState
+value = 1102
+triggerall = AILevel > 0
+triggerall = RoundState = 2
+triggerall = NumEnemy
+triggerall = EnemyNear, Alive
+trigger1 = statetype != A
+trigger1 = ctrl
+trigger1 = P2StateType = A && P2BodyDist X < 140 && P2Dist Y < -40
+trigger1 = Random < 40 * AILevel / 4
+
+[State -1, SM: IA: Senpū-kyaku]
+type = ChangeState
+value = 1202
+triggerall = AILevel > 0
+triggerall = RoundState = 2
+triggerall = NumEnemy
+triggerall = EnemyNear, Alive
+trigger1 = statetype != A
+trigger1 = ctrl
+trigger1 = P2BodyDist X = [60, 220]
+trigger1 = Random < 20 * AILevel / 4
+trigger2 = MoveHit
+trigger2 = StateNo = [200, 699]
+trigger2 = statetype != A
+trigger2 = Random < 350 * AILevel / 8
+
+[State -1, SM: IA: Hōō Renkyaku]
+type = ChangeState
+value = 3302
+triggerall = AILevel > 0
+triggerall = RoundState = 2
+triggerall = NumEnemy
+triggerall = EnemyNear, Alive
+triggerall = power >= 1000
+trigger1 = statetype != A
+trigger1 = ctrl
+trigger1 = P2BodyDist X < 60
+trigger1 = Random < 20 * AILevel / 4
+trigger2 = MoveHit
+trigger2 = StateNo = [200, 699]
+trigger2 = statetype != A
+trigger2 = Random < 350 * AILevel / 8
+
+[State -1, SM: IA: golpes de cerca]
+type = ChangeState
+value = ifelse(Random % 6 = 0, 201, ifelse(Random % 5 = 0, 210, ifelse(Random % 4 = 0, 220, ifelse(Random % 3 = 0, 230, ifelse(Random % 2 = 0, 240, 250)))))
+triggerall = AILevel > 0
+triggerall = RoundState = 2
+triggerall = NumEnemy
+triggerall = EnemyNear, Alive
+trigger1 = statetype = S
+trigger1 = ctrl
+trigger1 = P2BodyDist X < 60
+trigger1 = Random < 60 * AILevel / 4
+
+[State -1, SM: IA: Agarre]
+type = ChangeState
+value = 800
+triggerall = AILevel > 0
+triggerall = RoundState = 2
+triggerall = NumEnemy
+triggerall = EnemyNear, Alive
+trigger1 = statetype = S
+trigger1 = ctrl
+trigger1 = P2BodyDist X < 24
+trigger1 = P2StateType != A
+trigger1 = P2MoveType != H
+trigger1 = Random < 20 * AILevel / 4
+
+[State -1, SM: Hōō Renkyaku (débil)]
 type = ChangeState
 value = 3300
-triggerall = command = "sm_sp3"
+triggerall = command = "sm_sp3_0"
+triggerall = power >= 1000
+trigger1 = statetype != A
+trigger1 = ctrl
+trigger2 = statetype != A
+trigger2 = movecontact
+trigger2 = (StateNo = 201 || StateNo = 210 || StateNo = 230 || StateNo = 240 || StateNo = 400 || StateNo = 410 || StateNo = 430 || StateNo = 440 || StateNo = 600 || StateNo = 610 || StateNo = 630 || StateNo = 640)
+trigger3 = statetype != A
+trigger3 = movecontact
+trigger3 = stateno = 1000 || stateno = 1001 || stateno = 1002 || stateno = 1003 || stateno = 1100 || stateno = 1101 || stateno = 1102 || stateno = 1103 || stateno = 1200 || stateno = 1201 || stateno = 1202 || stateno = 1203
+
+[State -1, SM: Hōō Renkyaku (medio)]
+type = ChangeState
+value = 3301
+triggerall = command = "sm_sp3_1"
+triggerall = power >= 1000
+trigger1 = statetype != A
+trigger1 = ctrl
+trigger2 = statetype != A
+trigger2 = movecontact
+trigger2 = (StateNo = 201 || StateNo = 210 || StateNo = 230 || StateNo = 240 || StateNo = 400 || StateNo = 410 || StateNo = 430 || StateNo = 440 || StateNo = 600 || StateNo = 610 || StateNo = 630 || StateNo = 640)
+trigger3 = statetype != A
+trigger3 = movecontact
+trigger3 = stateno = 1000 || stateno = 1001 || stateno = 1002 || stateno = 1003 || stateno = 1100 || stateno = 1101 || stateno = 1102 || stateno = 1103 || stateno = 1200 || stateno = 1201 || stateno = 1202 || stateno = 1203
+
+[State -1, SM: Hōō Renkyaku (fuerte)]
+type = ChangeState
+value = 3302
+triggerall = command = "sm_sp3_2"
 triggerall = power >= 1000
 trigger1 = statetype != A
 trigger1 = ctrl

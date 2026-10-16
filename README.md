@@ -37,6 +37,8 @@ Fighter Factory, but designed so that **anyone** can make a character:
   enders and combo breakers).
 - 🎨 **Alternate colors** with one click per part (skin, clothes, hair…), 🔊 **voices** in WAV, OGG or MP3, and
   🧩 a **sprite sheet cutter**.
+- 🤖 **CPU AI**, 📊 **frame data**, ✅ a **check** before sharing, 🕘 **version history** and 📦 a **.zip ready to
+  share**.
 - ▶ **Test in IKEMEN GO** with one button, and 🛠 advanced tools (sprites, animations and code by hand) for
   those who need them.
 - 🌎 In English, Español, Português, Français, Deutsch and Italiano.
@@ -258,6 +260,34 @@ The editor always opens in **simple mode**. The advanced tools are tucked away i
 - **🛠 Advanced mode** — everything below, by hand, like Fighter Factory. If you open something simple mode builds
   (the `_simple.st`, what's between the "SIMPLE-MODE" marks in the `.cmd`, or one of its animations) a yellow
   notice shows up, and your first change reminds you it gets rebuilt and hand edits are lost.
+
+### 🆕 More moves, AI and finishing the character
+
+- **More moves** (all optional: leave the slot empty and it doesn't have it): a **taunt** with the Start button
+  (in «Intro and ending»), an **air dash** with → → or ← ← (in «Jumping»), an **air throw** (in «👊 Attacks») and,
+  in each special's ⚙ Settings, **wall bounce**: the opponent is shot back, bounces off the edge of the screen and
+  falls so you can keep the combo going.
+- **New specials:** **calls a helper** (a new type: it appears in front, moves forward and hits; its animation goes
+  in the «🧍 Helper» tab), **several projectiles at once** in a fan, and a **beam** (the projectile stays in front
+  like a long beam and hits several times), in the projectiles' ⚙ Settings.
+- **Versions on supers and enders:** like specials, the super and the ender can have light, medium and heavy
+  versions (each with its button; stronger = more damage and faster). An ender «of a special» still only comes
+  out with the heavy button.
+- **🔊 Combo voices:** in «🔊 Voices → 🔗 Combos» you add one slot per hit count (➕): at 3 hits one plays, at 5
+  another… If one hit skips several, the highest plays.
+- **🏆 Victory quotes** in «👤 Character» (one per line; the game picks one at random).
+- **🤖 AI (CPU):** how it fights when the computer controls it: aggressiveness, whether it does combos, whether it
+  uses the super and when it uses each special (up close, mid range, far away, against a jumping opponent or
+  never; «Automatic» picks based on what it does). It only changes the CPU (`AILevel > 0`), never the player.
+- **🏁 Check and share:**
+  - **✅ Check the character**: empty animations, unfinished specials, repeated commands, voices using sounds that
+    are gone, missing portraits and code errors. Double-click one to go fix it.
+  - **📊 Frame data**: for each attack and special, how many ticks until it hits, how long it stays active, how
+    long it takes to recover and the advantage on hit and on block (approximate).
+  - **🕘 Version history**: snapshots of the character's folder in `_editor_history` (automatically when saving, at
+    most every 15 minutes, or by hand). «↩ Go back to this one» saves another snapshot first, so it can be undone.
+  - **📦 Share**: a clean `.zip` (without `_editor_backups` or `_editor_history`) with a `COMANDOS.txt` listing its
+    moves.
 
 ### 🧩 Sprite sheet cutter
 

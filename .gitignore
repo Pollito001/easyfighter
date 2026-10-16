@@ -7,6 +7,7 @@ venv/
 
 # Copias de seguridad que hace el editor al guardar
 _editor_backups/
+_editor_history/
 *.tmp
 
 # Ejecutables (PyInstaller / AppImage)

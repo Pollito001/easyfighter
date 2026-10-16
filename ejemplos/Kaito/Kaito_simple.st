@@ -1355,7 +1355,7 @@ value = 0
 ctrl = 1
 
 ;---------------------------------------------------------------------------
-; Rengeki
+; Rengeki (débil)
 [Statedef 3300]
 type = S
 movetype = A
@@ -1373,15 +1373,15 @@ trigger1 = AnimElemTime(2) >= 0
 trigger1 = (AnimElemTime(2) % 5) = 0
 trigger1 = AnimElemTime(2) < 20
 attr = S, HA
-damage = 44, 5
-animtype = Heavy
+damage = 35, 4
+animtype = Light
 guardflag = MA
 hitflag = MAF
 priority = 5, Hit
 pausetime = 14, 14
-sparkno = 2
+sparkno = 0
 guard.sparkno = 40
-hitsound = 5, 2
+hitsound = 5, 0
 guardsound = 6, 0
 ground.type = High
 ground.slidetime = 14
@@ -1394,15 +1394,15 @@ air.velocity = -0.72, -6
 type = HitDef
 trigger1 = AnimElemTime(2) = 20
 attr = S, HA
-damage = 44, 5
-animtype = Heavy
+damage = 35, 4
+animtype = Light
 guardflag = MA
 hitflag = MAF
 priority = 5, Hit
 pausetime = 14, 14
-sparkno = 2
+sparkno = 0
 guard.sparkno = 40
-hitsound = 5, 2
+hitsound = 5, 0
 guardsound = 6, 0
 ground.type = High
 ground.slidetime = 14
@@ -1429,8 +1429,156 @@ value = 0
 ctrl = 1
 
 ;---------------------------------------------------------------------------
+; Rengeki (medio)
+[Statedef 3301]
+type = S
+movetype = A
+physics = S
+velset = 0, 0
+juggle = 4
+ctrl = 0
+anim = 3300
+poweradd = -1000
+sprpriority = 2
+
+[State 3301, Golpe]
+type = HitDef
+trigger1 = AnimElemTime(2) >= 0
+trigger1 = (AnimElemTime(2) % 5) = 0
+trigger1 = AnimElemTime(2) < 20
+attr = S, HA
+damage = 44, 5
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 14, 14
+sparkno = 1
+guard.sparkno = 40
+hitsound = 5, 1
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 14
+ground.hittime = 18
+sparkxy = -10, -147
+ground.velocity = -1.2
+air.velocity = -0.72, -6
+
+[State 3301, Último golpe (lo tumba)]
+type = HitDef
+trigger1 = AnimElemTime(2) = 20
+attr = S, HA
+damage = 44, 5
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 14, 14
+sparkno = 1
+guard.sparkno = 40
+hitsound = 5, 1
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 14
+ground.hittime = 18
+sparkxy = -10, -147
+ground.velocity = -0.96, -13
+air.velocity = -0.84, -12
+fall = 1
+air.fall = 1
+fall.recover = 1
+
+[State 3301, Pausa con destello]
+type = SuperPause
+trigger1 = AnimElem = 1
+time = 30
+movetime = 0
+darken = 1
+
+[State 3301, Fin]
+type = ChangeState
+trigger1 = AnimTime = 0
+trigger1 = statetype != A
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; Rengeki (fuerte)
+[Statedef 3302]
+type = S
+movetype = A
+physics = S
+velset = 0, 0
+juggle = 4
+ctrl = 0
+anim = 3300
+poweradd = -1000
+sprpriority = 2
+
+[State 3302, Golpe]
+type = HitDef
+trigger1 = AnimElemTime(2) >= 0
+trigger1 = (AnimElemTime(2) % 5) = 0
+trigger1 = AnimElemTime(2) < 20
+attr = S, HA
+damage = 53, 6
+animtype = Heavy
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 14, 14
+sparkno = 2
+guard.sparkno = 40
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 14
+ground.hittime = 18
+sparkxy = -10, -147
+ground.velocity = -1.2
+air.velocity = -0.72, -6
+
+[State 3302, Último golpe (lo tumba)]
+type = HitDef
+trigger1 = AnimElemTime(2) = 20
+attr = S, HA
+damage = 53, 6
+animtype = Heavy
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 14, 14
+sparkno = 2
+guard.sparkno = 40
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 14
+ground.hittime = 18
+sparkxy = -10, -147
+ground.velocity = -0.96, -13
+air.velocity = -0.84, -12
+fall = 1
+air.fall = 1
+fall.recover = 1
+
+[State 3302, Pausa con destello]
+type = SuperPause
+trigger1 = AnimElem = 1
+time = 30
+movetime = 0
+darken = 1
+
+[State 3302, Fin]
+type = ChangeState
+trigger1 = AnimTime = 0
+trigger1 = statetype != A
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
 ; Ryūjin Remate (Remate)
-[Statedef 3900]
+[Statedef 3902]
 type = S
 movetype = A
 physics = S
@@ -1441,11 +1589,11 @@ anim = 3900
 poweradd = 40
 sprpriority = 2
 
-[State 3900, Golpe]
+[State 3902, Golpe]
 type = HitDef
 trigger1 = AnimElem = 3
 attr = S, SA
-damage = 117, 11
+damage = 140, 13
 animtype = Heavy
 guardflag = MA
 hitflag = MAF
@@ -1465,7 +1613,7 @@ fall = 1
 air.fall = 1
 fall.recover = 0
 
-[State 3900, Fin]
+[State 3902, Fin]
 type = ChangeState
 trigger1 = AnimTime = 0
 trigger1 = statetype != A

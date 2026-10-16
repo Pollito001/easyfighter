@@ -1288,7 +1288,7 @@ value = 0
 ctrl = 1
 
 ;---------------------------------------------------------------------------
-; Hōō Renkyaku
+; Hōō Renkyaku (débil)
 [Statedef 3300]
 type = S
 movetype = A
@@ -1306,15 +1306,15 @@ trigger1 = AnimElemTime(2) >= 0
 trigger1 = (AnimElemTime(2) % 5) = 0
 trigger1 = AnimElemTime(2) < 20
 attr = S, HA
-damage = 46, 6
-animtype = Heavy
+damage = 37, 4
+animtype = Light
 guardflag = MA
 hitflag = MAF
 priority = 5, Hit
 pausetime = 14, 14
-sparkno = 2
+sparkno = 0
 guard.sparkno = 40
-hitsound = 5, 2
+hitsound = 5, 0
 guardsound = 6, 0
 ground.type = High
 ground.slidetime = 14
@@ -1327,15 +1327,15 @@ air.velocity = -0.96, -6
 type = HitDef
 trigger1 = AnimElemTime(2) = 20
 attr = S, HA
-damage = 46, 6
-animtype = Heavy
+damage = 37, 4
+animtype = Light
 guardflag = MA
 hitflag = MAF
 priority = 5, Hit
 pausetime = 14, 14
-sparkno = 2
+sparkno = 0
 guard.sparkno = 40
-hitsound = 5, 2
+hitsound = 5, 0
 guardsound = 6, 0
 ground.type = High
 ground.slidetime = 14
@@ -1355,6 +1355,154 @@ movetime = 0
 darken = 1
 
 [State 3300, Fin]
+type = ChangeState
+trigger1 = AnimTime = 0
+trigger1 = statetype != A
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; Hōō Renkyaku (medio)
+[Statedef 3301]
+type = S
+movetype = A
+physics = S
+velset = 0, 0
+juggle = 4
+ctrl = 0
+anim = 3300
+poweradd = -1000
+sprpriority = 2
+
+[State 3301, Golpe]
+type = HitDef
+trigger1 = AnimElemTime(2) >= 0
+trigger1 = (AnimElemTime(2) % 5) = 0
+trigger1 = AnimElemTime(2) < 20
+attr = S, HA
+damage = 46, 6
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 14, 14
+sparkno = 1
+guard.sparkno = 40
+hitsound = 5, 1
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 14
+ground.hittime = 18
+sparkxy = -10, -102
+ground.velocity = -1.6
+air.velocity = -0.96, -6
+
+[State 3301, Último golpe (lo tumba)]
+type = HitDef
+trigger1 = AnimElemTime(2) = 20
+attr = S, HA
+damage = 46, 6
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 14, 14
+sparkno = 1
+guard.sparkno = 40
+hitsound = 5, 1
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 14
+ground.hittime = 18
+sparkxy = -10, -102
+ground.velocity = -1.28, -13
+air.velocity = -1.12, -12
+fall = 1
+air.fall = 1
+fall.recover = 1
+
+[State 3301, Pausa con destello]
+type = SuperPause
+trigger1 = AnimElem = 1
+time = 30
+movetime = 0
+darken = 1
+
+[State 3301, Fin]
+type = ChangeState
+trigger1 = AnimTime = 0
+trigger1 = statetype != A
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; Hōō Renkyaku (fuerte)
+[Statedef 3302]
+type = S
+movetype = A
+physics = S
+velset = 0, 0
+juggle = 4
+ctrl = 0
+anim = 3300
+poweradd = -1000
+sprpriority = 2
+
+[State 3302, Golpe]
+type = HitDef
+trigger1 = AnimElemTime(2) >= 0
+trigger1 = (AnimElemTime(2) % 5) = 0
+trigger1 = AnimElemTime(2) < 20
+attr = S, HA
+damage = 55, 7
+animtype = Heavy
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 14, 14
+sparkno = 2
+guard.sparkno = 40
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 14
+ground.hittime = 18
+sparkxy = -10, -102
+ground.velocity = -1.6
+air.velocity = -0.96, -6
+
+[State 3302, Último golpe (lo tumba)]
+type = HitDef
+trigger1 = AnimElemTime(2) = 20
+attr = S, HA
+damage = 55, 7
+animtype = Heavy
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 14, 14
+sparkno = 2
+guard.sparkno = 40
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 14
+ground.hittime = 18
+sparkxy = -10, -102
+ground.velocity = -1.28, -13
+air.velocity = -1.12, -12
+fall = 1
+air.fall = 1
+fall.recover = 1
+
+[State 3302, Pausa con destello]
+type = SuperPause
+trigger1 = AnimElem = 1
+time = 30
+movetime = 0
+darken = 1
+
+[State 3302, Fin]
 type = ChangeState
 trigger1 = AnimTime = 0
 trigger1 = statetype != A

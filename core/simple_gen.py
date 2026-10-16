@@ -47,6 +47,8 @@ ANIM_SECTIONS = [
         ("jump_down", "Salto (bajando)", "Mientras baja.", 44, [("hold", 44), ("hold", 45), ("hold", 46)]),
         ("jump_fwd", "Salto adelante (voltereta)", "Opcional: si la llenas, el salto hacia adelante usa esta "
          "(primera mitad subiendo, segunda bajando).", 42, [("first_half", 42), ("second_half", 45)]),
+        ("air_dash", "Dash en el aire", "Opcional: en el aire, → → (o ← ←) avanza (o retrocede) rápido, una vez "
+         "por salto. Si la dejas vacía, no tiene dash en el aire.", 115, [("hold", 115)]),
     ]),
     ("guard", "Cubrirse", [
         ("guard_s", "Cubrirse de pie", "Del primer cuadro (normal) al último (cubierto).",
@@ -82,6 +84,8 @@ ANIM_SECTIONS = [
          "la de «Ganar».", 181, [("hold", 181)]),
         ("lose", "Perder por tiempo", "Si se acaba el tiempo y va perdiendo.", 170, [("hold", 170)]),
         ("draw", "Empate", "Si empatan.", 175, [("hold", 175)]),
+        ("taunt", "Burla", "Opcional: provoca al rival con el botón Start (s). Si la dejas vacía, no tiene burla.",
+         195, [("once", 195)]),
         ("win2", "Ganar (otra pose 2)", "Opcional: otra pose de victoria. Al ganar sale una al azar.", 182,
          [("hold", 182)]),
         ("win3", "Ganar (otra pose 3)", "Opcional: otra pose de victoria. Al ganar sale una al azar.", 183,
@@ -98,7 +102,7 @@ ANIM_SLOTS = {s[0]: s for _sec, _t, lst in ANIM_SECTIONS for s in lst}
 # poses de más (opcionales): casilla → la casilla principal con la que se sortean
 EXTRA_POSES = {"win2": "win", "win3": "win", "win4": "win", "lose2": "lose", "lose3": "lose"}
 # casillas opcionales que no avisan si están vacías (algo más llena su animación)
-OPTIONAL_EMPTY = set(EXTRA_POSES) | {"crouch_idle"}
+OPTIONAL_EMPTY = set(EXTRA_POSES) | {"crouch_idle", "air_dash", "taunt"}
 
 # ---------------------------------------------------------------- golpes normales
 BUTTONS = ["x", "y", "z", "a", "b", "c"]
@@ -147,6 +151,7 @@ SPECIAL_TYPES = [
     ("dash", "Golpe avanzando (embestida)"),
     ("rise", "Golpe que sube (gancho)"),
     ("grab", "Agarre especial (de cerca, no se puede cubrir)"),
+    ("helper", "Llama a un ayudante (entra y pega)"),
     ("counter", "Contraataque (atrapa el golpe del rival)"),
     ("none", "Sin golpe (solo movimiento o efectos)"),
     ("converted", "Del personaje (convertido)"),
@@ -659,6 +664,9 @@ SPECIAL_FIELDS = [
      'El rival sale volando y cae al suelo. «Con el último golpe»: los golpes de antes lo dejan aturdido de pie '
      'y el último lo manda a volar (lo normal en un súper de varios golpes).'),
     ("height", 'Cómo se cubre', "height", 0, 0, "hitting", 'De pie, agachado, solo de pie (desde arriba) o no se puede cubrir.'),
+    ("wall_bounce", 'Rebota en la pared', bool, 0, 1, "hitting",
+     'Cuando lo tumba / lo lanza, el rival sale disparado hacia atrás, rebota contra la orilla de la pantalla y '
+     'cae. Sirve para seguir el combo. Solo si «Lo tumba / lo lanza» no está en «No».'),
     ("juggle", 'Puntos de combo (juggle)', int, 0, 30, "all", 'Cuánto «gasta» para pegarle a alguien que va por el aire.'),
     ("invuln", 'Invencible al empezar (ticks)', int, 0, 120, "all", 'No le pueden pegar durante esos ticks.'),
     ("proj_hits_life", 'El proyectil desaparece tras (ticks)', int, 0, 999, "proj", '0 = sigue hasta salir de la pantalla.'),
@@ -680,6 +688,18 @@ SPECIAL_FIELDS = [
      'combo con un autodoble. En un súper, el rival se queda de pie; si no lo marcas, el súper cierra el combo y '
      'lo tumba.'),
     ("proj_vy", 'Velocidad hacia arriba', float, -40, 40, "proj", 'El proyectil sube (positivo) o baja (negativo).'),
+    ("proj_count", 'Cantidad de proyectiles', int, 1, 5, "proj",
+     'Cuántos lanza a la vez, en abanico (uno más arriba que otro).'),
+    ("proj_spread", 'Separación del abanico', float, 0, 10, "proj",
+     'Con varios proyectiles: qué tan separados salen (velocidad hacia arriba / abajo entre uno y otro).'),
+    ("proj_beam", 'Rayo (se queda delante)', bool, 0, 1, "proj",
+     'El proyectil no avanza: se queda delante del personaje como un rayo largo y pega varias veces '
+     '(«Golpes»). El personaje se queda quieto mientras dura. Dibuja el rayo largo en «El proyectil».'),
+    ("beam_time", 'Duración del rayo (ticks)', int, 5, 300, "proj", 'Cuánto dura el rayo (60 ticks = 1 segundo).'),
+    ("helper_speed", 'Velocidad del ayudante', float, -20, 30, "helper",
+     'Qué tan rápido avanza el ayudante (0 = se queda donde aparece).'),
+    ("helper_life", 'El ayudante se va tras (ticks)', int, 10, 600, "helper",
+     'Se va al terminar su animación o al pasar este tiempo, lo que pase primero.'),
     ("proj_ax", 'Aceleración', float, -5, 5, "proj", 'El proyectil va más rápido (o más lento) con el tiempo.'),
     ("proj_ay", 'Caída', float, -5, 5, "proj", 'Negativo = cae como una granada.'),
     ("ex_cost", 'Poder de la versión EX', int, 0, 3000, "special", 'Cuánta barra gasta la versión EX (dos botones juntos). 1000 = 1 barra.'),
@@ -731,7 +751,9 @@ def spec(sp, key):
             "proj_hits_life": 0, "dash_speed": 6.5, "rise_x": 1.8, "rise_y": 8.5, "rise_frame": 1, "rise_speed": 100, "power_gain": 40, "power_cost": 1,
             "superpause": 30, "darken": True, "cancel": True, "proj_vel": 7.0 if super_ else 5.0,
             "use_where": "ground", "cancel_specials": True, "proj_vy": 0.0, "proj_ax": 0.0, "proj_ay": 0.0,
-            "ex_cost": 500, "counter_window": 14, "grab_range": 25, "stop_on_hit": False,
+            "ex_cost": 500, "counter_window": 14, "grab_range": 25, "stop_on_hit": False, "wall_bounce": False,
+            "proj_count": 1, "proj_spread": 2.0, "proj_beam": False, "beam_time": 60, "helper_speed": 4.0,
+            "helper_life": 120,
             "ad_open": not super_}.get(key)
 
 
@@ -868,8 +890,7 @@ def special_params(sp, v, sprites, k):
     """Números de un especial para la versión v (0 débil, 1 medio, 2 fuerte): cuadro que pega, de dónde
     sale el proyectil (relativo al eje) y velocidades. Lo usan el código y la prueba."""
     keys = _frames(sp)
-    super_ = sp.get("kind") == "super"
-    vv = 1 if super_ else v
+    vv = min(3, max(0, int(v)))
     hf = hit_frame_of(sp, keys, sprites) if keys else 0
     spr = sprites.get(keys[hf]) if keys and 0 <= hf < len(keys) else None
     try:
@@ -954,6 +975,17 @@ def _sparkxy(box, k):
 AD_CANCEL = "@@AUTODOBLES@@"
 KI_GRACE = 20                 # ticks de margen para seguir el combo justo después de un movimiento
 AD_CANCEL_JOIN = " || @@AUTODOBLES@@"
+
+
+def sp_versions(sp):
+    """Versiones que tiene un especial, súper o remate: 0 débil, 1 medio, 2 fuerte, 3 EX (solo especiales).
+    El remate de un especial («Remate de») sale solo con el botón fuerte."""
+    kind = sp.get("kind") or "special"
+    if kind == "ender" and sp.get("ender_of"):
+        return [2]
+    vflags = list(sp.get("versions", [1, 1, 1])) + [0, 0, 0, 0]
+    top = 3 if kind in ("super", "ender") else 4
+    return [i for i in range(top) if vflags[i]] or [1]
 
 
 def ender_base(sp, specials):
@@ -1062,6 +1094,9 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
                  '[Command]\nname = "sm_hf"\ncommand = /$F\ntime = 1\n']
     # «aguantando → / ← justo ahora» (para los comandos «mientras caminas»)
     commands += [f'[Command]\nname = "sm_hold_{d}"\ncommand = /{d}\ntime = 1\n' for d in ("F", "B")]
+    commands += ['[Command]\nname = "sm_FF"\ncommand = F, F\ntime = 10\n',
+                 '[Command]\nname = "sm_BB"\ncommand = B, B\ntime = 10\n',
+                 '[Command]\nname = "sm_s"\ncommand = s\ntime = 1\n']
     ent_special, ent_throw, ent_air, ent_crouch, ent_stand = [], [], [], [], []
 
     def hitdef(attr, dmg, gdmg, strength, guardflag, gtype, k, box, extra=(), fall=False, air=False, proj=False):
@@ -1289,6 +1324,110 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
                 f"trigger1 = p2bodydist X < {round(12 * k)}", "trigger1 = p2statetype != A",
                 "trigger1 = p2movetype != H"]) + "\n")
 
+    # -------- agarre en el aire: agarra a un rival que va por el aire y lo estrella contra el suelo
+    ath = cfg.get("air_throw") or {}
+    akeys = _frames(ath)
+    if akeys:
+        n = al.get(ath.get("state"), 850, (0, 10, 20, 21), (0, 10))
+        if n is None:
+            g.problems.append("air_throw")
+        else:
+            ath["state"] = n
+            title = _lbl(tr("Agarre en el aire"))
+            rel = int(ath.get("hit", 0) or 0)
+            if not (1 <= rel <= len(akeys)):
+                rel = max(1, (len(akeys) * 2 + 2) // 3)
+            mb = manual_boxes(ath)
+            reach = make_action(n, title + " (" + tr("intento") + ")", akeys[:1], 4, "hold", sprites, hit_index=0,
+                                ref=refs.get("A"), manual={0: mb[0]} if 0 in mb else (mb if box_mode(ath) == "manual"
+                                                                                       else None))
+            reach.frames[-1].time = 6
+            full = make_action(n + 10, title, akeys, ath.get("time", 4), "hold", sprites)
+            g.actions += [reach, full]
+            dmg = int(ath.get("damage", 70))
+            b = ath.get("button", "y")
+            dist = round(26 * k)
+            g.states.append("\n".join([
+                f"; {title}", f"[Statedef {n}]", "type = A", "movetype = A", "physics = A", "juggle = 0", "ctrl = 0",
+                f"anim = {n}", "sprpriority = 2", "",
+                f"[State {n}, {tr('Agarrar')}]", "type = HitDef", "trigger1 = Time = 0", "attr = A, NT",
+                "hitflag = A-", "priority = 1, Miss", "sparkno = -1", "p1sprpriority = 1", "p2sprpriority = 0",
+                "p1facing = 1", "p2facing = 1", f"p1stateno = {n + 10}", f"p2stateno = {n + 20}", "guard.dist = 0",
+                "fall = 1", "",
+                f"[State {n}, {tr('Fin')}]", "type = ChangeState", "trigger1 = Time >= 6", "value = 50", "ctrl = 0",
+                "",
+                f"; {title} ({tr('lo tiene agarrado')})", f"[Statedef {n + 10}]", "type = A", "movetype = A",
+                "physics = N", "velset = 0, 0", "ctrl = 0", f"anim = {n + 10}", "poweradd = 40", "sprpriority = 2",
+                ""] + _play(n + 10, tr("Voz"), voice("throw")) + [
+                f"[State {n + 10}, {tr('Sujetar')}]", "type = TargetBind", f"trigger1 = AnimElemTime({rel}) < 0",
+                f"pos = {dist}, 0", "",
+                f"[State {n + 10}, {tr('Daño')}]", "type = TargetLifeAdd", f"trigger1 = AnimElem = {rel}",
+                f"value = {-dmg}", "",
+                f"[State {n + 10}, {tr('Lanzar')}]", "type = TargetState", f"trigger1 = AnimElem = {rel}",
+                f"value = {n + 21}", "",
+                f"[State {n + 10}, {tr('Caer')}]", "type = ChangeState", f"trigger1 = AnimElemTime({rel}) >= 6",
+                "trigger2 = Time >= 90", "value = 50", "ctrl = 0", "",
+                f"; {title} ({tr('el rival, agarrado')})", f"[Statedef {n + 20}]", "type = A", "movetype = H",
+                "physics = N", "velset = 0, 0", "",
+                f"[State {n + 20}, {tr('Animación')}]", "type = ChangeAnim", "trigger1 = Time = 0",
+                "value = ifelse(SelfAnimExist(5030), 5030, 5000)", "",
+                f"; {title} ({tr('el rival, contra el suelo')})", f"[Statedef {n + 21}]", "type = A",
+                "movetype = H", "physics = N", "",
+                f"[State {n + 21}, {tr('Volar')}]", "type = VelSet", "trigger1 = Time = 0",
+                f"x = {_fmt(round(-2.5 * k, 2))}", f"y = {_fmt(round(6 * k, 2))}", "",
+                f"[State {n + 21}, {tr('Caer')}]", "type = HitFallSet", "trigger1 = Time = 0", "value = 1", "",
+                f"[State {n + 21}, {tr('Caer')} 2]", "type = SelfState", "trigger1 = Time = 0", "value = 5050", ""]))
+            ent_throw.append("\n".join([
+                f"[State -1, SM: {title}]", "type = ChangeState", f"value = {n}", f'triggerall = command = "sm_{b}"',
+                'triggerall = command = "sm_hf"', "trigger1 = statetype = A", "trigger1 = ctrl",
+                f"trigger1 = p2bodydist X < {round(14 * k)}", f"trigger1 = abs(p2dist Y) < {round(30 * k)}",
+                "trigger1 = p2statetype = A", "trigger1 = p2movetype != H"]) + "\n")
+
+    # -------- burla (botón Start)
+    if own_frames(cfg, "taunt")[0]:
+        n = al.get(cfg.get("taunt_state"), 195, (0,), ())
+        if n is not None:
+            cfg["taunt_state"] = n
+            title = _lbl(tr("Burla"))
+            g.states.append("\n".join([
+                f"; {title}", f"[Statedef {n}]", "type = S", "movetype = I", "physics = S", "ctrl = 0",
+                f"anim = {ANIM_SLOTS['taunt'][3]}", "velset = 0, 0", "sprpriority = 2", "",
+                f"[State {n}, {tr('Poder')}]", "type = PowerAdd", "trigger1 = Time = 0", "value = 50", "",
+                f"[State {n}, {tr('Fin')}]", "type = ChangeState", "trigger1 = AnimTime = 0", "value = 0",
+                "ctrl = 1", ""]))
+            ent_stand.append("\n".join([
+                f"[State -1, SM: {title}]", "type = ChangeState", f"value = {n}", 'trigger1 = command = "sm_s"',
+                "trigger1 = statetype = S", "trigger1 = ctrl"]) + "\n")
+
+    # -------- dash en el aire (→ → o ← ←), una vez por salto
+    if own_frames(cfg, "air_dash")[0]:
+        n = al.get(cfg.get("air_dash_state"), 115, (0, 1), ())
+        if n is not None:
+            cfg["air_dash_state"] = n
+            title = _lbl(tr("Dash en el aire"))
+            spd = float(cfg.get("air_dash_speed", 6.0))
+            dur = 18
+            sd = []
+            for j, (sign, cmd) in enumerate(((1, "sm_FF"), (-1, "sm_BB"))):
+                st = n + j
+                sd += [f"; {title}" + ("" if j == 0 else f" ({tr('atrás')})"), f"[Statedef {st}]", "type = A",
+                       "movetype = I", "physics = N", "ctrl = 0", f"anim = {ANIM_SLOTS['air_dash'][3]}",
+                       "sprpriority = 2", "",
+                       f"[State {st}, {tr('Una vez por salto')}]", "type = MapSet", "trigger1 = Time = 0",
+                       'map = "sm_adsh"', "value = 1", "",
+                       f"[State {st}, {tr('Impulso')}]", "type = VelSet", "trigger1 = Time = 0",
+                       f"x = {_fmt(round(sign * spd * k, 2))}", "y = 0", "",
+                       f"[State {st}, {tr('Fin')}]", "type = ChangeState", f"trigger1 = Time >= {dur}", "value = 50",
+                       "ctrl = 1", ""]
+                ent_air.append("\n".join([
+                    f"[State -1, SM: {title}" + ("" if j == 0 else f" ({tr('atrás')})") + "]", "type = ChangeState",
+                    f"value = {st}", f'trigger1 = command = "{cmd}"', "trigger1 = statetype = A", "trigger1 = ctrl",
+                    "trigger1 = Map(sm_adsh) = 0", f"trigger1 = Pos Y < {round(-12 * k)}"]) + "\n")
+            g.states.append("\n".join(sd))
+            ent_air.insert(0, "\n".join([
+                f"[State -1, SM: {title}: {tr('en el suelo otra vez')}]", "type = MapSet", 'map = "sm_adsh"',
+                "value = 0", "trigger1 = statetype != A", "trigger1 = Map(sm_adsh) != 0"]) + "\n")
+
     # -------- especiales y súper
     specials = cfg.get("specials", [])
     # primero los números de todos (los «seguir con otro especial» necesitan saber a dónde van)
@@ -1296,6 +1435,36 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
         migrate_special(sp)
         for st_ in (sp.get("vstates") or {}).values():
             al.ts.add(int(st_))
+    # rebote en la pared: un estado para el rival (lo usa cualquier especial que lo tenga)
+    wb_state = None
+    if any(sp.get("type") != "converted" and _frames(sp) and spec(sp, "wall_bounce") for sp in specials):
+        wb_state = al.get(cfg.get("wb_state"), 880, (0,), ())
+        if wb_state is not None:
+            cfg["wb_state"] = wb_state
+            w_ = wb_state
+            title = _lbl(tr("Rebota en la pared"))
+            g.states.append("\n".join([
+                f"; {title} ({tr('el rival')})", f"[Statedef {w_}]", "type = A", "movetype = H", "physics = N",
+                "ctrl = 0", "",
+                f"[State {w_}, {tr('Animación')}]", "type = ChangeAnim", "trigger1 = Time = 0",
+                "value = ifelse(SelfAnimExist(5030), 5030, ifelse(SelfAnimExist(5050), 5050, 5000))", "",
+                f"[State {w_}, {tr('Sale disparado')}]", "type = VelSet", "trigger1 = Time = 0",
+                f"x = {_fmt(round(-11 * k, 2))}", f"y = {_fmt(round(-4 * k, 2))}", "",
+                f"[State {w_}, {tr('Cae')}]", "type = VelAdd", "trigger1 = Time > 0", f"y = {_fmt(round(0.4 * k, 3))}",
+                "",
+                f"[State {w_}, {tr('Choca con la pared')}]", "type = EnvShake", "trigger1 = BackEdgeBodyDist <= 0",
+                "trigger1 = Time > 1", "time = 10", "",
+                f"[State {w_}, {tr('Choca con la pared')} 2]", "type = PlaySnd", "trigger1 = BackEdgeBodyDist <= 0",
+                "trigger1 = Time > 1", "value = F5, 2", "",
+                f"[State {w_}, {tr('Rebota')}]", "type = VelSet", "trigger1 = BackEdgeBodyDist <= 0",
+                "trigger1 = Time > 1", f"x = {_fmt(round(3 * k, 2))}", f"y = {_fmt(round(-6.5 * k, 2))}", "",
+                f"[State {w_}, {tr('Cae')} 2]", "type = HitFallSet", "trigger1 = BackEdgeBodyDist <= 0",
+                "trigger1 = Time > 1", "trigger2 = Time >= 45", "trigger3 = Pos Y >= 0", "trigger3 = Vel Y > 0",
+                "trigger3 = Time > 2", "value = 1", "",
+                f"[State {w_}, {tr('Cae')} 3]", "type = SelfState", "trigger1 = BackEdgeBodyDist <= 0",
+                "trigger1 = Time > 1", "trigger2 = Time >= 45", "value = 5050", "",
+                f"[State {w_}, {tr('Choca con el suelo')}]", "type = SelfState", "trigger1 = Pos Y >= 0",
+                "trigger1 = Vel Y > 0", "trigger1 = Time > 2", "value = 5100", ""]))
     smain = {}
     for idx, sp in enumerate(specials):
         conv = sp.get("type") == "converted"
@@ -1314,7 +1483,8 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
         if conv:
             main = vst.get(1, vst.get(2, next(iter(vst.values()), n)))
         else:
-            main = n if (super_ or sp.get("kind") == "ender") else n + 1
+            vs_ = sp_versions(sp)
+            main = n + (1 if 1 in vs_ else vs_[0])
         if sp.get("uid"):
             smain[sp["uid"]] = main
     special_states = []           # especiales (no súper ni remates): para cancelar y «el súper cancela especiales»
@@ -1337,11 +1507,12 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
                 if m:
                     state_anim[st_] = sp["_n"] if (sp.get("anim_changed") and _frames(sp)) else int(m.group(1))
         elif kind_ in ("super", "ender"):
-            mine = [sp["_n"]]
-            state_anim[sp["_n"]] = sp["_n"]
-            state_after[sp["_n"]] = special_after_hit(sp, sprites)
-            if throws_proj(sp):
-                state_proj[sp["_n"]] = sp["_n"]
+            mine = [sp["_n"] + v for v in sp_versions(sp)]
+            for st_ in mine:
+                state_anim[st_] = sp["_n"]
+                state_after[st_] = special_after_hit(sp, sprites)
+                if throws_proj(sp):
+                    state_proj[st_] = sp["_n"]
         else:
             mine = [sp["_n"] + v for v in range(4)]
             for st_ in mine:
@@ -1355,7 +1526,8 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
         if opens_autodouble(sp):
             opener_states += mine
         if kind_ == "super":
-            states_by_v.setdefault(2, []).extend(mine)
+            for v_ in sp_versions(sp):
+                states_by_v.setdefault(min(2, v_), []).append(sp["_n"] + v_)
             continue
         special_states += mine
         if sp.get("type") == "converted":
@@ -1619,6 +1791,10 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
             continue
 
         # ---------- especial del modo simple
+        helper = typ == "helper"
+        if helper and not _frames(sp.get("proj") or {}):
+            continue
+        helper_done = False
         proj = typ == "proj"
         if proj and sp.get("evmode") and not any(e.get("main") for e in sp.get("events") or []):
             proj = False   # le quitaron el evento del proyectil: no lanza nada
@@ -1664,16 +1840,21 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
             if hkeys:
                 g.actions.append(make_action(n + 60, f"{name} ({tr('al chocar')})", hkeys,
                                              (sp.get("proj_hit") or {}).get("time", 3), "once", sprites))
+        if helper:
+            hk = _frames(sp.get("proj") or {})
+            hhf = hit_frame_of(sp.get("proj") or {}, hk, sprites)
+            g.actions.append(make_action(n + 50, f"{name} ({tr('ayudante')})", hk,
+                                         (sp.get("proj") or {}).get("time", 4), "once", sprites, hit_index=hhf,
+                                         ref=refs.get("S")))
         if typ == "grab" and hf + 1 < len(keys):
             g.actions.append(make_action(n + 5, f"{name} ({tr('lo tiene agarrado')})", keys[hf:],
                                          sp.get("time", 4), "once", sprites))
         buttons = FAMILY_BUTTONS.get(sp.get("family", "punch"), ["x", "y", "z"])
         if base_sp is not None:
             buttons = buttons[2:3]         # débil y medio siguen siendo el especial (linker)
-        vflags = list(sp.get("versions", [1, 1, 1])) + [0, 0, 0, 0]
         ender_ = sp.get("kind") == "ender"
-        single = super_ or ender_          # una sola versión (el súper y el remate)
-        versions = [1] if single else [i for i in range(4) if vflags[i]] or [1]
+        single = super_ or ender_          # el súper y el remate (no tienen EX ni hacen remates)
+        versions = sp_versions(sp)
         # para el autodoble: el rival sigue aturdido hasta que termina el especial (y un poquito más)
         after_hit = 0
         if cb is not None and cb["autodouble"] and opens_autodouble(sp) and not ender_ and body.frames:
@@ -1698,25 +1879,20 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
             gaps = [b_ - a_ for a_, b_ in zip(starts, starts[1:])]
             if gaps:
                 after_hit = max(after_hit, max(gaps) + 6)
-        if single:
-            for b in buttons:
-                commands.append(f'[Command]\nname = "{cname}"\ncommand = {motion.format(b=b)}\n'
-                                f'time = {cmd_time(motion, 30)}\n{buf}')
-        else:
-            for v in versions:
-                ctime = cmd_time(motion, 30 if motion.count(",") >= 4 else 20)
-                b = f"{buttons[0]}+{buttons[1]}" if v == 3 else buttons[v]
-                commands.append(f'[Command]\nname = "{cname}_{v}"\ncommand = {motion.format(b=b)}\ntime = {ctime}\n{buf}')
+        for v in versions:
+            ctime = cmd_time(motion, 30 if (single or motion.count(",") >= 4) else 20)
+            b = f"{buttons[0]}+{buttons[1]}" if v == 3 else (buttons[v] if len(buttons) == 3 else buttons[-1])
+            commands.append(f'[Command]\nname = "{cname}_{v}"\ncommand = {motion.format(b=b)}\ntime = {ctime}\n{buf}')
         for v in versions:
             prm = special_params(sp, v, sprites, k)
             front = prm["front"]
-            st = n if single else n + v
-            vv = 1 if single else v
+            st = n + v
+            vv = v
             total = int(round(int(sp.get("damage", 60)) * VERSION_DMG[vv]))
             dmg = max(1, int(round(total / hits)))
             gdmg = int(round(dmg * int(spec(sp, "guard_pct")) / 100.0))
-            strength = 2 if (single or v == 3) else v
-            lbl = name if single else f"{name} ({tr(VERSION_NAMES[v]).lower() if v < 3 else 'EX'})"
+            strength = 2 if v == 3 else v
+            lbl = name if len(versions) == 1 else f"{name} ({tr(VERSION_NAMES[v]).lower() if v < 3 else 'EX'})"
             evmode = bool(sp.get("evmode"))
             air_mode = (typ == "rise" and not evmode) or use == "air"
             rise_f = max(1, min(len(keys), int(spec(sp, "rise_frame")))) if typ == "rise" else 1
@@ -1798,6 +1974,8 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
             hd_fly = hd + [f"ground.velocity = {_fmt(round(-push * 0.8, 2))}, {_fmt(round(-6.5 * k, 2))}",
                            f"air.velocity = {_fmt(round(-push * 0.7, 2))}, {_fmt(round(-6 * k, 2))}",
                            "fall = 1", "air.fall = 1", "fall.recover = 1"]
+            if wb_state is not None and spec(sp, "wall_bounce") and mode != "no":
+                hd_fly = hd_fly + [f"p2stateno = {wb_state}", "p2getp1state = 1"]
             hd = hd_fly if mode != "no" else hd_stun
             gap = max(1, int(spec(sp, "hit_gap")))
             if proj:
@@ -1815,8 +1993,63 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
                 if _frames(sp.get("proj_hit") or {}):
                     extra.append(f"projhitanim = {n + 60}")
                     extra.append(f"projremanim = {n + 60}")
-                sd += [f"[State {st}, {tr('Proyectil')}]", "type = Projectile", f"trigger1 = AnimElem = {hf + 1}"]
-                sd += extra + hd + [""]
+                beam = bool(spec(sp, "proj_beam"))
+                cnt = 1 if beam else max(1, min(5, int(spec(sp, "proj_count"))))
+                spread = float(spec(sp, "proj_spread")) * k
+                if beam:
+                    btime = max(5, int(spec(sp, "beam_time")))
+                    extra = [x for x in extra if not x.startswith(("velocity", "accel", "projremovetime",
+                                                                   "projremove ="))]
+                    extra += ["velocity = 0, 0", "accel = 0, 0", f"projremovetime = {btime}", "projremove = 0"]
+                for j in range(cnt):
+                    ex = extra
+                    if cnt > 1:
+                        vyj = vy + (j - (cnt - 1) / 2.0) * -spread
+                        ex = [f"velocity = {_fmt(round(speed, 2))}, {_fmt(round(vyj, 2))}"
+                              if x.startswith("velocity") else x for x in extra]
+                    sd += [f"[State {st}, {tr('Proyectil')}" + (f" {j + 1}" if cnt > 1 else "") + "]",
+                           "type = Projectile", f"trigger1 = AnimElem = {hf + 1}"]
+                    sd += ex + hd + [""]
+                if beam:
+                    # el personaje se queda quieto mientras dura el rayo
+                    t_hf = sum(max(1, kf.time) if kf.time > 0 else 10 for kf in body.frames[:hf])
+                    sd += [f"[State {st}, {tr('Quieto mientras dura el rayo')}]", "type = ChangeAnim",
+                           f"trigger1 = Time < {t_hf + btime}", "trigger1 = AnimTime >= 0", f"value = {n}",
+                           f"elem = {len(keys)}", "",
+                           f"[State {st}, {tr('Fin del rayo')}]", "type = ChangeState",
+                           f"trigger1 = Time >= {t_hf + btime}", "trigger1 = statetype != A", "value = 0",
+                           "ctrl = 1", ""]
+            elif helper:
+                hp = sp.get("proj") or {}
+                hk = _frames(hp)
+                hhf = hit_frame_of(hp, hk, sprites)
+                hx = round(prm["px"] * scale)
+                hy = round(prm["py"] * scale) if sp.get("proj_y") is not None else 0
+                sd += [f"[State {st}, {tr('Llama al ayudante')}]", "type = Helper", f"trigger1 = AnimElem = {hf + 1}",
+                       "helpertype = normal", f'name = "{_lbl(name)}"', f"ID = {n}", f"stateno = {n + 20}",
+                       f"pos = {hx}, {hy}", "postype = p1", "facing = 1", "keyctrl = 0", "ownpal = 1", ""]
+                if not helper_done:
+                    helper_done = True
+                    hspeed = float(spec(sp, "helper_speed")) * k
+                    life = max(10, int(spec(sp, "helper_life")))
+                    hst = n + 20
+                    hs = [f"; {_lbl(name)} ({tr('ayudante')})", f"[Statedef {hst}]", "type = S", "movetype = A",
+                          "physics = N", "ctrl = 0", f"anim = {n + 50}", "velset = 0, 0", "sprpriority = 3", "",
+                          f"[State {hst}, {tr('No le pueden pegar')}]", "type = NotHitBy", "trigger1 = 1",
+                          "value = SCA", "time = 1", "",
+                          f"[State {hst}, {tr('Avanza')}]", "type = VelSet", "trigger1 = Time = 0",
+                          f"x = {_fmt(round(hspeed, 2))}", ""]
+                    hd_h = [x for x in hd if not x.startswith("sparkxy")]
+                    if hits > 1:
+                        t0 = f"AnimElemTime({hhf + 1})"
+                        hs += [f"[State {hst}, {tr('Golpe')}]", "type = HitDef", f"trigger1 = {t0} >= 0",
+                               f"trigger1 = ({t0} % {gap}) = 0", f"trigger1 = {t0} < {hits * gap}"] + hd_h + [""]
+                    else:
+                        hs += [f"[State {hst}, {tr('Golpe')}]", "type = HitDef",
+                               f"trigger1 = AnimElem = {hhf + 1}"] + hd_h + [""]
+                    hs += [f"[State {hst}, {tr('Se va')}]", "type = DestroySelf", "trigger1 = AnimTime = 0",
+                           f"trigger2 = Time >= {life}", ""]
+                    g.states.append("\n".join(hs))
             elif typ == "grab":
                 sd += [f"[State {st}, {tr('Agarrar')}]", "type = HitDef", "trigger1 = Time = 0", "attr = S, ST",
                        "hitflag = M-", "priority = 6, Miss", "sparkno = -1", "p1sprpriority = 1",
@@ -1874,7 +2107,7 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
                 # remate: más daño y tumba al rival; su entrada va con los autodobles (solo sale después de uno)
                 g.states.append(ender_text("\n".join(sd), st, st, max(0, int(cb.get("ender_bonus", 30)))
                                            if cb is not None else 30, k, tr))
-                ender_items.append(dict(st=st, name=name, cmd=cname, hold=held_dir(motion), use=use))
+                ender_items.append(dict(st=st, name=lbl, cmd=f"{cname}_{v}", hold=held_dir(motion), use=use))
                 continue
             g.states.append("\n".join(sd))
             if (cb is not None and cb.get("enders") and not single and v == 2 and typ in ("hit", "dash", "rise")
@@ -1882,7 +2115,7 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
                 ender_src.append(dict(sp=sp, idx=idx, st=st, text="\n".join(sd), name=name,
                                       cmd=f"{cname}_{v}", hold=held_dir(motion), use=use))
             e = [f"[State -1, SM: {lbl}]", "type = ChangeState", f"value = {st}",
-                 f'triggerall = command = "{cname if super_ else f"{cname}_{v}"}"']
+                 f'triggerall = command = "{cname}_{v}"']
             hd_ = held_dir(motion)
             if hd_ in ("F", "B"):
                 # la flecha tiene que seguir aguantada en el mismo tick del botón
@@ -1893,6 +2126,8 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
                 e.append(f"triggerall = power >= {int(spec(sp, 'ex_cost'))}")
             if proj:
                 e.append(f"triggerall = NumProjID({n}) = 0")
+            if helper:
+                e.append(f"triggerall = NumHelper({n}) = 0")
             if typ == "grab":
                 e += [f"triggerall = p2bodydist X < {round(int(spec(sp, 'grab_range')) * k)}",
                       "triggerall = p2statetype != A", "triggerall = p2movetype != H"]
@@ -2239,6 +2474,25 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
                 f"[State -1, SM: {tr('Voz')} {vkey}]", "type = PlaySnd", f"value = {snd[0]}, {snd[1]}", "channel = 0",
                 "trigger1 = Time = 0", f"trigger1 = StateNo = {stn}"]) + "\n")
 
+    # voces del combo: al llegar a cierta cantidad de golpes (la más alta que se alcanzó, una sola vez)
+    cv = sorted([x for x in cfg.get("combo_voices", []) if isinstance(x.get("snd"), list) and int(x.get("hits", 0)) > 1],
+                key=lambda x: -int(x["hits"]))
+    if cv:
+        ent_voice.append("\n".join([
+            f"[State -1, SM: {tr('Voz del combo')}: {tr('fin del combo')}]", "type = MapSet", 'map = "sm_cv"',
+            "value = 0", "trigger1 = Map(sm_cv) > 0", "trigger1 = !NumEnemy", "trigger2 = Map(sm_cv) > 0",
+            "trigger2 = NumEnemy", "trigger2 = EnemyNear, MoveType != H"]) + "\n")
+        for x in cv:
+            n_, snd = int(x["hits"]), x["snd"]
+            trig = ["trigger1 = NumEnemy", "trigger1 = EnemyNear, MoveType = H",
+                    f"trigger1 = EnemyNear, GetHitVar(hitcount) >= {n_}", f"trigger1 = Map(sm_cv) < {n_}"]
+            ent_voice.append("\n".join([
+                f"[State -1, SM: {tr('Voz del combo')} {n_}]", "type = PlaySnd", f"value = {snd[0]}, {snd[1]}",
+                "channel = 0", "ignorehitpause = 1"] + trig) + "\n")
+            ent_voice.append("\n".join([
+                f"[State -1, SM: {tr('Voz del combo')} {n_} ({tr('ya sonó')})]", "type = MapSet", 'map = "sm_cv"',
+                f"value = {n_}", "ignorehitpause = 1"] + trig) + "\n")
+
     # ayuda para combos: el rival se queda aturdido unos ticks más después de cada golpe
     extra = int(cb["extra_stun"]) if cb is not None else 0
     if extra > 0:
@@ -2279,17 +2533,132 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
             f"[State {stn}, SM: {_lbl(tr('Pose al azar'))}]", "type = ChangeAnim", "trigger1 = Time = 0",
             f"value = {pick}", ""] + extra_lines) + "\n")
 
+    ent_ai = ai_entries(cfg, specials, norm, k, tr)
+
     g.commands = commands
-    g.entries = (ent_off + [e for o, e in sorted(ent_special, key=lambda x: x[0])] + ent_combo + ent_throw + ent_rep + ent_air + ent_crouch +
+    g.entries = (ent_off + ent_ai + [e for o, e in sorted(ent_special, key=lambda x: x[0])] + ent_combo + ent_throw + ent_rep + ent_air + ent_crouch +
                  ent_stand[::-1] + ent_voice)
     owned = {a.number for a in g.actions}
     cfg["owned"] = sorted(owned)
     return g
 
 
+# ---------------------------------------------------------------- IA de la computadora
+AI_RANGES = [("auto", "Automático (según lo que hace)"), ("near", "De cerca"), ("mid", "A media distancia"),
+             ("far", "De lejos"), ("air", "Contra un rival que salta"), ("never", "Nunca")]
+
+
+def ai_auto_range(sp):
+    typ = sp.get("type", "proj")
+    if sp.get("kind") == "super":
+        return "mid" if typ in ("proj", "helper") else "near"
+    return {"proj": "far", "rise": "air", "dash": "mid", "hit": "near", "grab": "near", "helper": "mid",
+            "counter": "never", "none": "never"}.get(typ, "mid")
+
+
+def ai_entries(cfg, specials, norm, k, tr=lambda s: s):
+    """Entradas del .cmd para la computadora (solo cuando la maneja el CPU: AILevel > 0)."""
+    ai = cfg.get("ai") or {}
+    if not ai.get("on"):
+        return []
+    aggr = max(1, min(10, int(ai.get("aggr", 5))))
+    chance = aggr * 4                       # de 1000 por tick, a nivel de IA 4
+    near, mid = round(30 * k), round(110 * k)
+    rng = {"near": f"P2BodyDist X < {near}", "mid": f"P2BodyDist X = [{near}, {mid}]",
+           "far": f"P2BodyDist X > {mid}",
+           "air": f"P2StateType = A && P2BodyDist X < {round(70 * k)} && P2Dist Y < {round(-20 * k)}"}
+    base = ["triggerall = AILevel > 0", "triggerall = RoundState = 2", "triggerall = NumEnemy",
+            "triggerall = EnemyNear, Alive"]
+    out = []
+    by = ai.get("moves") or {}
+    for idx, sp in enumerate(specials):
+        n = sp.get("state")
+        if n is None or sp.get("type") == "converted" or sp.get("kind") == "ender" or not _frames(sp):
+            continue
+        r = by.get(sp.get("uid") or str(idx), "auto")
+        r = ai_auto_range(sp) if r == "auto" else r
+        if r not in rng:
+            continue
+        vs = [v for v in sp_versions(sp) if v < 3] or sp_versions(sp)
+        st = n + max(vs)
+        use = spec(sp, "use_where")
+        where = "statetype = A" if use == "air" else ("statetype != L" if use == "both" else "statetype != A")
+        e = [f"[State -1, SM: {tr('IA')}: {_lbl(sp.get('name') or '?')}]", "type = ChangeState", f"value = {st}"]
+        e += base
+        if sp.get("kind") == "super":
+            e.append(f"triggerall = power >= {1000 * max(1, int(spec(sp, 'power_cost')))}")
+            if not ai.get("supers", True):
+                continue
+        if sp.get("type") == "proj":
+            e.append(f"triggerall = NumProjID({n}) = 0")
+        if sp.get("type") == "helper":
+            e.append(f"triggerall = NumHelper({n}) = 0")
+        e += [f"trigger1 = {where}", "trigger1 = ctrl", f"trigger1 = {rng[r]}",
+              f"trigger1 = Random < {chance * (2 if r == 'air' else 1)} * AILevel / 4"]
+        if ai.get("combos", True) and r in ("near", "mid") and sp.get("type") in ("hit", "dash", "rise", "proj", "helper"):
+            # combo: cancela un golpe normal que pegó en este especial
+            e += ["trigger2 = MoveHit", "trigger2 = StateNo = [200, 699]", f"trigger2 = {where}",
+                  f"trigger2 = Random < {150 + chance * 10} * AILevel / 8"]
+        out.append("\n".join(e) + "\n")
+    # golpes normales de cerca (y el agarre)
+    stand = [v[0] for key, v in norm.items() if v[1] == "S"]
+    if stand:
+        pick = str(stand[-1])
+        for j in range(len(stand) - 2, -1, -1):
+            pick = f"ifelse(Random % {len(stand) - j} = 0, {stand[j]}, {pick})"
+        out.append("\n".join([f"[State -1, SM: {tr('IA')}: {tr('golpes de cerca')}]", "type = ChangeState",
+                               f"value = {pick}"] + base + [
+            "trigger1 = statetype = S", "trigger1 = ctrl", f"trigger1 = P2BodyDist X < {near}",
+            f"trigger1 = Random < {chance * 3} * AILevel / 4"]) + "\n")
+    th = cfg.get("throw") or {}
+    if _frames(th) and th.get("state") is not None and not is_off(cfg, "throw"):
+        out.append("\n".join([f"[State -1, SM: {tr('IA')}: {tr('Agarre')}]", "type = ChangeState",
+                               f"value = {int(th['state'])}"] + base + [
+            "trigger1 = statetype = S", "trigger1 = ctrl", f"trigger1 = P2BodyDist X < {round(12 * k)}",
+            "trigger1 = P2StateType != A", "trigger1 = P2MoveType != H", f"trigger1 = Random < {chance} * AILevel / 4"])
+                   + "\n")
+    return out
+
+
 def has_moves(cfg):
     return bool(any(_frames(e or {}) for e in cfg["normals"].values()) or _frames(cfg.get("throw") or {}) or
-                any(_frames(s) for s in cfg.get("specials", [])) or any(cfg.get("voices", {}).values()))
+                any(_frames(s) for s in cfg.get("specials", [])) or any(cfg.get("voices", {}).values()) or
+                any(x.get("snd") for x in cfg.get("combo_voices", [])))
+
+
+# ---------------------------------------------------------------- frases de victoria ([Quotes] del .cns)
+_QUOTES_SEC = re.compile(r"(?im)^[ \t]*\[\s*quotes\s*\][^\n]*\n(.*?)(?=^[ \t]*\[|\Z)", re.DOTALL)
+
+
+def read_quotes(cns_text):
+    """Las frases de victoria del .cns (sección [Quotes], el idioma de siempre), en orden."""
+    m = _QUOTES_SEC.search(cns_text or "")
+    if not m:
+        return []
+    out = []
+    for ln in m.group(1).splitlines():
+        q = re.match(r'\s*victory(\d+)\s*=\s*"?(.*?)"?\s*(;.*)?$', ln, re.IGNORECASE)
+        if q and q.group(2).strip() and q.group(2).strip() not in ("...", "…"):
+            out.append((int(q.group(1)), q.group(2).strip()))
+    return [t for _n, t in sorted(out)]
+
+
+def write_quotes(cns_text, quotes):
+    """El .cns con su [Quotes] al día (hasta 100 frases). Sin frases, la sección se quita."""
+    quotes = [q.replace('"', "'").strip() for q in quotes if q and q.strip()][:100]
+    body = "".join(f'victory{i + 1} = "{q}"\n' for i, q in enumerate(quotes))
+    sec = ("[Quotes]\n; " + "frases de victoria (EasyFighter)" + "\n" + body + "\n") if quotes else ""
+    m = re.search(r"(?im)^[ \t]*\[\s*quotes\s*\][^\n]*\n.*?(?=^[ \t]*\[|\Z)", cns_text, re.DOTALL)
+    if m:
+        return cns_text[:m.start()] + sec + cns_text[m.end():]
+    if not sec:
+        return cns_text
+    st = re.search(r"(?im)^[ \t]*\[\s*statedef\b", cns_text)
+    pos = st.start() if st else len(cns_text)
+    pre = cns_text[:pos]
+    if pre and not pre.endswith("\n\n"):
+        sec = ("\n" if pre.endswith("\n") else "\n\n") + sec
+    return pre + sec + cns_text[pos:]
 
 
 # ---------------------------------------------------------------- texto de los archivos

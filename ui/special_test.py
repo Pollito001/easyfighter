@@ -41,7 +41,7 @@ class Sim:
         sp = d.sp
         self.sp = sp
         self.v = version
-        vv = 1 if sp.get("kind") == "super" else version
+        vv = version
         self.vv = vv
         self.k = d.k
         self.g = d.gravity
@@ -438,7 +438,27 @@ class SpecialCanvas(QWidget):
             hk = sg._frames(sp.get("proj_hit") or {})
             ptime = max(1, int((sp.get("proj") or {}).get("time", 4)))
             htime = max(1, int((sp.get("proj_hit") or {}).get("time", 3)))
-            if t >= hit_t and pk:
+            beam = bool(sg.spec(sp, "proj_beam"))
+            if beam and pk and hit_t <= t < hit_t + int(sg.spec(sp, "beam_time")):
+                # rayo: se queda delante, quieto
+                k2, _ = self.frame_at(pk, ptime, t - hit_t, loop=True)
+                self.draw_sprite(p, k2, ox + prm["px"] * sc * z, oy + prm["py"] * sc * z, z, sc)
+            cnt = max(1, min(5, int(sg.spec(sp, "proj_count"))))
+            spread = float(sg.spec(sp, "proj_spread")) * d.k
+            if t >= hit_t and pk and not beam and cnt > 1:
+                # abanico: los de más (el del medio lo dibuja lo de abajo)
+                dt = t - hit_t
+                vy0 = -float(sg.spec(sp, "proj_vy")) * d.k
+                for j in range(cnt):
+                    off = (j - (cnt - 1) / 2.0) * -spread
+                    if abs(off) < 1e-6:
+                        continue
+                    x = prm["px"] * sc + prm["speed"] * dt
+                    y = prm["py"] * sc + (vy0 + off) * dt
+                    if x < target_x and y < 0:
+                        k2, _ = self.frame_at(pk, ptime, dt, loop=True)
+                        self.draw_sprite(p, k2, ox + x * z, oy + y * z, z, sc)
+            if t >= hit_t and pk and not beam and not (cnt % 2 == 0):
                 dt = t - hit_t
                 vy = -float(sg.spec(sp, "proj_vy")) * d.k
                 ax_, ay_ = float(sg.spec(sp, "proj_ax")) * d.k, -float(sg.spec(sp, "proj_ay")) * d.k
@@ -461,6 +481,20 @@ class SpecialCanvas(QWidget):
                         xx = prm["px"] * sc + prm["speed"] * tt + ax_ * tt * tt / 2
                         yy = prm["py"] * sc + vy * tt + ay_ * tt * tt / 2
                         self.draw_sprite(p, k3, ox + xx * z, oy + min(0.0, yy) * z, z, sc)
+        # el ayudante: aparece delante y avanza
+        if sp.get("type") == "helper":
+            hk = sg._frames(sp.get("proj") or {})
+            if hk:
+                htime_ = max(1, int((sp.get("proj") or {}).get("time", 4)))
+                hit_t = prm["hf"] * time
+                dt = t - hit_t
+                life = min(int(sg.spec(sp, "helper_life")), len(hk) * htime_)
+                if 0 <= dt < life:
+                    k2, _ = self.frame_at(hk, htime_, dt, hold=True)
+                    x = prm["px"] * sc + float(sg.spec(sp, "helper_speed")) * d.k * dt
+                    y = prm["py"] * sc if sp.get("proj_y") is not None else 0
+                    if k2 is not None:
+                        self.draw_sprite(p, k2, ox + x * z, oy + y * z, z, sc)
         # proyectiles de los eventos
         for kk, x, y, f in fr["projs"]:
             self.draw_sprite(p, kk, ox + x * z, oy + y * z, z, sc, facing=f)
@@ -503,17 +537,8 @@ class SpecialTest(QDialog):
         lay = QVBoxLayout(self)
         row = QHBoxLayout()
         self.version = QComboBox()
-        if sp.get("kind") == "super":
-            self.version.addItem(tr('Súper'), 2)
-        elif sp.get("kind") == "ender":
-            self.version.addItem(tr('Remate'), 2)
-        else:
-            vals = list(sp.get("versions", [1, 1, 1])) + [0, 0, 0, 0]
-            for i, n in enumerate(sg.VERSION_NAMES):
-                if vals[i]:
-                    self.version.addItem(tr(n), i)
-            if self.version.count() == 0:
-                self.version.addItem(tr(sg.VERSION_NAMES[1]), 1)
+        for i in sg.sp_versions(sp):
+            self.version.addItem(tr(sg.VERSION_NAMES[i]), i)
         row.addWidget(QLabel(tr('Versión:')))
         row.addWidget(self.version)
         self.pick = QCheckBox(tr('Tocar en la pantalla para elegir de dónde sale el proyectil'))

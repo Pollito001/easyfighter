@@ -83,7 +83,7 @@ boxes, sound, who it can hit.
 
 ## Step 5 · 🔥 Specials and super
 
-**➕ Add special**, **⚡ Add super** or **💥 Add ender**. Each one has tabs:
+**🔥 Add special**, **⚡ Add super** or **💥 Add ender**. Each one has tabs:
 
 - **Data:** name, **command** (↓↘→, →↓↘, charge…, or make your own with 🎮), button, **what it does**
   (projectile, hit in place, rush, uppercut, special throw, counter…), damage and its voice.
@@ -129,6 +129,9 @@ Alternate colors: the ones you get by picking it with another button on the sele
 A sound for each thing (on hit, on special, on getting hit, on winning…). It accepts WAV, OGG, MP3, FLAC… and
 converts them to WAV automatically. Each special, super or ender can have its own voice.
 
+In **🔗 Combos (by hit count)** tap **➕ Add hit count** for each combo voice: for example, one at 3 hits and
+another at 5.
+
 ![Voices](img/08_voces_en.png)
 
 ## Step 10 · Test and save
@@ -139,6 +142,22 @@ converts them to WAV automatically. Each special, super or ender can have its ow
   character's folder.
 
 ![In game](img/juego_especial.png)
+
+## Step 11 · 🤖 AI (CPU)
+
+Tick **Use the EasyFighter AI** so the computer fights better with your character: choose how aggressive it is,
+whether it does combos, whether it uses the super and when it uses each special. When you play as it, nothing
+changes for you.
+
+## Step 12 · 🏁 Check and share
+
+1. **🔍 Check now**: tells you if something is missing (double-click a problem to go fix it).
+2. **📊 Calculate**: the frame data of each attack, to balance it.
+3. **🕘 Version history**: the editor saves snapshots when you save; **↩ Go back to this one** returns to one.
+4. **📦 Create the .zip…**: the character ready to share, with a `COMANDOS.txt`.
+
+> 💡 There are also **🏆 Victory quotes** in «👤 Character», and optional moves: **taunt**, **air dash**, **air
+> throw**, **wall bounce**, **helper**, **beam** and **several projectiles**.
 
 ---
 
