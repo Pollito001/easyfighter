@@ -268,8 +268,13 @@ The editor always opens in **simple mode**. The advanced tools are tucked away i
   in each special's ⚙ Settings, **wall bounce**: the opponent is shot back, bounces off the edge of the screen and
   falls so you can keep the combo going.
 - **New specials:** **calls a helper** (a new type: it appears in front, moves forward and hits; its animation goes
-  in the «🧍 Helper» tab), **several projectiles at once** in a fan, and a **beam** (the projectile stays in front
-  like a long beam and hits several times), in the projectiles' ⚙ Settings.
+  in the «🧍 Helper» tab), **several projectiles at once** in a fan, and a **beam** (on specials and supers): it
+  comes out of the hand, **stretches** to its length and hits several times. It has optional parts in the
+  «🔥 Projectile» tab (a **charge** before the beam, a **muzzle** stuck to the hand and a **tip** that moves forward,
+  all with the beam's effect) and, in ⚙ Settings, a ready-made **beam type** (classic, fast laser, electric, fire
+  stream, short or super beam) you can customize: its length (or to the edge of the screen), how fast it
+  stretches, whether it hits **non-stop** (every few ticks until it fades) or a set number of times, an **effect**
+  (blink, electric pulse or wobble) and whether it **fades out gradually**.
 - **Versions on supers and enders:** like specials, the super and the ender can have light, medium and heavy
   versions (each with its button; stronger = more damage and faster). An ender «of a special» still only comes
   out with the heavy button.

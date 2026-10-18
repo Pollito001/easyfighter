@@ -1515,7 +1515,10 @@ class SpecialCard(QFrame):
         self.body_w.addTab(t2, tr('🎞 Animación'))
         # pestaña: proyectil
         self.proj_tab = QWidget()
-        pc = QHBoxLayout(self.proj_tab)
+        outer = QVBoxLayout(self.proj_tab)
+        outer.setContentsMargins(0, 0, 0, 0)
+        pc = QHBoxLayout()
+        outer.addLayout(pc)
         c1 = QVBoxLayout()
         self.proj_title = title_label(tr('El proyectil'))
         c1.addWidget(self.proj_title)
@@ -1557,6 +1560,29 @@ class SpecialCard(QFrame):
         pc.addLayout(c1, 1)
         pc.addLayout(c2, 1)
         pc.addLayout(c3, 1)
+        # el rayo: sus otras partes (opcionales)
+        self.beam_row = QWidget()
+        br = QHBoxLayout(self.beam_row)
+        br.setContentsMargins(0, 6, 0, 0)
+        self.beam_boxes = {}
+        for key, title, tip, off in (
+                ("beam_charge", 'Antes del rayo (carga)', 'Opcional: sale primero donde nace el rayo (la energía que '
+                 'se junta en las manos). Cuando termina su animación, sale el rayo.', 30),
+                ("beam_head", 'Boca del rayo', 'Opcional: el destello pegado a la mano mientras dura el rayo.', 31),
+                ("beam_tip", 'Punta del rayo', 'Opcional: va en la punta y avanza mientras el rayo se estira.', 32)):
+            col = QVBoxLayout()
+            lab = title_label(tr(title))
+            lab.setToolTip(tr(tip))
+            col.addWidget(lab)
+            fb = FramesBox(sm, tr(title), base + off, default_time=3, small=True)
+            fb.optional = True
+            fb.setToolTip(tr(tip))
+            fb.bind(sp.setdefault(key, {}))
+            fb.changed.connect(sm.moves_changed)
+            col.addWidget(fb, 1)
+            br.addLayout(col, 1)
+            self.beam_boxes[key] = fb
+        outer.addWidget(self.beam_row)
         self.fill_pos()
         self.p_auto.toggled.connect(self.on_pos)
         for w in (self.p_x, self.p_y, self.p_speed):
@@ -1667,10 +1693,14 @@ class SpecialCard(QFrame):
         self.body_w.setTabVisible(self.body_w.indexOf(self.proj_tab), typ in ("proj", "helper"))
         helper = typ == "helper"
         self.body_w.setTabText(self.body_w.indexOf(self.proj_tab), tr('🧍 Ayudante') if helper else tr('🔥 Proyectil'))
-        self.proj_title.setText(tr('El ayudante (su animación)') if helper else tr('El proyectil'))
-        self.proj_pos_title.setText(tr('Dónde aparece') if helper else tr('Posición del proyectil'))
-        self.proj_hit_title.setVisible(not helper)
-        self.proj_hit.setVisible(not helper)
+        beam = typ == "proj" and bool(sg.spec(self.sp, "proj_beam"))
+        self.proj_title.setText(tr('El ayudante (su animación)') if helper else
+                                tr('Cuerpo del rayo (se estira)') if beam else tr('El proyectil'))
+        self.beam_row.setVisible(beam)
+        self.proj_pos_title.setText(tr('Dónde aparece') if helper else tr('Dónde nace el rayo') if beam else
+                                    tr('Posición del proyectil'))
+        self.proj_hit_title.setVisible(not helper and not beam)
+        self.proj_hit.setVisible(not helper and not beam)
         self.body_w.setTabVisible(self.body_w.indexOf(self.cond_tab), typ == "converted" and
                                   bool(self.sp.get("ventry")))
         self.body_w.setTabVisible(self.body_w.indexOf(self.adv_tab), typ != "converted")
@@ -1718,6 +1748,15 @@ class SpecialCard(QFrame):
 
     def on_adv(self, key, value):
         self.sp[key] = value
+        if key == "proj_beam":
+            self.update_tabs()
+        if key == "beam_preset":
+            # rayo ya hecho: sus ajustes se ponen solos (y se ven en las casillas)
+            sg.apply_beam_preset(self.sp, value)
+            self.show_adv_values(sg.BEAM_KEYS + ("hits",))
+        elif key in sg.BEAM_KEYS and self.sp.get("beam_preset", "classic") != "custom":
+            self.sp["beam_preset"] = "custom"
+            self.show_adv_values(("beam_preset",))
         if key == "ad_open" and "launch" not in self.sp and "launch" in self.adv:
             # «lo tumba» de fábrica cambia: abre autodobles → se queda de pie; si no → lo tumba
             w = self.adv["launch"][1]
@@ -1726,6 +1765,21 @@ class SpecialCard(QFrame):
             w.blockSignals(False)
         self.refresh_head()
         self.sm.moves_changed()
+
+    def show_adv_values(self, keys):
+        for key in keys:
+            if key not in self.adv:
+                continue
+            w = self.adv[key][1]
+            v = self.adv_value(key)
+            w.blockSignals(True)
+            if isinstance(w, QCheckBox):
+                w.setChecked(bool(v))
+            elif isinstance(w, QComboBox):
+                w.setCurrentIndex(max(0, w.findData(v)))
+            else:
+                w.setValue(v)
+            w.blockSignals(False)
 
     def reset_adv(self):
         for key, _l, _k, _lo, _hi, _w, _t in sg.SPECIAL_FIELDS:

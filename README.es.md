@@ -274,8 +274,13 @@ avanzadas…** (pide confirmación; para volver, el botón «🧸 Volver al modo
   en las ⚙ Ajustes de cada especial, **rebota en la pared**: el rival sale disparado, rebota en la orilla de la
   pantalla y cae para seguir el combo.
 - **Especiales nuevos:** **llama a un ayudante** (un tipo nuevo: aparece delante, avanza y pega; su animación va
-  en la pestaña «🧍 Ayudante»), **varios proyectiles a la vez** en abanico y **rayo** (el proyectil se queda delante
-  como un rayo largo y pega varias veces), en las ⚙ Ajustes de los proyectiles.
+  en la pestaña «🧍 Ayudante»), **varios proyectiles a la vez** en abanico y **rayo** (en especiales y súper):
+  sale de la mano, **se estira** hasta su largo y pega varias veces. Tiene partes opcionales en la pestaña
+  «🔥 Proyectil» (**carga** antes del rayo, **boca** pegada a la mano y **punta** que avanza, todas con el mismo
+  efecto que el rayo) y, en las ⚙ Ajustes, un **tipo de rayo** ya hecho (clásico, láser rápido, eléctrico, chorro
+  de fuego, corto o súper rayo) que se puede personalizar: su largo (o hasta la orilla de la pantalla), qué tan
+  rápido se estira, si pega **sin parar** (cada pocos ticks hasta que se apaga) o un número de golpes, un
+  **efecto** (parpadeo, pulso de electricidad o temblor) y si **se apaga poco a poco**.
 - **Versiones en súper y remates:** igual que los especiales, el súper y el remate pueden tener versión débil,
   media y fuerte (cada una con su botón, más fuerte = más daño y más rápida). El remate «de un especial» sigue
   saliendo solo con el botón fuerte.

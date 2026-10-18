@@ -333,6 +333,57 @@ class SpecialCanvas(QWidget):
                      pm, QRectF(pm.rect()))
         p.restore()
 
+    def draw_beam(self, p, sp, pk, ptime, hit_t, x0, y0, z, sc):
+        """El rayo como en el juego: carga → boca, cuerpo estirado y punta → se apaga."""
+        import math
+        d = self.dlg
+        parts = {key: (sg._frames(sp.get(key) or {}), max(1, int((sp.get(key) or {}).get("time", 3))))
+                 for key in ("beam_charge", "beam_head", "beam_tip")}
+        ck, ct = parts["beam_charge"]
+        c = len(ck) * ct if ck else 0
+        t_ = int(sg.spec(sp, "beam_time"))
+        fade = 10 if sg.spec(sp, "beam_fade") else 0
+        grow = max(1, int(sg.spec(sp, "beam_grow")))
+        length = (int(sg.spec(sp, "beam_len")) or 420 * d.k) * sc * z
+        total = c + t_ + fade
+        loop = max(len(d.sim().frames), hit_t + total + 15)
+        bt = self.tick % loop - hit_t
+        if bt < 0 or bt >= total:
+            return
+        if bt < c:
+            k2, _ = self.frame_at(ck, ct, bt)
+            if k2 is not None:
+                self.draw_sprite(p, k2, x0, y0, z, sc)
+            return
+        tt = bt - c
+        cur = length * min(1.0, (tt + 1) / grow)
+        fx = sg.spec(sp, "beam_fx") or "none"
+        rate = max(1, int(sg.spec(sp, "beam_fx_rate")))
+        alpha, thick = 1.0, 1.0
+        if fx == "blink" and (tt // rate) % 2 == 1:
+            alpha = 0.0
+        if fx == "pulse":
+            alpha = (165 + 90 * math.sin(bt * 3.1416 / rate)) / 256
+        if fx == "wobble":
+            thick = 1 + 0.2 * math.sin(bt * 3.1416 / rate)
+        if bt >= c + t_ and fade:
+            k_ = (c + t_ + fade - bt) / fade
+            alpha, thick = alpha * k_, thick * k_
+        kb, _ = self.frame_at(pk, ptime, tt, loop=True)
+        s = d.sm.sprite(*kb) if kb else None
+        pm = d.sm.pixmap(*kb) if s is not None else None
+        if pm is not None and alpha > 0:
+            p.save()
+            p.setOpacity(max(0.0, min(1.0, alpha)))
+            h = pm.height() * sc * z * thick
+            p.drawPixmap(QRectF(x0, y0 - s.y * sc * z * thick, cur, h), pm, QRectF(pm.rect()))
+            p.restore()
+        for key, xx in (("beam_head", x0), ("beam_tip", x0 + cur)):
+            keys, tm = parts[key]
+            if keys and alpha > 0:
+                k3, _ = self.frame_at(keys, tm, tt, loop=True)
+                self.draw_sprite(p, k3, xx, y0, z, sc, alpha=max(0.0, min(1.0, alpha)))
+
     def paintEvent(self, _e):
         p = QPainter(self)
         p.fillRect(self.rect(), QColor(theme.CANVAS))
@@ -439,10 +490,8 @@ class SpecialCanvas(QWidget):
             ptime = max(1, int((sp.get("proj") or {}).get("time", 4)))
             htime = max(1, int((sp.get("proj_hit") or {}).get("time", 3)))
             beam = bool(sg.spec(sp, "proj_beam"))
-            if beam and pk and hit_t <= t < hit_t + int(sg.spec(sp, "beam_time")):
-                # rayo: se queda delante, quieto
-                k2, _ = self.frame_at(pk, ptime, t - hit_t, loop=True)
-                self.draw_sprite(p, k2, ox + prm["px"] * sc * z, oy + prm["py"] * sc * z, z, sc)
+            if beam and pk:
+                self.draw_beam(p, sp, pk, ptime, hit_t, ox + prm["px"] * sc * z, oy + prm["py"] * sc * z, z, sc)
             cnt = max(1, min(5, int(sg.spec(sp, "proj_count"))))
             spread = float(sg.spec(sp, "proj_spread")) * d.k
             if t >= hit_t and pk and not beam and cnt > 1:
