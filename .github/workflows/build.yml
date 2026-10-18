@@ -39,6 +39,10 @@ jobs:
       - name: appimagetool (solo Linux)
         if: matrix.appimage
         run: |
+          # libxcb-cursor0 y xcb-util: Qt las necesita para abrir en X11 y no todas las distros las traen,
+          # así que van dentro del programa; «file» lo pide appimagetool
+          sudo apt-get update
+          sudo apt-get install -y libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 file
           curl -L -o appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x appimagetool
           sudo mv appimagetool /usr/local/bin/appimagetool

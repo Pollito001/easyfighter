@@ -114,6 +114,32 @@ def pyinstaller(osn, onefile, work):
     subprocess.run(args, check=True, cwd=ROOT)
 
 
+# Linux: bibliotecas que tienen que ser las del sistema y no las de la máquina donde se armó. Si van dentro,
+# chocan con el escritorio de quien lo usa: el teclado en Wayland (libxkbcommon: se cerraba al aguantar Shift
+# en KDE), las fuentes (fontconfig / freetype: avisos «invalid attribute») y los gráficos (X11, Wayland, GL).
+# Todo escritorio Linux las trae.
+SYSTEM_LIBS = ("libxkbcommon", "libfontconfig", "libfreetype", "libwayland-", "libX11", "libxcb", "libXau",
+               "libXdmcp", "libXext", "libXrender", "libXi", "libXfixes", "libXcursor", "libXrandr",
+               "libXinerama", "libXcomposite", "libXdamage", "libGL", "libGLX", "libGLdispatch", "libEGL",
+               "libOpenGL", "libdrm", "libgbm", "libvulkan", "libdbus-1", "libglib-2.0", "libgobject-2.0",
+               "libgio-2.0", "libgthread-2.0", "libgmodule-2.0", "libharfbuzz", "libpng16", "libexpat", "libz.so")
+# estas no las trae todo Linux (son de xcb-util): se quedan dentro, o Qt no abre en X11 sin ellas
+KEEP_LIBS = ("libxcb-icccm", "libxcb-image", "libxcb-keysyms", "libxcb-render-util", "libxcb-util",
+             "libxcb-cursor", "libxcb-ewmh")
+
+
+def drop_system_libs(folder):
+    """Quita del programa armado las bibliotecas de SYSTEM_LIBS que PyInstaller copió de la máquina."""
+    gone = []
+    for f in Path(folder).rglob("*.so*"):
+        if f.is_file() and f.name.startswith(SYSTEM_LIBS) and not f.name.startswith(KEEP_LIBS) and \
+                "Qt6" not in f.parts and "PyQt6" not in f.parts:
+            f.unlink()
+            gone.append(f.name)
+    if gone:
+        print("Usan las del sistema: " + ", ".join(sorted(gone)))
+
+
 def built_path(osn, onefile):
     dist = ROOT / "dist"
     if osn == "macos":
@@ -204,7 +230,11 @@ def main():
     work = ROOT / "build" / "pyinstaller"
     shutil.rmtree(work, ignore_errors=True)
     work.mkdir(parents=True)
+    if osn == "linux" and a.onefile:
+        print("Aviso: en Linux, --onefile mete las bibliotecas del sistema dentro; mejor sin --onefile.")
     pyinstaller(osn, a.onefile, work)
+    if osn == "linux" and not a.onefile:
+        drop_system_libs(built_path(osn, False))
     outs = [package(osn, a.onefile, version)]
     if a.appimage and osn == "linux":
         outs.append(appimage(a.onefile, version))
