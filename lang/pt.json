@@ -2109,5 +2109,12 @@
  "Rayo eléctrico": "Raio elétrico",
  "Chorro de fuego": "Jato de fogo",
  "Rayo corto": "Raio curto",
- "Súper rayo (largo y fuerte)": "Super raio (longo e forte)"
+ "Súper rayo (largo y fuerte)": "Super raio (longo e forte)",
+ "🔦 Rayo": "🔦 Raio",
+ "Cómo se apaga": "Como se apaga",
+ "Al terminar: se hace fino hacia su eje, se cierra hacia el centro (desde arriba y desde abajo), solo se hace transparente o desaparece de golpe.": "Ao terminar: fica fino em direção ao seu eixo, se fecha para o centro (de cima e de baixo), só fica transparente ou some de uma vez.",
+ "Se achica hacia su eje": "Afina em direção ao eixo",
+ "Se cierra hacia el centro (de arriba y de abajo)": "Se fecha para o centro (de cima e de baixo)",
+ "Solo se desvanece": "Só desvanece",
+ "Desaparece de golpe": "Some de uma vez"
 }

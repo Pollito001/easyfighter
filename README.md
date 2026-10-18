@@ -271,10 +271,11 @@ The editor always opens in **simple mode**. The advanced tools are tucked away i
   in the «🧍 Helper» tab), **several projectiles at once** in a fan, and a **beam** (on specials and supers): it
   comes out of the hand, **stretches** to its length and hits several times. It has optional parts in the
   «🔥 Projectile» tab (a **charge** before the beam, a **muzzle** stuck to the hand and a **tip** that moves forward,
-  all with the beam's effect) and, in ⚙ Settings, a ready-made **beam type** (classic, fast laser, electric, fire
+  all with the beam's effect) and, in ⚙ Settings (in its own **🔦 Beam** section), a ready-made **beam type** (classic, fast laser, electric, fire
   stream, short or super beam) you can customize: its length (or to the edge of the screen), how fast it
   stretches, whether it hits **non-stop** (every few ticks until it fades) or a set number of times, an **effect**
-  (blink, electric pulse or wobble) and whether it **fades out gradually**.
+  (blink, electric pulse or wobble) and **how it ends**: it shrinks toward its axis, **closes toward the center**
+  (from top and bottom), only fades out or vanishes at once.
 - **Versions on supers and enders:** like specials, the super and the ender can have light, medium and heavy
   versions (each with its button; stronger = more damage and faster). An ender «of a special» still only comes
   out with the heavy button.

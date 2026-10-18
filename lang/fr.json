@@ -2109,5 +2109,12 @@
  "Rayo eléctrico": "Rayon électrique",
  "Chorro de fuego": "Jet de feu",
  "Rayo corto": "Rayon court",
- "Súper rayo (largo y fuerte)": "Super rayon (long et puissant)"
+ "Súper rayo (largo y fuerte)": "Super rayon (long et puissant)",
+ "🔦 Rayo": "🔦 Rayon",
+ "Cómo se apaga": "Comment il s'éteint",
+ "Al terminar: se hace fino hacia su eje, se cierra hacia el centro (desde arriba y desde abajo), solo se hace transparente o desaparece de golpe.": "À la fin : il s'amincit vers son axe, se referme vers le centre (par le haut et par le bas), devient seulement transparent ou disparaît d'un coup.",
+ "Se achica hacia su eje": "S'amincit vers son axe",
+ "Se cierra hacia el centro (de arriba y de abajo)": "Se referme vers le centre (haut et bas)",
+ "Solo se desvanece": "S'estompe seulement",
+ "Desaparece de golpe": "Disparaît d'un coup"
 }

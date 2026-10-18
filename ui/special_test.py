@@ -342,7 +342,8 @@ class SpecialCanvas(QWidget):
         ck, ct = parts["beam_charge"]
         c = len(ck) * ct if ck else 0
         t_ = int(sg.spec(sp, "beam_time"))
-        fade = 10 if sg.spec(sp, "beam_fade") else 0
+        end = sg.spec(sp, "beam_end") or "axis"
+        fade = 0 if end == "none" else 10
         grow = max(1, int(sg.spec(sp, "beam_grow")))
         length = (int(sg.spec(sp, "beam_len")) or 420 * d.k) * sc * z
         total = c + t_ + fade
@@ -363,26 +364,41 @@ class SpecialCanvas(QWidget):
         if fx == "blink" and (tt // rate) % 2 == 1:
             alpha = 0.0
         if fx == "pulse":
-            alpha = (165 + 90 * math.sin(bt * 3.1416 / rate)) / 256
+            alpha = (165 + 90 * math.sin(tt * 3.1416 / rate)) / 256
         if fx == "wobble":
-            thick = 1 + 0.2 * math.sin(bt * 3.1416 / rate)
+            thick = 1 + 0.2 * math.sin(tt * 3.1416 / rate)
         if bt >= c + t_ and fade:
             k_ = (c + t_ + fade - bt) / fade
-            alpha, thick = alpha * k_, thick * k_
+            alpha = alpha * k_
+            if end in ("axis", "center"):
+                thick = thick * k_
         kb, _ = self.frame_at(pk, ptime, tt, loop=True)
         s = d.sm.sprite(*kb) if kb else None
         pm = d.sm.pixmap(*kb) if s is not None else None
+        # la línea hacia la que se achica todo: el eje del cuerpo, o el centro de su dibujo
+        line = y0
+        if end == "center" and pm is not None:
+            line = y0 + (pm.height() / 2 - s.y) * sc * z
         if pm is not None and alpha > 0:
             p.save()
             p.setOpacity(max(0.0, min(1.0, alpha)))
-            h = pm.height() * sc * z * thick
-            p.drawPixmap(QRectF(x0, y0 - s.y * sc * z * thick, cur, h), pm, QRectF(pm.rect()))
+            h = pm.height() * sc * z
+            top = y0 - s.y * sc * z
+            p.translate(0, line)
+            p.scale(1, thick)
+            p.translate(0, -line)
+            p.drawPixmap(QRectF(x0, top, cur, h), pm, QRectF(pm.rect()))
             p.restore()
         for key, xx in (("beam_head", x0), ("beam_tip", x0 + cur)):
             keys, tm = parts[key]
-            if keys and alpha > 0:
+            if keys and alpha > 0 and thick > 0:
                 k3, _ = self.frame_at(keys, tm, tt, loop=True)
+                p.save()
+                p.translate(0, line)
+                p.scale(1, thick)
+                p.translate(0, -line)
                 self.draw_sprite(p, k3, xx, y0, z, sc, alpha=max(0.0, min(1.0, alpha)))
+                p.restore()
 
     def paintEvent(self, _e):
         p = QPainter(self)

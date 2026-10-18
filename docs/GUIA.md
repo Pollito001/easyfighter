@@ -157,7 +157,8 @@ cambia nada.
 4. **📦 Crear el .zip…**: el personaje listo para compartir, con un `COMANDOS.txt`.
 
 > 💡 También hay **🏆 Frases de victoria** en «👤 Personaje», y movimientos opcionales: **burla**, **dash en el
-> aire**, **agarre en el aire**, **rebote en la pared**, **ayudante**, **rayo** y **varios proyectiles**.
+> aire**, **agarre en el aire**, **rebote en la pared**, **ayudante**, **rayo** (sus ajustes van juntos en la sección **🔦 Rayo** de ⚙ Ajustes) y
+> **varios proyectiles**.
 
 ---
 

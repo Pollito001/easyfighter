@@ -277,10 +277,11 @@ avanzadas…** (pide confirmación; para volver, el botón «🧸 Volver al modo
   en la pestaña «🧍 Ayudante»), **varios proyectiles a la vez** en abanico y **rayo** (en especiales y súper):
   sale de la mano, **se estira** hasta su largo y pega varias veces. Tiene partes opcionales en la pestaña
   «🔥 Proyectil» (**carga** antes del rayo, **boca** pegada a la mano y **punta** que avanza, todas con el mismo
-  efecto que el rayo) y, en las ⚙ Ajustes, un **tipo de rayo** ya hecho (clásico, láser rápido, eléctrico, chorro
+  efecto que el rayo) y, en las ⚙ Ajustes (en su propia sección **🔦 Rayo**), un **tipo de rayo** ya hecho (clásico, láser rápido, eléctrico, chorro
   de fuego, corto o súper rayo) que se puede personalizar: su largo (o hasta la orilla de la pantalla), qué tan
   rápido se estira, si pega **sin parar** (cada pocos ticks hasta que se apaga) o un número de golpes, un
-  **efecto** (parpadeo, pulso de electricidad o temblor) y si **se apaga poco a poco**.
+  **efecto** (parpadeo, pulso de electricidad o temblor) y **cómo se apaga**: se achica hacia su eje, **se cierra
+  hacia el centro** (de arriba y de abajo), solo se desvanece o desaparece de golpe.
 - **Versiones en súper y remates:** igual que los especiales, el súper y el remate pueden tener versión débil,
   media y fuerte (cada una con su botón, más fuerte = más daño y más rápida). El remate «de un especial» sigue
   saliendo solo con el botón fuerte.

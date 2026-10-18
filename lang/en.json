@@ -2109,5 +2109,12 @@
  "Rayo eléctrico": "Electric beam",
  "Chorro de fuego": "Fire stream",
  "Rayo corto": "Short beam",
- "Súper rayo (largo y fuerte)": "Super beam (long and strong)"
+ "Súper rayo (largo y fuerte)": "Super beam (long and strong)",
+ "🔦 Rayo": "🔦 Beam",
+ "Cómo se apaga": "How it ends",
+ "Al terminar: se hace fino hacia su eje, se cierra hacia el centro (desde arriba y desde abajo), solo se hace transparente o desaparece de golpe.": "When it ends: it thins toward its axis, closes toward the center (from top and bottom), only fades out, or vanishes at once.",
+ "Se achica hacia su eje": "Shrinks toward its axis",
+ "Se cierra hacia el centro (de arriba y de abajo)": "Closes toward the center (from top and bottom)",
+ "Solo se desvanece": "Only fades out",
+ "Desaparece de golpe": "Vanishes at once"
 }

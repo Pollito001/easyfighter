@@ -1725,19 +1725,53 @@ class SpecialCard(QFrame):
                 lab.hide()
             g.removeWidget(w)
             w.hide()
-        i = 0
-        for key, (lab, w, where) in self.adv.items():
-            if not sg.field_applies(where, self.sp):
-                continue
-            r, c = i // 2, (i % 2) * 2
-            if lab is not None:
-                g.addWidget(lab, r, c)
-                g.addWidget(w, r, c + 1)
-                lab.show()
-            else:
-                g.addWidget(w, r, c, 1, 2)
-            w.show()
-            i += 1
+        for h in getattr(self, "adv_heads", []):
+            g.removeWidget(h)
+            h.hide()
+            h.deleteLater()
+        self.adv_heads = []
+        for r_ in range(g.rowCount()):
+            g.setRowStretch(r_, 0)
+        row = [0]
+
+        def put(items):
+            i = 0
+            for key, (lab, w, where) in items:
+                r, c = row[0] + i // 2, (i % 2) * 2
+                if lab is not None:
+                    g.addWidget(lab, r, c)
+                    g.addWidget(w, r, c + 1)
+                    lab.show()
+                else:
+                    g.addWidget(w, r, c, 1, 2)
+                w.show()
+                i += 1
+            row[0] += (i + 1) // 2
+
+        def head(text):
+            box = QWidget()
+            v = QVBoxLayout(box)
+            v.setContentsMargins(0, 10, 0, 2)
+            v.setSpacing(6)
+            line = QFrame()
+            line.setFrameShape(QFrame.Shape.HLine)
+            line.setStyleSheet(f"color: {theme.LINE};")
+            v.addWidget(line)
+            v.addWidget(title_label(text))
+            g.addWidget(box, row[0], 0, 1, 4)
+            self.adv_heads.append(box)
+            row[0] += 1
+
+        shown = [(key, v) for key, v in self.adv.items() if sg.field_applies(v[2], self.sp)]
+        # el rayo va aparte, al final, con su título (y la casilla «Rayo» abre esa sección)
+        beam_keys = {"proj_beam"} | {k_ for k_, v in shown if v[2] == "beam"}
+        put([x for x in shown if x[0] not in beam_keys])
+        beam = [x for x in shown if x[0] in beam_keys]
+        if beam:
+            head(tr('🔦 Rayo'))
+            put([x for x in beam if x[0] == "proj_beam"])
+            put([x for x in beam if x[0] != "proj_beam"])
+        g.setRowStretch(row[0], 1)
 
     def adv_value(self, key):
         """Lo que vale de verdad un ajuste (el de «lo tumba» depende también de los autodobles)."""

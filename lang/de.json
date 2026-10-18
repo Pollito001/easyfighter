@@ -2109,5 +2109,12 @@
  "Rayo eléctrico": "Elektrischer Strahl",
  "Chorro de fuego": "Feuerstrahl",
  "Rayo corto": "Kurzer Strahl",
- "Súper rayo (largo y fuerte)": "Super-Strahl (lang und stark)"
+ "Súper rayo (largo y fuerte)": "Super-Strahl (lang und stark)",
+ "🔦 Rayo": "🔦 Strahl",
+ "Cómo se apaga": "Wie er endet",
+ "Al terminar: se hace fino hacia su eje, se cierra hacia el centro (desde arriba y desde abajo), solo se hace transparente o desaparece de golpe.": "Am Ende: er wird zu seiner Achse hin dünn, schließt sich zur Mitte (von oben und unten), wird nur durchsichtig oder verschwindet sofort.",
+ "Se achica hacia su eje": "Wird zur Achse hin dünn",
+ "Se cierra hacia el centro (de arriba y de abajo)": "Schließt sich zur Mitte (von oben und unten)",
+ "Solo se desvanece": "Wird nur ausgeblendet",
+ "Desaparece de golpe": "Verschwindet sofort"
 }

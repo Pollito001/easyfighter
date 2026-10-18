@@ -157,7 +157,8 @@ changes for you.
 4. **📦 Create the .zip…**: the character ready to share, with a `COMANDOS.txt`.
 
 > 💡 There are also **🏆 Victory quotes** in «👤 Character», and optional moves: **taunt**, **air dash**, **air
-> throw**, **wall bounce**, **helper**, **beam** and **several projectiles**.
+> throw**, **wall bounce**, **helper**, **beam** (its settings are grouped in the **🔦 Beam** section of ⚙ Settings) and
+> **several projectiles**.
 
 ---
 
