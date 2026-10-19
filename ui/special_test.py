@@ -333,9 +333,9 @@ class SpecialCanvas(QWidget):
                      pm, QRectF(pm.rect()))
         p.restore()
 
-    def draw_beam(self, p, sp, pk, ptime, hit_t, x0, y0, z, sc):
-        """El rayo como en el juego: carga → boca, cuerpo estirado y punta → se apaga."""
-        import math
+    def draw_beam(self, p, sp, pk, ptime, hit_t, x0, y0, z, sc, ground=None, rival_x=None):
+        """El rayo como en el juego: carga → boca, cuerpo estirado y punta → se apaga. Puede caer del cielo o
+        salir del piso (girado) y ser varios, uno tras otro."""
         d = self.dlg
         parts = {key: (sg._frames(sp.get(key) or {}), max(1, int((sp.get(key) or {}).get("time", 3))))
                  for key in ("beam_charge", "beam_head", "beam_tip")}
@@ -344,13 +344,50 @@ class SpecialCanvas(QWidget):
         t_ = int(sg.spec(sp, "beam_time"))
         end = sg.spec(sp, "beam_end") or "axis"
         fade = 0 if end == "none" else 10
-        grow = max(1, int(sg.spec(sp, "beam_grow")))
-        length = (int(sg.spec(sp, "beam_len")) or 420 * d.k) * sc * z
+        bdir = sg.spec(sp, "beam_dir") or "forward"
+        vert = bdir != "forward"
+        length = (int(sg.spec(sp, "beam_len")) or (230 if vert else 420) * d.k) * sc * z
+        count = max(1, min(8, int(sg.spec(sp, "beam_count"))))
+        delay = max(0, int(sg.spec(sp, "beam_delay"))) if count > 1 else 0
+        step = int(sg.spec(sp, "beam_step")) * d.k * sc * z
+        aim = sg.spec(sp, "beam_aim") or "front"
+        s0 = d.sm.sprite(*pk[0]) if pk else None
+        standing = False
+        if s0 is not None:
+            ph, pw = s0.pixels().shape[:2]
+            standing = sg.beam_standing(sp, pw, ph)
         total = c + t_ + fade
-        loop = max(len(d.sim().frames), hit_t + total + 15)
-        bt = self.tick % loop - hit_t
-        if bt < 0 or bt >= total:
-            return
+        loop = max(len(d.sim().frames), hit_t + total + (count - 1) * delay + 15)
+        t0 = self.tick % loop - hit_t
+        if ground is None:
+            ground = y0
+        for j in range(count):
+            bt = t0 - j * delay
+            if bt < 0 or bt >= total:
+                continue
+            if vert:
+                if aim == "rival" and rival_x is not None:
+                    bx = rival_x + (j - (count - 1) / 2.0) * step
+                else:
+                    bx = x0 + j * step
+                by = ground - length if bdir == "down" else ground
+            else:
+                bx, by = x0 + j * step, y0
+            p.save()
+            p.translate(bx, by)
+            if vert and not standing:
+                p.rotate(90 if bdir == "down" else -90)      # dibujado acostado y girado, como en el juego
+            self.draw_beam_one(p, sp, pk, ptime, parts, bt, c, t_, fade, end, length, z, sc, vert, standing, bdir)
+            p.restore()
+
+    def draw_beam_one(self, p, sp, pk, ptime, parts, bt, c, t_, fade, end, length, z, sc, vert=False,
+                      standing=False, bdir="forward"):
+        """Un rayo, dibujado desde (0, 0) hacia la derecha (el que llama lo pone en su sitio y lo gira)."""
+        import math
+        d = self.dlg
+        x0 = y0 = 0
+        ck, ct = parts["beam_charge"]
+        grow = max(1, int(sg.spec(sp, "beam_grow")))
         if bt < c:
             k2, _ = self.frame_at(ck, ct, bt)
             if k2 is not None:
@@ -375,15 +412,44 @@ class SpecialCanvas(QWidget):
         kb, _ = self.frame_at(pk, ptime, tt, loop=True)
         s = d.sm.sprite(*kb) if kb else None
         pm = d.sm.pixmap(*kb) if s is not None else None
+        if standing:
+            # dibujado de pie: no se gira; se estira hacia abajo (cae) o hacia arriba (sube) y se afina de lado
+            down = bdir == "down"
+            if pm is not None and alpha > 0:
+                p.save()
+                p.setOpacity(max(0.0, min(1.0, alpha)))
+                left = x0 - (pm.width() / 2 if end == "center" else s.x) * sc * z
+                p.translate(x0, 0)
+                p.scale(thick, 1)
+                p.translate(-x0, 0)
+                r = QRectF(left, y0 if down else y0 - cur, pm.width() * sc * z, cur)
+                p.drawPixmap(r, pm, QRectF(pm.rect()))
+                p.restore()
+            for key, yy in (("beam_head", y0), ("beam_tip", y0 + cur if down else y0 - cur)):
+                keys, tm = parts[key]
+                if keys and alpha > 0 and thick > 0:
+                    k3, _ = self.frame_at(keys, tm, tt, loop=True)
+                    p.save()
+                    p.translate(x0, 0)
+                    p.scale(thick, 1)
+                    p.translate(-x0, 0)
+                    self.draw_sprite(p, k3, x0, yy, z, sc, alpha=max(0.0, min(1.0, alpha)))
+                    p.restore()
+            return
         # la línea hacia la que se achica todo: el eje del cuerpo, o el centro de su dibujo
         line = y0
+        shift = 0.0
         if end == "center" and pm is not None:
             line = y0 + (pm.height() / 2 - s.y) * sc * z
+            if vert:
+                # girado: en el juego la mitad de la columna queda justo donde sale
+                shift = y0 - line
+                line = y0
         if pm is not None and alpha > 0:
             p.save()
             p.setOpacity(max(0.0, min(1.0, alpha)))
             h = pm.height() * sc * z
-            top = y0 - s.y * sc * z
+            top = y0 - s.y * sc * z + shift
             p.translate(0, line)
             p.scale(1, thick)
             p.translate(0, -line)
@@ -507,7 +573,8 @@ class SpecialCanvas(QWidget):
             htime = max(1, int((sp.get("proj_hit") or {}).get("time", 3)))
             beam = bool(sg.spec(sp, "proj_beam"))
             if beam and pk:
-                self.draw_beam(p, sp, pk, ptime, hit_t, ox + prm["px"] * sc * z, oy + prm["py"] * sc * z, z, sc)
+                self.draw_beam(p, sp, pk, ptime, hit_t, ox + prm["px"] * sc * z, oy + prm["py"] * sc * z, z, sc,
+                               ground=oy, rival_x=tx + 17 * d.k * z)
             cnt = max(1, min(5, int(sg.spec(sp, "proj_count"))))
             spread = float(sg.spec(sp, "proj_spread")) * d.k
             if t >= hit_t and pk and not beam and cnt > 1:

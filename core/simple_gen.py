@@ -158,10 +158,15 @@ SPECIAL_TYPES = [
 ]
 LAUNCH_MODES = [("no", "No"), ("last", "Sí, con el último golpe"), ("all", "Sí, con cada golpe")]
 BEAM_FX = [("none", "Ninguno"), ("blink", "Parpadeo"), ("pulse", "Pulso (electricidad)"), ("wobble", "Temblor")]
-BEAM_ENDS = [("axis", "Se achica hacia su eje"), ("center", "Se cierra hacia el centro (de arriba y de abajo)"),
+BEAM_ENDS = [("axis", "Se achica hacia su eje"), ("center", "Se cierra hacia el centro (de los dos lados)"),
              ("fadeonly", "Solo se desvanece"), ("none", "Desaparece de golpe")]
 BEAM_HIT_MODES = [("stream", "Sin parar hasta que se apaga"), ("count", "Golpes contados («Golpes»)")]
-# rayos ya hechos: lo que ponen en los ajustes del rayo
+BEAM_DIRS = [("forward", "De frente (sale de la mano)"), ("down", "Cae del cielo (de arriba hacia abajo)"),
+             ("up", "Sale del piso (de abajo hacia arriba)")]
+BEAM_AIMS = [("front", "Delante del personaje"), ("rival", "Sobre el rival")]
+BEAM_DRAWN = [("auto", "Automático (según su forma)"), ("lying", "Acostado (hacia la derecha): se gira"),
+              ("standing", "De pie (vertical): no se gira")]
+_BEAM_BASE = dict(beam_dir="forward", beam_aim="front", beam_count=1, beam_step=70, beam_delay=8)
 BEAM_PRESETS = {
     "classic": ("Clásico (energía)", dict(beam_len=0, beam_grow=10, beam_time=60, beam_fx="pulse", beam_fx_rate=3,
                                           beam_hit_mode="stream", beam_hit_gap=4, beam_end="axis")),
@@ -176,10 +181,27 @@ BEAM_PRESETS = {
     "mega": ("Súper rayo (largo y fuerte)", dict(beam_len=0, beam_grow=12, beam_time=100, beam_fx="pulse",
                                                  beam_fx_rate=3, beam_hit_mode="stream", beam_hit_gap=3,
                                                  beam_end="axis")),
+    "thunder": ("Trueno sobre el rival", dict(beam_dir="down", beam_aim="rival", beam_len=0, beam_grow=3,
+                                              beam_time=22, beam_fx="blink", beam_fx_rate=2, beam_hit_mode="stream",
+                                              beam_hit_gap=3, beam_end="center")),
+    "rain": ("Lluvia de rayos (uno tras otro)", dict(beam_dir="down", beam_count=4, beam_step=70, beam_delay=8,
+                                                     beam_len=0, beam_grow=4, beam_time=24, beam_fx="pulse",
+                                                     beam_fx_rate=2, beam_hit_mode="stream", beam_hit_gap=3,
+                                                     beam_end="center")),
+    "pillars": ("Columnas que salen del piso", dict(beam_dir="up", beam_count=3, beam_step=80, beam_delay=10,
+                                                    beam_len=160, beam_grow=8, beam_time=30, beam_fx="wobble",
+                                                    beam_fx_rate=3, beam_hit_mode="stream", beam_hit_gap=4,
+                                                    beam_end="center")),
+    "storm": ("Tormenta sobre el rival", dict(beam_dir="down", beam_aim="rival", beam_count=3, beam_step=55,
+                                              beam_delay=6, beam_len=0, beam_grow=2, beam_time=18, beam_fx="blink",
+                                              beam_fx_rate=2, beam_hit_mode="stream", beam_hit_gap=3,
+                                              beam_end="none")),
 }
+for _k, (_n, _v) in BEAM_PRESETS.items():
+    BEAM_PRESETS[_k] = (_n, {**_BEAM_BASE, **_v})
 BEAM_PRESET_NAMES = [("custom", "Personalizado")] + [(k, v[0]) for k, v in BEAM_PRESETS.items()]
 BEAM_KEYS = ("beam_len", "beam_grow", "beam_time", "beam_fx", "beam_fx_rate", "beam_hit_mode", "beam_hit_gap",
-             "beam_end")
+             "beam_end", "beam_dir", "beam_aim", "beam_count", "beam_step", "beam_delay")
 
 
 def apply_beam_preset(sp, key):
@@ -728,6 +750,22 @@ SPECIAL_FIELDS = [
      'en la pestaña «🔥 Proyectil».'),
     ("beam_preset", 'Tipo de rayo', ("choice", BEAM_PRESET_NAMES), 0, 0, "beam",
      'Rayos ya hechos: escoge uno y sus ajustes se ponen solos. Si después cambias algo, pasa a «Personalizado».'),
+    ("beam_dir", 'Dirección del rayo', ("choice", BEAM_DIRS), 0, 0, "beam",
+     'De frente: sale de la mano hacia adelante. Cae del cielo: una columna que baja hasta el piso. Sale del '
+     'piso: una columna que sube. El rayo se dibuja igual (acostado, hacia la derecha): el editor lo gira.'),
+    ("beam_aim", 'Dónde cae', ("choice", BEAM_AIMS), 0, 0, "beamv",
+     'Delante del personaje: a la distancia de «Dónde nace el rayo» (pestaña «🔥 Proyectil»). Sobre el rival: '
+     'justo donde está el rival, aunque esté lejos.'),
+    ("beam_drawn", 'Cómo está dibujado', ("choice", BEAM_DRAWN), 0, 0, "beamv",
+     'Acostado: el dibujo del rayo va hacia la derecha y el editor lo gira. De pie: ya lo dibujaste vertical '
+     '(de arriba hacia abajo) y se usa tal cual. Automático: si el dibujo es más alto que ancho, está de pie.'),
+    ("beam_count", 'Cuántos rayos', int, 1, 8, "beam",
+     'Varios rayos uno tras otro, cada uno más adelante que el anterior (por ejemplo, una lluvia de rayos que '
+     'avanza hacia el rival). El daño se reparte entre todos.'),
+    ("beam_step", 'Separación entre rayos', int, 0, 400, "beamchain",
+     'Distancia entre un rayo y el siguiente, en pixeles del personaje.'),
+    ("beam_delay", 'Tiempo entre rayos (ticks)', int, 0, 60, "beamchain",
+     'Cuánto espera para lanzar el siguiente (0 = todos a la vez).'),
     ("beam_hit_mode", 'Cómo pega el rayo', ("choice", BEAM_HIT_MODES), 0, 0, "beam",
      'Sin parar: pega cada pocos ticks mientras el rival esté dentro, hasta que el rayo se apaga (como la '
      'mayoría de los rayos). Golpes contados: pega las veces de «Golpes», repartidas en lo que dura.'),
@@ -736,7 +774,8 @@ SPECIAL_FIELDS = [
      'todos los golpes.'),
     ("beam_time", 'Duración del rayo (ticks)', int, 5, 300, "beam", 'Cuánto dura el rayo (60 ticks = 1 segundo).'),
     ("beam_len", 'Largo del rayo', int, 0, 4000, "beam",
-     'Hasta dónde llega, en pixeles del personaje. 0 = hasta la orilla de la pantalla.'),
+     'Hasta dónde llega, en pixeles del personaje. 0 = hasta la orilla de la pantalla (o desde lo alto de la '
+     'pantalla, si cae del cielo).'),
     ("beam_grow", 'Se estira en (ticks)', int, 1, 120, "beam",
      'Cuánto tarda en llegar a su largo: pocos = sale de golpe; muchos = avanza como un chorro.'),
     ("beam_fx", 'Efecto del rayo', ("choice", BEAM_FX), 0, 0, "beam",
@@ -806,7 +845,8 @@ def spec(sp, key):
             "ex_cost": 500, "counter_window": 14, "grab_range": 25, "stop_on_hit": False, "wall_bounce": False,
             "proj_count": 1, "proj_spread": 2.0, "proj_beam": False, "beam_time": 60, "helper_speed": 4.0,
             "beam_len": 0, "beam_grow": 10, "beam_fx": "pulse", "beam_fx_rate": 3, "beam_end": "axis",
-            "beam_preset": "classic", "beam_hit_mode": "stream", "beam_hit_gap": 4,
+            "beam_preset": "classic", "beam_hit_mode": "stream", "beam_hit_gap": 4, "beam_dir": "forward",
+            "beam_aim": "front", "beam_count": 1, "beam_step": 70, "beam_delay": 8, "beam_drawn": "auto",
             "helper_life": 120,
             "ad_open": not super_}.get(key)
 
@@ -853,8 +893,14 @@ def field_applies(where, sp):
         return super_
     if where == "adopen":
         return sp.get("kind") != "ender"
-    if where == "beam":
-        return typ == "proj" and bool(spec(sp, "proj_beam"))
+    if where in ("beam", "beamv", "beamchain"):
+        if not (typ == "proj" and bool(spec(sp, "proj_beam"))):
+            return False
+        if where == "beamv":
+            return (spec(sp, "beam_dir") or "forward") != "forward"
+        if where == "beamchain":
+            return int(spec(sp, "beam_count")) > 1
+        return True
     if where == "projfly":
         return typ == "proj" and not spec(sp, "proj_beam")
     return (where == "all" or (where == "hitting" and typ not in ("none", "grab")) or
@@ -1050,23 +1096,41 @@ def sp_versions(sp):
 BEAM_STEPS = 8                # cajas de golpe del rayo mientras se estira (acciones n+90…n+97)
 
 
+def beam_standing(sp, w, h):
+    """¿El rayo que cae / sube está dibujado de pie (vertical)? Entonces no se gira."""
+    if (spec(sp, "beam_dir") or "forward") == "forward":
+        return False
+    mode = spec(sp, "beam_drawn") or "auto"
+    if mode == "auto":
+        return h > w
+    return mode == "standing"
+
+
 def beam_actions(sp, n, name, sprites, k, tr=lambda s: s):
     """Animaciones del rayo: carga (n+30), boca (n+31), punta (n+32) y el cuerpo (n+90…n+97: el mismo dibujo con la
     caja de golpe cada vez más larga). El cuerpo se dibuja desde su orilla izquierda para estirarlo hacia adelante."""
     body = _frames(sp.get("proj") or {})
     btime = max(1, int((sp.get("proj") or {}).get("time", 3)))
-    w = h = top = 0
+    w = h = top = ax = 0
     for key in body[:1]:
         s_ = sprites.get(key)
         if s_ is not None:
             ph, pw = s_.pixels().shape[:2]
-            w, h, top = pw, ph, -s_.y
+            w, h, top, ax = pw, ph, -s_.y, s_.x
     w = max(1, w)
-    length = int(spec(sp, "beam_len")) or round(420 * k)
+    bdir = spec(sp, "beam_dir") or "forward"
+    vert = bdir != "forward"
+    standing = beam_standing(sp, w, h)
+    # 0 = hasta la orilla de la pantalla (de lado) o desde lo alto de la pantalla (cayendo / subiendo)
+    length = int(spec(sp, "beam_len")) or round((230 if vert else 420) * k)
     # «se cierra hacia el centro»: el dibujo va con su centro (de arriba a abajo) en el eje, así al hacerlo fino
     # se cierra desde arriba y desde abajo; el ayudante se corre para que se vea en el mismo lugar
     center = (spec(sp, "beam_end") or "axis") == "center"
-    yshift = int(round(h / 2 + top)) if center else 0
+    # girado (cae / sube): IKEMEN gira el dibujo alrededor de su eje y no gira el corrimiento del cuadro, así
+    # que no se corre el dibujo: el ayudante se mueve cada tick para que el rayo empiece en su sitio
+    yshift = int(round(h / 2 + top)) if center and not vert else 0
+    # dibujado de pie: no se gira, se estira hacia abajo (cae) o hacia arriba (sube) desde su orilla
+    sox = int(round(ax - w / 2)) if center else 0
     out = []
     for i in range(BEAM_STEPS):
         a = Action(n + 90 + i)
@@ -1077,13 +1141,28 @@ def beam_actions(sp, n, name, sprites, k, tr=lambda s: s):
         for g_, n_ in body:
             s_ = sprites.get((g_, n_))
             oy = 0
-            if center and s_ is not None:
+            if center and s_ is not None and not vert:
                 oy = int(round(s_.y - s_.pixels().shape[0] / 2))
-            f = Frame(g_, n_, int(s_.x) if s_ is not None else 0, oy, btime)
-            f.clsn1 = [(0, top - yshift, lx, top - yshift + max(4, h))]
+            f = Frame(g_, n_, int(s_.x) if s_ is not None and not vert else 0, oy, btime)
+            if standing and s_ is not None:
+                f.x = sox
+                f.y = int(s_.y) if bdir == "down" else int(s_.y) - s_.pixels().shape[0]
+            t0, t1 = top - yshift, top - yshift + max(4, h)
+            # las cajas no se giran solas: se ponen ya giradas, alrededor del eje (donde está el ayudante)
+            near, far = round(-ax * lx / w), round(lx - ax * lx / w)
+            if standing:
+                x0_ = sox - ax
+                f.clsn1 = [(x0_, 0, x0_ + max(4, w), lx)] if bdir == "down" else [(x0_, -lx, x0_ + max(4, w), 0)]
+            elif bdir == "down":
+                f.clsn1 = [(-t1, near, -t0, far)]
+            elif bdir == "up":
+                f.clsn1 = [(t0, -far, t1, -near)]
+            else:
+                f.clsn1 = [(0, t0, lx, t1)]
             a.frames.append(f)
         out.append(a)
-    info = dict(actions=out, width=w, length=length, charge=0, head=False, tip=False, yshift=yshift)
+    info = dict(actions=out, width=w, length=length, charge=0, head=False, tip=False, yshift=yshift, dir=bdir,
+                ax=ax, yc=(top + h / 2.0) if center else 0.0, standing=standing, height=max(1, h))
     for key, num, mode in (("beam_charge", n + 30, "once"), ("beam_head", n + 31, "loop"), ("beam_tip", n + 32, "loop")):
         ent = sp.get(key) or {}
         keys = _frames(ent)
@@ -1095,7 +1174,7 @@ def beam_actions(sp, n, name, sprites, k, tr=lambda s: s):
             f.clsn1, f.clsn2 = [], []
             # la boca y la punta van pegadas a la línea del cuerpo (se achican hacia la misma línea que él);
             # el dibujo se corre para que se vea donde mismo
-            if key != "beam_charge":
+            if key != "beam_charge" and not vert:
                 f.y -= yshift
         out.append(a)
         if key == "beam_charge":
@@ -1107,6 +1186,12 @@ def beam_actions(sp, n, name, sprites, k, tr=lambda s: s):
     fade = 0 if end == "none" else 10
     info.update(grow=grow, fade=fade, end=end, time=max(5, int(spec(sp, "beam_time"))))
     info["total"] = info["charge"] + info["time"] + fade
+    info["count"] = max(1, min(8, int(spec(sp, "beam_count"))))
+    info["delay"] = max(0, int(spec(sp, "beam_delay"))) if info["count"] > 1 else 0
+    info["step"] = round(int(spec(sp, "beam_step")) * k)
+    info["aim"] = spec(sp, "beam_aim") or "front"
+    # lo que dura todo: el último rayo sale (cantidad − 1) × espera después del primero
+    info["all"] = info["total"] + (info["count"] - 1) * info["delay"]
     return info
 
 
@@ -1116,6 +1201,12 @@ def beam_state(sp, n, name, info, hd, hd_last, hits, px, py, k, tr=lambda s: s):
     st = n + 30
     c, t, grow, fade = info["charge"], info["time"], info["grow"], info["fade"]
     w, length = info["width"], info["length"]
+    bdir = info.get("dir", "forward")
+    # el rayo se dibuja acostado (hacia la derecha) y se gira: hacia abajo si cae, hacia arriba si sube
+    standing = info.get("standing", False)
+    angle = 0 if standing else {"down": 90, "up": -90}.get(bdir, 0)
+    # de frente y solo uno: sigue al personaje; cayendo, subiendo o en cadena: se queda donde salió
+    follow = bdir == "forward" and info.get("count", 1) == 1
     fx = spec(sp, "beam_fx") or "none"
     rate = max(1, int(spec(sp, "beam_fx_rate")))
 
@@ -1135,8 +1226,10 @@ def beam_state(sp, n, name, info, hd, hd_last, hits, px, py, k, tr=lambda s: s):
         """Efecto (parpadeo, pulso, temblor) y apagado de un ayudante del rayo; t0 = cuándo empieza el rayo."""
         out = []
         sx = scale_x or "1.0"
+        # de pie: lo largo es lo alto (y lo grueso, lo ancho)
+        sc_ = f"{thick(t0)}, {sx}" if standing else f"{sx}, {thick(t0)}"
         out += [f"[State {stn}, {tr('Se estira')}]", "type = AngleDraw", f"trigger1 = Time >= {t0}",
-                f"scale = {sx}, {thick(t0)}", ""]
+                f"scale = {sc_}"] + ([f"value = {angle}"] if angle else []) + [""]
         if fx == "blink":
             out += [f"[State {stn}, {tr('Parpadeo')}]", "type = Trans", f"trigger1 = Time >= {t0}",
                     f"trigger1 = ((Time - {t0}) / {rate}) % 2 = 1", "trans = addalpha", "alpha = 0, 256", ""]
@@ -1154,10 +1247,30 @@ def beam_state(sp, n, name, info, hd, hd_last, hits, px, py, k, tr=lambda s: s):
            f"{float(length)}) > {BEAM_STEPS}, {BEAM_STEPS}, ceil({cur(c)} * {BEAM_STEPS} / {float(length)})))"
     first = f"{n + 30}" if info["charge"] else f"{n + 90}"
     lines = [f"; {_lbl(name)} ({tr('rayo')})", f"[Statedef {st}]", "type = A", "movetype = A", "physics = N",
-             "ctrl = 0", "velset = 0, 0", f"anim = {first}", "sprpriority = 3", "",
-             f"[State {st}, {tr('Sigue al personaje')}]", "type = BindToRoot", "trigger1 = 1", "time = 1",
-             f"pos = {px}, {py + info.get('yshift', 0)}", "facing = 1", "",
-             f"[State {st}, {tr('No le pueden pegar')}]", "type = NotHitBy", "trigger1 = 1", "value = SCA",
+             "ctrl = 0", "velset = 0, 0", f"anim = {first}", "sprpriority = 3", ""]
+    if follow:
+        lines += [f"[State {st}, {tr('Sigue al personaje')}]", "type = BindToRoot", "trigger1 = 1", "time = 1",
+                  f"pos = {px}, {py + info.get('yshift', 0)}", "facing = 1", ""]
+    elif bdir == "forward":
+        lines += [f"[State {st}, {tr('Se queda donde salió')}]", "type = PosAdd", "trigger1 = Time = 0",
+                  f"y = {info.get('yshift', 0)}", ""] if info.get("yshift") else []
+    elif standing:
+        lines += [f"[State {st}, {tr('Al piso')}]", "type = PosSet", "trigger1 = Time = 0",
+                  f"y = {-length if bdir == 'down' else 0}", ""]
+    else:
+        # la columna: baja desde lo alto hasta el piso o sube desde el piso. El dibujo gira alrededor de su eje,
+        # así que el ayudante se acomoda cada tick para que el rayo empiece siempre en el mismo punto
+        sg_ = 1 if bdir == "down" else -1
+        y0 = -length if bdir == "down" else 0
+        ax, yc = info.get("ax", 0), info.get("yc", 0.0)
+        cur_e = f"ifelse(Time < {c}, 0, {cur(c)})"
+        th_e = f"ifelse(Time < {c}, 1.0, {thick(c)})"
+        lines += [f"[State {st}, {tr('Dónde sale')}]", "type = VarSet", "trigger1 = Time = 0", "fv = 0",
+                  "value = Pos X", "",
+                  f"[State {st}, {tr('Al piso')}]", "type = PosSet", "trigger1 = 1",
+                  f"x = fvar(0) + facing * {_fmt(round(sg_ * yc, 2))} * {th_e}",
+                  f"y = {y0} + {_fmt(round(sg_ * ax / float(w), 4))} * {cur_e}", ""]
+    lines += [f"[State {st}, {tr('No le pueden pegar')}]", "type = NotHitBy", "trigger1 = 1", "value = SCA",
              "time = 1", ""]
     if info["charge"]:
         lines += [f"[State {st}, {tr('Termina la carga')}]", "type = ChangeAnim", f"trigger1 = Time = {c}",
@@ -1170,7 +1283,7 @@ def beam_state(sp, n, name, info, hd, hd_last, hits, px, py, k, tr=lambda s: s):
                       "postype = p1", "facing = 1", "keyctrl = 0", "ownpal = 1", ""]
     lines += [f"[State {st}, {tr('Caja de golpe del largo actual')}]", "type = ChangeAnim", f"trigger1 = Time >= {c}",
               f"trigger1 = Anim != {n + 89} + {step}", f"value = {n + 89} + {step}", ""]
-    lines += effects(st, c, f"{cur(c)} / {float(w)}")
+    lines += effects(st, c, f"{cur(c)} / {float(info.get('height', w) if standing else w)}")
     # golpes
     total_dmg = 0
     for x in hd:
@@ -1184,7 +1297,8 @@ def beam_state(sp, n, name, info, hd, hd_last, hits, px, py, k, tr=lambda s: s):
     else:
         n_hits = max(1, hits)
         gap = max(1, t // n_hits)
-    per = max(1, round(total_dmg / n_hits)) if total_dmg else None
+    n_all = n_hits * info.get("count", 1)        # el daño total se reparte entre todos los rayos
+    per = max(1, round(total_dmg / n_all)) if total_dmg else None
     pause = max(0, min(gap - 1, 3))           # pausa corta: si no, el juego se traba con tantos golpes
 
     def tune(lst):
@@ -1195,7 +1309,7 @@ def beam_state(sp, n, name, info, hd, hd_last, hits, px, py, k, tr=lambda s: s):
             if per is not None and x.startswith("damage = "):
                 g_ = re.match(r"damage = \d+(?:, *(\d+))?", x)
                 gd = int(g_.group(1)) if g_ and g_.group(1) else 0
-                x = f"damage = {per}, {max(0, round(gd * max(1, hits) / n_hits))}"
+                x = f"damage = {per}, {max(0, round(gd * max(1, hits) / n_all))}"
             if x.startswith("pausetime"):
                 x = f"pausetime = {pause}, {pause}"
             if x.startswith("ground.slidetime"):
@@ -1204,6 +1318,11 @@ def beam_state(sp, n, name, info, hd, hd_last, hits, px, py, k, tr=lambda s: s):
         return out
     # los golpes casi no empujan (el rival se queda dentro del rayo); el último lo tumba si así se escogió
     hd_b = [x for x in tune(hd) if not x.startswith(("ground.velocity", "air.velocity", "fall", "air.fall"))]
+    spark = []
+    if bdir != "forward":
+        # la chispa a la altura del cuerpo (el ayudante girado está muy arriba o muy abajo)
+        spark = [f"sparkxy = 0, floor(-(Pos Y) - {round(60 * k)})"]
+    hd_b += spark
     hd_b += [f"ground.velocity = {_fmt(round(-0.6 * k, 2))}", f"air.velocity = {_fmt(round(-0.6 * k, 2))}, "
              f"{_fmt(round(-1.5 * k, 2))}"]
     # aturdido hasta el próximo golpe del rayo
@@ -1217,7 +1336,7 @@ def beam_state(sp, n, name, info, hd, hd_last, hits, px, py, k, tr=lambda s: s):
                   f"trigger1 = (Time - {c}) < {gap * n_stun}"] + hd_b + [""]
     if hd_last is not None:
         lines += [f"[State {st}, {tr('Último golpe (lo tumba)')}]", "type = HitDef",
-                  f"trigger1 = Time = {last_t}"] + tune(hd_last) + [""]
+                  f"trigger1 = Time = {last_t}"] + tune(hd_last) + spark + [""]
     text = _beam_clock("\n".join(lines), st, tr)
     # los ayudantes de la boca y la punta (nacen cuando empieza el rayo: su Time 0 = el comienzo)
     for key, sub, anim in (("head", n + 31, n + 31), ("tip", n + 32, n + 32)):
@@ -1226,7 +1345,7 @@ def beam_state(sp, n, name, info, hd, hd_last, hits, px, py, k, tr=lambda s: s):
         sl = [f"; {_lbl(name)} ({tr('boca') if key == 'head' else tr('punta')})", f"[Statedef {sub}]", "type = A",
               "movetype = I", "physics = N", "ctrl = 0", "velset = 0, 0", f"anim = {anim}", "sprpriority = 4", "",
               f"[State {sub}, {tr('Sigue al rayo')}]", "type = BindToParent", "trigger1 = 1", "time = 1",
-              "pos = " + ("0, 0" if key == "head" else f"{cur(0)}, 0"),
+              "pos = " + _beam_part_pos(key, bdir, info, cur(0), thick(0)),
               "facing = 1", "",
               f"[State {sub}, {tr('No le pueden pegar')}]", "type = NotHitBy", "trigger1 = 1", "value = SCA",
               "time = 1", ""]
@@ -1234,6 +1353,21 @@ def beam_state(sp, n, name, info, hd, hd_last, hits, px, py, k, tr=lambda s: s):
         text += "\n\n;---------------------------------------------------------------------------\n" + \
             _beam_clock("\n".join(sl), sub, tr)
     return text
+
+
+def _beam_part_pos(key, bdir, info, cur0, thick0):
+    """Dónde va la boca (al comienzo) o la punta (al final del largo actual), respecto al cuerpo del rayo."""
+    if bdir == "forward":
+        return "0, 0" if key == "head" else f"{cur0}, 0"
+    if info.get("standing"):
+        return "0, 0" if key == "head" else (f"0, {cur0}" if bdir == "down" else f"0, -{cur0}")
+    # el cuerpo girado está en su eje: el comienzo queda a eje × escala hacia atrás
+    sg_ = 1 if bdir == "down" else -1
+    ax, w, yc = info.get("ax", 0), max(1, info.get("width", 1)), info.get("yc", 0.0)
+    x = f"{_fmt(round(-sg_ * yc, 2))} * {thick0}" if yc else "0"
+    back = f"{_fmt(round(ax / float(w), 4))} * {cur0}"
+    y = f"{-sg_} * {back}" if key == "head" else f"{sg_} * ({cur0} - {back})"
+    return f"{x}, {y}"
 
 
 def _beam_clock(text, stn, tr=lambda s: s):
@@ -2276,17 +2410,27 @@ def generate(cfg, sprites, k, taken_states, taken_actions, tr=lambda s: s, scale
                            "type = Projectile", f"trigger1 = AnimElem = {hf + 1}"]
                     sd += ex + hd + [""]
                 if beam:
-                    # el rayo es un ayudante (n+30) que se estira; el personaje se queda quieto mientras dura
-                    sd += [f"[State {st}, {tr('Rayo')}]", "type = Helper", f"trigger1 = AnimElem = {hf + 1}",
-                           "helpertype = normal", f'name = "{_lbl(name)} ({tr("rayo")})"', f"ID = {n}",
-                           f"stateno = {n + 30}", f"pos = {px}, {py}", "postype = p1", "facing = 1",
-                           "keyctrl = 0", "ownpal = 1", ""]
+                    # el rayo es un ayudante (n+30) que se estira; el personaje se queda quieto mientras dura.
+                    # En cadena: uno tras otro, cada uno más adelante (o repartidos sobre el rival)
+                    t_hf = sum(max(1, kf.time) if kf.time > 0 else 10 for kf in body.frames[:hf])
+                    bi = beam_info
+                    for j in range(bi["count"]):
+                        if bi["aim"] == "rival" and bi["dir"] != "forward":
+                            bx = round((j - (bi["count"] - 1) / 2.0) * bi["step"])
+                            ppos, ptype = f"{bx}, 0", "p2"
+                        else:
+                            ppos, ptype = f"{px + j * bi['step']}, {py}", "p1"
+                        trig = f"AnimElem = {hf + 1}" if j == 0 else f"Time = {t_hf + j * bi['delay']}"
+                        sd += [f"[State {st}, {tr('Rayo')}" + (f" {j + 1}" if bi["count"] > 1 else "") + "]",
+                               "type = Helper", f"trigger1 = {trig}", "helpertype = normal",
+                               f'name = "{_lbl(name)} ({tr("rayo")})"', f"ID = {n}", f"stateno = {n + 30}",
+                               f"pos = {ppos}", f"postype = {ptype}", "facing = 1", "keyctrl = 0", "ownpal = 1",
+                               ""]
                     if not beam_info.get("state_done"):
                         beam_info["state_done"] = True
                         g.states.append(beam_state(sp, n, name, beam_info, hd_stun, hd_fly if mode != "no" else None,
                                                    hits, px, py, k, tr))
-                    t_hf = sum(max(1, kf.time) if kf.time > 0 else 10 for kf in body.frames[:hf])
-                    t_end = t_hf + beam_info["total"]
+                    t_end = t_hf + beam_info["all"]
                     sd += [f"[State {st}, {tr('Quieto mientras dura el rayo')}]", "type = ChangeAnim",
                            f"trigger1 = Time < {t_end}", "trigger1 = AnimTime >= 0", f"value = {n}",
                            f"elem = {len(keys)}", "",

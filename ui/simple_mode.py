@@ -1697,8 +1697,10 @@ class SpecialCard(QFrame):
         self.proj_title.setText(tr('El ayudante (su animación)') if helper else
                                 tr('Cuerpo del rayo (se estira)') if beam else tr('El proyectil'))
         self.beam_row.setVisible(beam)
-        self.proj_pos_title.setText(tr('Dónde aparece') if helper else tr('Dónde nace el rayo') if beam else
-                                    tr('Posición del proyectil'))
+        vert = beam and (sg.spec(self.sp, "beam_dir") or "forward") != "forward"
+        self.proj_pos_title.setText(tr('Dónde aparece') if helper else
+                                    tr('Dónde cae el rayo (solo cuenta qué tan adelante)') if vert else
+                                    tr('Dónde nace el rayo') if beam else tr('Posición del proyectil'))
         self.proj_hit_title.setVisible(not helper and not beam)
         self.proj_hit.setVisible(not helper and not beam)
         self.body_w.setTabVisible(self.body_w.indexOf(self.cond_tab), typ == "converted" and
@@ -1764,7 +1766,7 @@ class SpecialCard(QFrame):
 
         shown = [(key, v) for key, v in self.adv.items() if sg.field_applies(v[2], self.sp)]
         # el rayo va aparte, al final, con su título (y la casilla «Rayo» abre esa sección)
-        beam_keys = {"proj_beam"} | {k_ for k_, v in shown if v[2] == "beam"}
+        beam_keys = {"proj_beam"} | {k_ for k_, v in shown if v[2] in ("beam", "beamv", "beamchain")}
         put([x for x in shown if x[0] not in beam_keys])
         beam = [x for x in shown if x[0] in beam_keys]
         if beam:
@@ -1788,9 +1790,12 @@ class SpecialCard(QFrame):
             # rayo ya hecho: sus ajustes se ponen solos (y se ven en las casillas)
             sg.apply_beam_preset(self.sp, value)
             self.show_adv_values(sg.BEAM_KEYS + ("hits",))
+            self.update_tabs()
         elif key in sg.BEAM_KEYS and self.sp.get("beam_preset", "classic") != "custom":
             self.sp["beam_preset"] = "custom"
             self.show_adv_values(("beam_preset",))
+        if key in ("beam_dir", "beam_count"):
+            self.update_tabs()          # aparecen / se esconden «Dónde cae», «Separación»…
         if key == "ad_open" and "launch" not in self.sp and "launch" in self.adv:
             # «lo tumba» de fábrica cambia: abre autodobles → se queda de pie; si no → lo tumba
             w = self.adv["launch"][1]

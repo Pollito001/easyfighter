@@ -276,6 +276,15 @@ The editor always opens in **simple mode**. The advanced tools are tucked away i
   stretches, whether it hits **non-stop** (every few ticks until it fades) or a set number of times, an **effect**
   (blink, electric pulse or wobble) and **how it ends**: it shrinks toward its axis, **closes toward the center**
   (from top and bottom), only fades out or vanishes at once.
+- **Beams that fall from the sky or come out of the ground, and in chains:** the **beam direction** can be
+  forward, **falls from the sky** (a column coming down to the ground) or **comes out of the ground** (a column
+  going up). You draw it as always (lying down, facing right) and the editor rotates it, hitboxes included; if
+  you already drew it standing (vertical), **«How it's drawn»** keeps it as is (on «Automatic» it notices on its
+  own because the drawing is taller than wide). It
+  can fall **in front of the character** or **on the rival**, and there can be **several beams one after
+  another** (how many, the gap and the time between them); the damage is split among them. Ready-made types:
+  **Thunder on the rival**, **Rain of beams**, **Columns from the ground** and **Storm on the rival**. All of
+  it shows in ▶ Test just like in the game.
 - **Versions on supers and enders:** like specials, the super and the ender can have light, medium and heavy
   versions (each with its button; stronger = more damage and faster). An ender «of a special» still only comes
   out with the heavy button.
@@ -309,6 +318,13 @@ sheet and it cuts it for you:
 - **In order**: by rows, left to right, with a number on each picked frame.
 - **Easy picking**: click a frame, double-click for the whole row, drag for several; merge or remove boxes,
   or draw one by hand with Shift + drag. There is also a **grid** mode (fixed-size cells).
+- **✋ Cutting by hand**: for sheets where automatic cutting doesn't work. Draw each box by dragging and
+  adjust it like the hitboxes: drag inside to move it, drag its edges and corners to stretch it, use the
+  arrows to move it 1 px at a time (Shift: 10) and Ctrl + arrows to resize it. You can also type its exact
+  position and size. **➡ Another one next to it** adds a same-size box to the right (to cut a row fast),
+  **✂ Fit to the drawing** shrinks it to what's drawn and **📐 This size for the picked ones** makes them all
+  match. It has **↶ Undo** (Ctrl+Z), and the boxes are saved for that sheet: next time you open it they're
+  still there. If you switch to "by hand" after an automatic cut, its boxes are the starting point.
 - **Repeat frames**: **Ctrl+click** a frame to add it again at the end (or right-click → **⧉ Add it again**),
   so you can build 1-2-3-2-1 with a frame that appears only once on the sheet. Each frame shows the
   positions it's used in (e.g. «2,5»). Under the preview there's the **order strip**: drag to change it, or

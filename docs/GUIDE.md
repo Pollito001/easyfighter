@@ -65,6 +65,9 @@ Each animation is a **slot**: standing, walking, crouching, jumping, running, wi
 
 ![Sheet cutter](img/09_cortador_en.png)
 
+> 💡 If **Automatic** cutting doesn't split your sheet's frames well, use **✋ By hand** (under «Cutting»):
+> drag to draw each box and adjust it by its edges, just like the hitboxes.
+
 ## Step 4 · 👊 Attacks
 
 The 18 normal attacks (light, medium and heavy punch and kick; standing, crouching and in the air) and the
@@ -157,7 +160,7 @@ changes for you.
 4. **📦 Create the .zip…**: the character ready to share, with a `COMANDOS.txt`.
 
 > 💡 There are also **🏆 Victory quotes** in «👤 Character», and optional moves: **taunt**, **air dash**, **air
-> throw**, **wall bounce**, **helper**, **beam** (its settings are grouped in the **🔦 Beam** section of ⚙ Settings) and
+> throw**, **wall bounce**, **helper**, **beam** (its settings are grouped in the **🔦 Beam** section of ⚙ Settings; it can go forward, fall from the sky or come out of the ground, and be several in a row) and
 > **several projectiles**.
 
 ---

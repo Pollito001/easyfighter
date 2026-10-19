@@ -66,6 +66,9 @@ Cada animación es una **casilla**: parado, caminar, agacharse, saltar, correr, 
 
 ![Cortador de hojas](img/09_cortador_es.png)
 
+> 💡 Si el corte **Automático** no separa bien los cuadros de tu hoja, usa **✋ A mano** (en «Corte»):
+> arrastra para dibujar cada caja y ajústala por los bordes, igual que las cajas de golpe.
+
 ## Paso 4 · 👊 Golpes
 
 Los 18 golpes normales (puño y patada débil, medio y fuerte; de pie, agachado y en el aire) y el agarre.
@@ -157,7 +160,7 @@ cambia nada.
 4. **📦 Crear el .zip…**: el personaje listo para compartir, con un `COMANDOS.txt`.
 
 > 💡 También hay **🏆 Frases de victoria** en «👤 Personaje», y movimientos opcionales: **burla**, **dash en el
-> aire**, **agarre en el aire**, **rebote en la pared**, **ayudante**, **rayo** (sus ajustes van juntos en la sección **🔦 Rayo** de ⚙ Ajustes) y
+> aire**, **agarre en el aire**, **rebote en la pared**, **ayudante**, **rayo** (sus ajustes van juntos en la sección **🔦 Rayo** de ⚙ Ajustes; puede ir de frente, caer del cielo o salir del piso, y ser varios seguidos) y
 > **varios proyectiles**.
 
 ---

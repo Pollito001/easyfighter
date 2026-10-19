@@ -447,6 +447,27 @@ def manual_box(fg, x0, y0, x1, y1):
     return Box(x0 + xs[0], y0 + ys[0], x0 + xs[-1] + 1, y0 + ys[-1] + 1, None, int(sub.sum()))
 
 
+def rect_box(fg, x0, y0, x1, y1):
+    """Caja a mano exacta (no se encoge al dibujo): todo lo que no es fondo dentro de ella. None si está vacía."""
+    h, w = fg.shape
+    x0, x1 = sorted((max(0, min(w, int(round(x0)))), max(0, min(w, int(round(x1))))))
+    y0, y1 = sorted((max(0, min(h, int(round(y0)))), max(0, min(h, int(round(y1))))))
+    if x1 - x0 < 1 or y1 - y0 < 1:
+        return None
+    sub = fg[y0:y1, x0:x1]
+    return Box(x0, y0, x1, y1, None, int(sub.sum()))
+
+
+def fit_box(fg, b):
+    """La misma caja encogida a lo que tiene dibujado (None si no tiene nada)."""
+    sub = fg[b.y0:b.y1, b.x0:b.x1]
+    if not sub.any():
+        return None
+    ys = np.where(sub.any(axis=1))[0]
+    xs = np.where(sub.any(axis=0))[0]
+    return b.x0 + int(xs[0]), b.y0 + int(ys[0]), b.x0 + int(xs[-1]) + 1, b.y0 + int(ys[-1]) + 1
+
+
 # ---------------------------------------------------------------- recortar
 def crop(rgba, label, fg, box, bg_colors=(), tolerance=0):
     """RGBA del cuadro: solo sus píxeles; el resto transparente. Con tolerancia (JPG) se limpia el borde

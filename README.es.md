@@ -282,6 +282,15 @@ avanzadas…** (pide confirmación; para volver, el botón «🧸 Volver al modo
   rápido se estira, si pega **sin parar** (cada pocos ticks hasta que se apaga) o un número de golpes, un
   **efecto** (parpadeo, pulso de electricidad o temblor) y **cómo se apaga**: se achica hacia su eje, **se cierra
   hacia el centro** (de arriba y de abajo), solo se desvanece o desaparece de golpe.
+- **Rayos que caen del cielo o salen del piso, y en cadena:** la **dirección del rayo** puede ser de frente,
+  **cae del cielo** (una columna que baja hasta el piso) o **sale del piso** (una columna que sube). Se dibuja
+  igual que siempre (acostado, hacia la derecha) y el editor lo gira, con sus cajas de golpe ya giradas; si
+  ya lo dibujaste de pie (vertical), **«Cómo está dibujado»** lo deja tal cual (en «Automático» lo nota solo
+  porque el dibujo es más alto que ancho). Puede
+  caer **delante del personaje** o **sobre el rival**, y pueden ser **varios rayos uno tras otro** (cuántos, la
+  separación y el tiempo entre uno y otro); el daño se reparte entre todos. Tipos ya hechos: **Trueno sobre el
+  rival**, **Lluvia de rayos**, **Columnas que salen del piso** y **Tormenta sobre el rival**. Todo se ve en
+  ▶ Probar igual que en el juego.
 - **Versiones en súper y remates:** igual que los especiales, el súper y el remate pueden tener versión débil,
   media y fuerte (cada una con su botón, más fuerte = más daño y más rápida). El remate «de un especial» sigue
   saliendo solo con el botón fuerte.
@@ -315,6 +324,14 @@ Abres una hoja de sprites (sprite sheet) y la corta sola:
 - **En orden**: por filas, de izquierda a derecha, con número en cada cuadro elegido.
 - **Elegir fácil**: clic en un cuadro, doble clic para toda la fila, arrastrar para varios; unir o quitar
   cajas, o dibujar una a mano con Mayús + arrastrar. También hay modo **cuadrícula** (celdas de tamaño fijo).
+- **✋ Corte a mano**: para hojas donde lo automático no sirve. Dibujas cada caja arrastrando y la ajustas
+  como las cajas de golpe: por dentro la mueves, por los bordes y esquinas la estiras, con las flechas la
+  mueves de 1 en 1 (Mayús: de 10 en 10) y con Ctrl + flechas cambias su tamaño. También puedes escribir su
+  posición y tamaño exactos. **➡ Otra igual al lado** pone una caja del mismo tamaño a la derecha (para
+  cortar una fila rápido), **✂ Ajustar al dibujo** la encoge a lo dibujado y **📐 Este tamaño a las
+  elegidas** las deja todas iguales. Tiene **↶ Deshacer** (Ctrl+Z), y las cajas se guardan para esa hoja: la
+  próxima vez que la abras siguen ahí. Si cambias a «a mano» después de un corte automático, sus cajas son
+  el punto de partida.
 - **Repetir cuadros**: **Ctrl+clic** en un cuadro lo pone otra vez al final (o clic derecho → **⧉ Agregarlo
   otra vez**), así armas 1-2-3-2-1 con un cuadro que en la hoja sale una sola vez. Cada cuadro marca en qué
   posiciones va (por ejemplo «2,5»). Debajo de la vista previa está la **tira con el orden**: arrastras para

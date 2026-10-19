@@ -3,7 +3,7 @@ from pathlib import Path
 
 import numpy as np
 from PyQt6.QtCore import QRectF, QSize, Qt, QTimer
-from PyQt6.QtGui import QColor, QFont, QIcon, QImage, QPainter, QPen, QPixmap
+from PyQt6.QtGui import QColor, QFont, QIcon, QImage, QKeySequence, QPainter, QPen, QPixmap
 from PyQt6.QtWidgets import (
     QApplication, QButtonGroup, QCheckBox, QComboBox, QDialog, QFileDialog, QFormLayout, QFrame, QGraphicsScene,
     QGridLayout, QGroupBox, QHBoxLayout, QLabel, QListWidget, QListWidgetItem, QMenu, QMessageBox, QPushButton,
@@ -21,6 +21,11 @@ AXIS_LABELS = [("ground", 'Suelo común de cada fila (recomendado)'), ("feet", '
                ("center", 'El centro de cada cuadro'),
                ("center_feet", 'El centro de cada cuadro, con los pies en el piso')]
 _CACHE = {}   # ruta → (QImage, rgba)
+HANDLE = 6     # px de pantalla para agarrar una esquina o un borde (modo a mano)
+CURSORS = {"move": Qt.CursorShape.SizeAllCursor, "l": Qt.CursorShape.SizeHorCursor,
+           "r": Qt.CursorShape.SizeHorCursor, "t": Qt.CursorShape.SizeVerCursor, "b": Qt.CursorShape.SizeVerCursor,
+           "lt": Qt.CursorShape.SizeFDiagCursor, "rb": Qt.CursorShape.SizeFDiagCursor,
+           "rt": Qt.CursorShape.SizeBDiagCursor, "lb": Qt.CursorShape.SizeBDiagCursor}
 
 
 def rgba_image(rgba):
@@ -45,7 +50,10 @@ class SheetView(ZoomView):
         self.drag_now = None
         self.picking = False
         self.setMouseTracking(True)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.hover = None
+        self.edit = None        # modo a mano: (parte, caja, punto inicial, rectángulo inicial)
+        self._pan = None
 
     def resizeEvent(self, e):
         super().resizeEvent(e)
@@ -74,6 +82,30 @@ class SheetView(ZoomView):
         self.pix_item = self.scene_.addPixmap(QPixmap.fromImage(img))
         self.scene_.setSceneRect(QRectF(-20, -20, img.width() + 40, img.height() + 40))
 
+    def hand(self):
+        return self.dlg.m_hand.isChecked()
+
+    def hit_test(self, pt):
+        """Modo a mano: (caja, parte) bajo el ratón; parte = «move» o una combinación de l/r/t/b."""
+        hd = HANDLE / max(0.05, self.zoom)
+        act = self.dlg.active
+        order = sorted(self.dlg.boxes, key=lambda b: (b is not act, b.w * b.h))
+        for b in order:
+            if not (b.x0 - hd <= pt.x() <= b.x1 + hd and b.y0 - hd <= pt.y() <= b.y1 + hd):
+                continue
+            part = ""
+            if abs(pt.x() - b.x0) <= hd:
+                part += "l"
+            elif abs(pt.x() - b.x1) <= hd:
+                part += "r"
+            if abs(pt.y() - b.y0) <= hd:
+                part += "t"
+            elif abs(pt.y() - b.y1) <= hd:
+                part += "b"
+            if part or (b.x0 <= pt.x() < b.x1 and b.y0 <= pt.y() < b.y1):
+                return b, part or "move"
+        return None, None
+
     def box_at(self, pt):
         best = None
         for b in self.dlg.boxes:
@@ -88,7 +120,18 @@ class SheetView(ZoomView):
             if self.picking:
                 self.dlg.pick_color(int(pt.x()), int(pt.y()))
                 return
-            mode = "draw" if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else "select"
+            mods = e.modifiers()
+            if self.hand() and not (mods & Qt.KeyboardModifier.ControlModifier):
+                # a mano: agarrar una caja (moverla / estirarla) o dibujar una nueva donde no hay
+                b, part = self.hit_test(pt)
+                if b is not None:
+                    self.dlg.set_active(b)
+                    self.edit = (part, b, pt, b.rect())
+                    return
+                self.drag = (pt, "draw")
+                self.drag_now = pt
+                return
+            mode = "draw" if mods & Qt.KeyboardModifier.ShiftModifier else "select"
             self.drag = (pt, mode)
             self.drag_now = pt
             return
@@ -102,10 +145,32 @@ class SheetView(ZoomView):
 
     def mouseMoveEvent(self, e):
         pt = self.mapToScene(e.position().toPoint())
+        if self.edit is not None:
+            part, b, start, (x0, y0, x1, y1) = self.edit
+            dx, dy = round(pt.x() - start.x()), round(pt.y() - start.y())
+            if part == "move":
+                x0, x1, y0, y1 = x0 + dx, x1 + dx, y0 + dy, y1 + dy
+            else:
+                if "l" in part:
+                    x0 += dx
+                if "r" in part:
+                    x1 += dx
+                if "t" in part:
+                    y0 += dy
+                if "b" in part:
+                    y1 += dy
+            self.dlg.move_box(b, (x0, y0, x1, y1), keep_size=(part == "move"))
+            return
         if self.drag is not None:
             self.drag_now = pt
             self.viewport().update()
             return
+        if self.hand() and not self.picking and self._pan is None:
+            _b, part = self.hit_test(pt)
+            if part:
+                self.setCursor(CURSORS[part])
+            else:
+                self.setCursor(Qt.CursorShape.CrossCursor)
         b = self.box_at(pt)
         if b is not self.hover:
             self.hover = b
@@ -121,6 +186,16 @@ class SheetView(ZoomView):
                 b = self.box_at(self.mapToScene(e.position().toPoint()))
                 if b is not None:
                     self.dlg.context_menu(b, e.globalPosition().toPoint())
+            return
+        if e.button() == Qt.MouseButton.LeftButton and self.edit is not None:
+            part, b, start, r0 = self.edit
+            self.edit = None
+            end = self.mapToScene(e.position().toPoint())
+            if b.rect() != r0:
+                self.dlg.box_done(b, r0)
+            elif abs(end.x() - start.x()) <= 3 and abs(end.y() - start.y()) <= 3:
+                self.dlg.toggle(b)          # un clic sin mover: elegir / quitar
+            self.viewport().update()
             return
         if e.button() == Qt.MouseButton.LeftButton and self.drag is not None:
             start, mode = self.drag
@@ -142,6 +217,32 @@ class SheetView(ZoomView):
             self.viewport().update()
             return
         super().mouseReleaseEvent(e)
+
+    def keyPressEvent(self, e):
+        """Modo a mano: flechas mueven la caja marcada (Mayús: de 10 en 10), Ctrl + flechas la estiran,
+        Supr la borra, Ctrl+Z deshace."""
+        d = self.dlg
+        if self.hand():
+            if e.matches(QKeySequence.StandardKey.Undo):
+                d.undo()
+                return
+            b = d.active
+            if b is not None and b in d.boxes:
+                if e.key() in (Qt.Key.Key_Delete, Qt.Key.Key_Backspace):
+                    d.delete_box(b)
+                    return
+                step = 10 if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else 1
+                dx, dy = {Qt.Key.Key_Left: (-step, 0), Qt.Key.Key_Right: (step, 0), Qt.Key.Key_Up: (0, -step),
+                          Qt.Key.Key_Down: (0, step)}.get(e.key(), (0, 0))
+                if dx or dy:
+                    x0, y0, x1, y1 = r0 = b.rect()
+                    if e.modifiers() & Qt.KeyboardModifier.ControlModifier:
+                        d.move_box(b, (x0, y0, max(x0 + 1, x1 + dx), max(y0 + 1, y1 + dy)))
+                    else:
+                        d.move_box(b, (x0 + dx, y0 + dy, x1 + dx, y1 + dy), keep_size=True)
+                    d.box_done(b, r0, quiet=True)
+                    return
+        super().keyPressEvent(e)
 
     def mouseDoubleClickEvent(self, e):
         b = self.box_at(self.mapToScene(e.position().toPoint()))
@@ -177,6 +278,27 @@ class SheetView(ZoomView):
                 p.fillRect(tr_, QColor("#ff6b35"))
                 p.setPen(QColor("#111"))
                 p.drawText(tr_, Qt.AlignmentFlag.AlignCenter, t)
+        # a mano: la caja marcada con sus agarraderas y su tamaño
+        act = self.dlg.active
+        if self.hand() and act is not None and act in boxes:
+            r = QRectF(act.x0, act.y0, act.w, act.h)
+            p.setPen(cosmetic(QColor("#ffffff"), 2, Qt.PenStyle.DashLine))
+            p.setBrush(Qt.BrushStyle.NoBrush)
+            p.drawRect(r)
+            hs = 6 / max(0.05, self.zoom)
+            p.setPen(cosmetic(QColor("#111111"), 1))
+            p.setBrush(QColor("#ffffff"))
+            for cx, cy in ((r.left(), r.top()), (r.right(), r.top()), (r.left(), r.bottom()),
+                           (r.right(), r.bottom()), (r.center().x(), r.top()), (r.center().x(), r.bottom()),
+                           (r.left(), r.center().y()), (r.right(), r.center().y())):
+                p.drawRect(QRectF(cx - hs / 2, cy - hs / 2, hs, hs))
+            p.setBrush(Qt.BrushStyle.NoBrush)
+            t = f"{act.w}×{act.h}"
+            tr_ = QRectF(act.x0, act.y1 + 2 / max(0.05, self.zoom), len(t) * f.pixelSize() * 0.62 + 6,
+                         f.pixelSize() + 3)
+            p.fillRect(tr_, QColor(0, 0, 0, 170))
+            p.setPen(QColor("#ffffff"))
+            p.drawText(tr_, Qt.AlignmentFlag.AlignCenter, t)
         # cuadros que ya se usaron en este personaje (marcados en morado, con la casilla donde están)
         if self.dlg.show_used.isChecked():
             fs = QFont(f)
@@ -289,6 +411,9 @@ class SheetCutter(QDialog):
         self.auto_bg = (False, [])
         self.manual_edits = False
         self.sel = []           # cuadros elegidos en orden: (x0, y0, x1, y1); uno puede salir más de una vez
+        self.active = None      # modo a mano: la caja marcada (la que se mueve con las flechas)
+        self.undo_stack = []    # modo a mano: cómo estaban las cajas antes de cada cambio
+        self._hand_path = None  # la hoja de la que son las cajas a mano
         self._strip_busy = False
         self.setWindowTitle(tr('🧩 Cortar hoja de sprites') + (f" — {slot_title}" if slot_title else ""))
         self.resize(1300, 820)
@@ -324,12 +449,13 @@ class SheetCutter(QDialog):
         ll.addLayout(top)
         self.view = SheetView(self)
         ll.addWidget(self.view, 1)
-        hint = QLabel(tr('🖱 Clic: elegir / quitar un cuadro · Ctrl+clic: repetirlo · Doble clic: toda la fila · Arrastrar: elegir varios '
+        self.hint = hint = QLabel(tr('🖱 Clic: elegir / quitar un cuadro · Ctrl+clic: repetirlo · Doble clic: toda la fila · Arrastrar: elegir varios '
                          '(con Alt: quitarlos) · Mayús + arrastrar: dibujar una caja a mano · Arrastrar con el '
                          'botón derecho: mover la hoja · Clic derecho: más opciones · Rueda: zoom · Mayús + rueda: a los lados · '
                          'Ctrl + rueda: arriba / abajo'))
         hint.setWordWrap(True)
         hint.setObjectName("CardPath")
+        self.hint_text = hint.text()
         self.show_used = QCheckBox(tr('✓ Marcar los cuadros que ya usé en este personaje (en morado, con la casilla '
                                       'donde están)'))
         self.show_used.setChecked(bool(self.opts.get("show_used", True)))
@@ -385,11 +511,12 @@ class SheetCutter(QDialog):
         mr = QHBoxLayout()
         self.m_auto = QRadioButton(tr('Automático'))
         self.m_grid = QRadioButton(tr('Cuadrícula'))
+        self.m_hand = QRadioButton(tr('✋ A mano'))
+        self.m_hand.setToolTip(tr('Tú dibujas cada caja y la ajustas con el ratón, como las cajas de golpe.'))
         bg = QButtonGroup(self)
-        bg.addButton(self.m_auto)
-        bg.addButton(self.m_grid)
-        mr.addWidget(self.m_auto)
-        mr.addWidget(self.m_grid)
+        for b_ in (self.m_auto, self.m_grid, self.m_hand):
+            bg.addButton(b_)
+            mr.addWidget(b_)
         gl.addLayout(mr)
         self.auto_box = QWidget()
         af = QFormLayout(self.auto_box)
@@ -425,7 +552,46 @@ class SheetCutter(QDialog):
         gf.addWidget(self.gap_x, 2, 1)
         gf.addWidget(self.gap_y, 2, 2)
         gl.addWidget(self.grid_box)
-        redo = QPushButton(tr('↺ Volver a cortar'))
+        # a mano
+        self.hand_box = QWidget()
+        hl = QVBoxLayout(self.hand_box)
+        hl.setContentsMargins(0, 0, 0, 0)
+        hl.addWidget(self._muted(tr('Arrastra en la hoja para dibujar una caja. Agárrala por dentro para moverla o '
+                                    'por un borde o esquina para estirarla. Un clic la elige o la quita.')))
+        hg = QGridLayout()
+        self.hx, self.hy, self.hw, self.hh = (QSpinBox() for _ in range(4))
+        for sp_ in (self.hx, self.hy):
+            sp_.setRange(0, 16384)
+        for sp_ in (self.hw, self.hh):
+            sp_.setRange(1, 16384)
+        hg.addWidget(QLabel(tr('Posición (x, y):')), 0, 0)
+        hg.addWidget(self.hx, 0, 1)
+        hg.addWidget(self.hy, 0, 2)
+        hg.addWidget(QLabel(tr('Tamaño (ancho × alto):')), 1, 0)
+        hg.addWidget(self.hw, 1, 1)
+        hg.addWidget(self.hh, 1, 2)
+        hl.addLayout(hg)
+        for sp_ in (self.hx, self.hy, self.hw, self.hh):
+            sp_.valueChanged.connect(self.on_hand_spin)
+        hb = QGridLayout()
+        for i, (txt, tip, fn) in enumerate((
+                (tr('➡ Otra igual al lado'), tr('Pone una caja del mismo tamaño justo a la derecha de la marcada '
+                                                 '(para ir cortando una fila).'), self.hand_next),
+                (tr('✂ Ajustar al dibujo'), tr('Encoge la caja marcada (o las elegidas) hasta lo que tienen dibujado.'),
+                 self.hand_fit),
+                (tr('📐 Este tamaño a las elegidas'), tr('Las cajas elegidas toman el tamaño de la marcada (se quedan '
+                                                         'con los pies en el mismo sitio).'), self.hand_same_size),
+                (tr('↶ Deshacer'), tr('Deshace el último cambio en las cajas (Ctrl+Z).'), self.undo),
+                (tr('🗑 Borrar todas'), tr('Quita todas las cajas para empezar de cero.'), self.hand_clear))):
+            b_ = QPushButton(txt)
+            b_.setToolTip(tip)
+            b_.clicked.connect(fn)
+            hb.addWidget(b_, i // 2, i % 2)
+        hl.addLayout(hb)
+        hl.addWidget(self._muted(tr('Teclado: flechas mueven la caja marcada 1 px (con Mayús, 10) · Ctrl + flechas '
+                                    'la estiran · Supr la borra · Ctrl+Z deshace · Ctrl + arrastrar: elegir varias.')))
+        gl.addWidget(self.hand_box)
+        self.redo = redo = QPushButton(tr('↺ Volver a cortar'))
         redo.setToolTip(tr('Vuelve a buscar los cuadros (se pierden los arreglos a mano).'))
         redo.clicked.connect(lambda: self.detect(force=True))
         gl.addWidget(redo)
@@ -549,7 +715,7 @@ class SheetCutter(QDialog):
         self.grow.valueChanged.connect(self.refresh_preview)
         self.mirror.setChecked(bool(o.get("mirror", False)))
         self.mirror.toggled.connect(self.refresh_preview)
-        self.m_auto.setChecked(True)
+        {"grid": self.m_grid, "hand": self.m_hand}.get(o.get("cut_mode"), self.m_auto).setChecked(True)
         self.timer = QTimer(self)
         self.timer.setSingleShot(True)
         self.timer.setInterval(250)
@@ -559,11 +725,13 @@ class SheetCutter(QDialog):
         self.tol.valueChanged.connect(self.on_tol)
         self.attach.toggled.connect(self.schedule)
         self.m_auto.toggled.connect(self.on_mode)
+        self.m_hand.toggled.connect(self.on_mode)
         self.bg_mode.currentIndexChanged.connect(self.schedule)
         self.axis.currentIndexChanged.connect(self.refresh_preview)
         self.on_tol(self.tol.value())
         self.on_mode()
         self.update_count()
+        self.update_hand_panel()
         last = st.get("sheet_last")
         if last and Path(last).is_file():
             QTimer.singleShot(0, lambda: self.load(last))
@@ -700,10 +868,27 @@ class SheetCutter(QDialog):
         self.tol_lbl.setText(str(v))
         self.schedule()
 
+    def cut_mode(self):
+        return "hand" if self.m_hand.isChecked() else "grid" if self.m_grid.isChecked() else "auto"
+
     def on_mode(self, *_a):
-        grid = self.m_grid.isChecked()
-        self.auto_box.setVisible(not grid)
-        self.grid_box.setVisible(grid)
+        mode = self.cut_mode()
+        self.auto_box.setVisible(mode == "auto")
+        self.grid_box.setVisible(mode == "grid")
+        self.hand_box.setVisible(mode == "hand")
+        self.redo.setVisible(mode != "hand")
+        if mode == "hand":
+            self.hint.setText(tr('🖱 Arrastrar donde no hay caja: dibujar una · Arrastrar una caja: moverla · Sus bordes y '
+                                 'esquinas: estirarla · Clic: elegir / quitar · Ctrl+clic: repetirlo · Ctrl + arrastrar: '
+                                 'elegir varios · Arrastrar con el botón derecho: mover la hoja · Clic derecho: más '
+                                 'opciones · Rueda: zoom'))
+            # las cajas que ya hay (del corte automático o la cuadrícula) son el punto de partida
+            if self.rgba is not None:
+                self._hand_path = self.path
+                self.detect(force=True)
+            return
+        self.hint.setText(self.hint_text)
+        self.view.unsetCursor()
         self.schedule()
 
     # ---- cortar
@@ -714,7 +899,7 @@ class SheetCutter(QDialog):
     def detect(self, force=False):
         if self.rgba is None:
             return
-        if self.manual_edits and not force:
+        if self.manual_edits and not force and not self.m_hand.isChecked():
             if QMessageBox.question(self, APP_NAME, tr('Volver a cortar borra los arreglos que hiciste a mano. '
                                                        '¿Seguir?')) != QMessageBox.StandardButton.Yes:
                 return
@@ -734,7 +919,22 @@ class SheetCutter(QDialog):
             tol = self.tol.value()
             self.used_colors = list(colors)
             keep = {(b.x0, b.y0, b.x1, b.y1) for b in self.boxes if b.selected}
-            if self.m_grid.isChecked():
+            if self.m_hand.isChecked():
+                # a mano no se busca nada: las cajas son las tuyas (o las que guardaste para esta hoja)
+                self.fg = sc.foreground(self.rgba, colors, tol, use_alpha)
+                self.label = None
+                if self._hand_path != self.path:
+                    self._hand_path = self.path
+                    saved = (self.opts.get("hand") or {}).get(self.path) or []
+                    self.boxes = [sc.Box(*r) for r in saved if len(r) == 4]
+                    keep = set()
+                    self.sel = []
+                    self.undo_stack = []
+                    self.active = None
+                for b in self.boxes:
+                    b.labels = None
+                self.boxes = sc.order_rows(self.boxes)
+            elif self.m_grid.isChecked():
                 self.fg = sc.foreground(self.rgba, colors, tol, use_alpha)
                 self.label = None
                 self.boxes = sc.grid_boxes(self.fg, self.cell_w.value(), self.cell_h.value(), self.off_x.value(),
@@ -745,13 +945,14 @@ class SheetCutter(QDialog):
             for b in self.boxes:
                 b.selected = (b.x0, b.y0, b.x1, b.y1) in keep
             self.crops = {}
-            self.manual_edits = False
+            self.manual_edits = self.m_hand.isChecked() and bool(self.boxes)
         finally:
             QApplication.restoreOverrideCursor()
         self.changed()
 
     def changed(self):
         self.reconcile()
+        self.update_hand_panel()
         self.view.viewport().update()
         self.update_count()
         self.refresh_preview()
@@ -905,12 +1106,14 @@ class SheetCutter(QDialog):
         if len(sel) < 2:
             QMessageBox.information(self, APP_NAME, tr('Elige dos o más cuadros para unirlos en uno.'))
             return
+        self.push_undo()
         self.boxes = sc.merge(self.boxes, sel)
         self.manual_edits = True
         self.crops = {}
         self.changed()
 
     def remove_selected(self):
+        self.push_undo()
         self.boxes = [b for b in self.boxes if not b.selected]
         self.manual_edits = True
         self.changed()
@@ -918,12 +1121,22 @@ class SheetCutter(QDialog):
     def add_manual(self, a, b):
         if self.fg is None:
             return
-        box = sc.manual_box(self.fg, a.x(), a.y(), b.x(), b.y())
+        hand = self.m_hand.isChecked()
+        if hand:
+            box = sc.rect_box(self.fg, a.x(), a.y(), b.x(), b.y())
+            if box is None or any(self.key_of(o) == self.key_of(box) for o in self.boxes):
+                return
+            self.push_undo()
+            self.active = box
+        else:
+            box = sc.manual_box(self.fg, a.x(), a.y(), b.x(), b.y())
         if box is None:
             return
         box.selected = True
         # lo que quede dentro de la caja nueva se quita (la reemplaza)
-        self.boxes = [o for o in self.boxes if not box.contains(o, 0)] + [box]
+        if not hand:
+            self.boxes = [o for o in self.boxes if not box.contains(o, 0)]
+        self.boxes = self.boxes + [box]
         if all(o.cell is None for o in self.boxes):
             self.boxes = sc.order_rows(self.boxes)
         self.manual_edits = True
@@ -935,9 +1148,187 @@ class SheetCutter(QDialog):
         m.addAction(tr('⧉ Agregarlo otra vez (repetir)'), lambda: self.repeat(b))
         m.addAction(tr('Elegir toda la fila'), lambda: self.select_row(b.row))
         m.addAction(tr('🗑 Borrar esta caja'), lambda: self.delete_box(b))
+        if self.m_hand.isChecked():
+            m.addSeparator()
+            for txt, fn in ((tr('➡ Otra igual al lado'), self.hand_next), (tr('✂ Ajustar al dibujo'), self.hand_fit),
+                            (tr('📐 Este tamaño a las elegidas'), self.hand_same_size)):
+                m.addAction(txt, lambda fn=fn: (self.set_active(b), fn()))
         if any(self.overlaps(r, (b.x0, b.y0, b.x1, b.y1)) for r in self.used_groups()):
             m.addAction(tr('✖ Olvidar que ya lo usé'), lambda: self.forget_used(b))
         m.exec(pos)
+
+    # ---- a mano
+    def snapshot(self):
+        return ([(self.key_of(b), b.selected, b.cell) for b in self.boxes], list(self.sel),
+                self.key_of(self.active) if self.active is not None else None)
+
+    def push_undo(self):
+        self.undo_stack.append(self.snapshot())
+        del self.undo_stack[:-60]
+
+    def undo(self):
+        if not self.undo_stack:
+            return
+        boxes, sel, act = self.undo_stack.pop()
+        self.boxes = []
+        for r, on, cell in boxes:
+            b = sc.Box(*r, cell=cell)
+            b.selected = on
+            self.boxes.append(b)
+        self.boxes = sc.order_rows(self.boxes)
+        self.sel = sel
+        self.active = next((b for b in self.boxes if self.key_of(b) == act), None)
+        self.crops = {}
+        self.changed()
+
+    def set_active(self, b):
+        self.active = b
+        self.update_hand_panel()
+        self.view.viewport().update()
+
+    def clamp_rect(self, r, keep_size=False):
+        h, w = self.rgba.shape[:2]
+        x0, y0, x1, y1 = (int(round(v)) for v in r)
+        if keep_size:
+            bw, bh = min(w, max(1, x1 - x0)), min(h, max(1, y1 - y0))
+            x0 = max(0, min(w - bw, x0))
+            y0 = max(0, min(h - bh, y0))
+            return x0, y0, x0 + bw, y0 + bh
+        x0, x1 = sorted((max(0, min(w, x0)), max(0, min(w, x1))))
+        y0, y1 = sorted((max(0, min(h, y0)), max(0, min(h, y1))))
+        return x0, y0, max(x0 + 1, x1), max(y0 + 1, y1)
+
+    def move_box(self, b, r, keep_size=False):
+        """Cambia el rectángulo de una caja mientras se arrastra (lo pesado se hace al soltar, en box_done)."""
+        if self.rgba is None:
+            return
+        b.x0, b.y0, b.x1, b.y1 = self.clamp_rect(r, keep_size)
+        self.update_hand_panel()
+        self.view.viewport().update()
+
+    def box_done(self, b, r0, quiet=False):
+        """Se terminó de mover / estirar una caja: su clave nueva en la lista en orden y el undo."""
+        new = self.key_of(b)
+        if new == tuple(r0):
+            return
+        if any(o is not b and self.key_of(o) == new for o in self.boxes):
+            b.x0, b.y0, b.x1, b.y1 = r0          # quedaría igual a otra: se deja como estaba
+            self.view.viewport().update()
+            return
+        # el undo guarda cómo estaba antes; las flechas seguidas sobre la misma caja cuentan como un cambio
+        if not (quiet and getattr(self, "_nudge", None) == tuple(r0)):
+            cur = self.snapshot()
+            self.undo_stack.append(([(tuple(r0) if o is b else k, on, c) for (k, on, c), o in zip(cur[0], self.boxes)],
+                                    cur[1], tuple(r0)))
+            del self.undo_stack[:-60]
+        self._nudge = new if quiet else None
+        b.labels = None
+        b.cell = None
+        self.sel = [new if k == tuple(r0) else k for k in self.sel]
+        if self.m_hand.isChecked():
+            self.boxes = sc.order_rows(self.boxes)
+        self.manual_edits = True
+        self.changed()
+
+    def update_hand_panel(self):
+        if not hasattr(self, "hx"):
+            return
+        b = self.active if self.active in self.boxes else None
+        for sp_, v in ((self.hx, b.x0 if b else 0), (self.hy, b.y0 if b else 0), (self.hw, b.w if b else 1),
+                       (self.hh, b.h if b else 1)):
+            sp_.blockSignals(True)
+            sp_.setValue(v)
+            sp_.setEnabled(b is not None)
+            sp_.blockSignals(False)
+
+    def on_hand_spin(self, *_a):
+        b = self.active
+        if b is None or b not in self.boxes or self.rgba is None:
+            return
+        r0 = b.rect()
+        x0, y0 = self.hx.value(), self.hy.value()
+        self.move_box(b, (x0, y0, x0 + self.hw.value(), y0 + self.hh.value()))
+        self.box_done(b, r0)
+
+    def need_active(self):
+        if self.active is None or self.active not in self.boxes:
+            QMessageBox.information(self, APP_NAME, tr('Primero agarra una caja en la hoja (queda marcada con '
+                                                       'agarraderas blancas).'))
+            return None
+        return self.active
+
+    def hand_next(self):
+        b = self.need_active()
+        if b is None or self.fg is None:
+            return
+        h, w = self.rgba.shape[:2]
+        if b.x1 + 1 > w:
+            return
+        x0, y0, x1, y1 = self.clamp_rect((b.x1, b.y0, b.x1 + b.w, b.y1), keep_size=True)
+        new = sc.rect_box(self.fg, x0, y0, x1, y1)
+        if new is None or any(self.key_of(o) == self.key_of(new) for o in self.boxes):
+            return
+        self.push_undo()
+        new.selected = True
+        self.boxes = sc.order_rows(self.boxes + [new])
+        self.active = new
+        self.manual_edits = True
+        self.changed()
+
+    def hand_fit(self):
+        if self.fg is None:
+            return
+        lst = [b for b in self.boxes if b.selected] if (self.active is None or self.active not in self.boxes) \
+            else [self.active]
+        if not lst:
+            self.need_active()
+            return
+        self.push_undo()
+        for b in lst:
+            r = sc.fit_box(self.fg, b)
+            if r is None or r == b.rect() or any(o is not b and self.key_of(o) == r for o in self.boxes):
+                continue
+            old = self.key_of(b)
+            b.x0, b.y0, b.x1, b.y1 = r
+            b.cell = None
+            self.sel = [r if k == old else k for k in self.sel]
+        self.boxes = sc.order_rows(self.boxes)
+        self.manual_edits = True
+        self.changed()
+
+    def hand_same_size(self):
+        ref = self.need_active()
+        if ref is None:
+            return
+        lst = [b for b in self.boxes if b.selected and b is not ref]
+        if not lst:
+            QMessageBox.information(self, APP_NAME, tr('Elige las cajas que quieres cambiar (clic en ellas) y '
+                                                       'después marca la que tiene el tamaño bueno.'))
+            return
+        self.push_undo()
+        for b in lst:
+            cx = (b.x0 + b.x1) / 2
+            r = self.clamp_rect((cx - ref.w / 2, b.y1 - ref.h, cx + ref.w / 2, b.y1), keep_size=True)
+            if any(o is not b and self.key_of(o) == r for o in self.boxes):
+                continue
+            old = self.key_of(b)
+            b.x0, b.y0, b.x1, b.y1 = r
+            b.cell = None
+            self.sel = [r if k == old else k for k in self.sel]
+        self.boxes = sc.order_rows(self.boxes)
+        self.manual_edits = True
+        self.changed()
+
+    def hand_clear(self):
+        if not self.boxes:
+            return
+        if QMessageBox.question(self, APP_NAME, tr('¿Quitar todas las cajas de esta hoja?')) != \
+                QMessageBox.StandardButton.Yes:
+            return
+        self.push_undo()
+        self.boxes = []
+        self.active = None
+        self.changed()
 
     # ---- cuadros ya usados (se guardan en la configuración del modo simple del personaje)
     def used_store(self):
@@ -1112,6 +1503,9 @@ class SheetCutter(QDialog):
         self.view.viewport().update()
 
     def delete_box(self, b):
+        self.push_undo()
+        if b is self.active:
+            self.active = None
         self.boxes = [o for o in self.boxes if o is not b]
         self.manual_edits = True
         self.changed()
@@ -1153,7 +1547,13 @@ class SheetCutter(QDialog):
         o = self.opts
         o.update(join=self.join.value(), attach=self.attach.isChecked(), min_area=self.min_area.value(),
                  axis=self.axis.currentData(), grow=self.grow.value(), show_used=self.show_used.isChecked(),
-                 mirror=self.mirror.isChecked())
+                 mirror=self.mirror.isChecked(), cut_mode=self.cut_mode())
+        if self.path and self.m_hand.isChecked():
+            # las cajas a mano se guardan para esta hoja (la próxima vez salen iguales)
+            hand = dict(o.get("hand") or {})
+            hand.pop(self.path, None)
+            hand[self.path] = [list(self.key_of(b)) for b in self.boxes]
+            o["hand"] = dict(list(hand.items())[-20:])
         try:
             self.record_used()
         except Exception:
